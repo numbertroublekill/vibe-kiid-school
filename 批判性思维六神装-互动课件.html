@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>批判性思维六神装 · 钥匙玩校</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Serif+SC:wght@600;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --void:#070B16; --panel:#111A2E; --panel2:#1B2540; --line:#2C3959;
+  --gold:#E8B44C; --gold-dim:#7E6128; --jade:#45D3A6; --blood:#E2574C;
+  --ink:#EAE7DC; --mute:#8FA0C0;
+  --serif:"Noto Serif SC","Source Han Serif SC","Songti SC","SimSun",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  --latin:"Bebas Neue",Impact,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%}
+body{
+  background:
+    radial-gradient(1200px 700px at 50% -10%, #16224180 0%, transparent 60%),
+    radial-gradient(900px 600px at 90% 110%, #1d183a66 0%, transparent 55%),
+    var(--void);
+  color:var(--ink); font-family:var(--sans); font-size:17px; line-height:1.75;
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.35;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:64px 64px; mask-image:radial-gradient(circle at 50% 40%,#000 0%,transparent 75%);
+  -webkit-mask-image:radial-gradient(circle at 50% 40%,#000 0%,transparent 75%);
+}
+.stage{position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:28px 26px 190px}
+.slide{display:none; animation:rise .45s ease both}
+.slide.on{display:block}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.slide{animation:none}*{transition:none!important}}
+
+.eyebrow{font-family:var(--latin); letter-spacing:.22em; font-size:15px; color:var(--gold);
+  display:flex; align-items:center; gap:12px; text-transform:uppercase}
+.eyebrow span{color:var(--mute); font-family:var(--sans); letter-spacing:.18em; font-size:12px}
+.eyebrow::after{content:""; flex:1; height:1px; background:linear-gradient(90deg,var(--gold-dim),transparent)}
+h1{font-family:var(--serif); font-weight:900; font-size:clamp(38px,7vw,82px); line-height:1.06; margin:.25em 0 .2em; letter-spacing:.02em}
+h2{font-family:var(--serif); font-weight:900; font-size:clamp(27px,3.6vw,44px); line-height:1.2; margin:.35em 0 .45em}
+h3{font-family:var(--serif); font-weight:600; font-size:20px; margin:0 0 10px}
+p{margin:0 0 14px; color:#DBD8CE}
+.lead{font-size:19px; color:var(--mute); max-width:62ch}
+.hl{color:var(--gold)}
+.jade{color:var(--jade)}
+
+/* 封面 */
+.cover{min-height:64vh; display:flex; flex-direction:column; justify-content:center}
+.cover .sig{display:flex; flex-wrap:wrap; gap:10px; margin-top:26px}
+.chip{border:1px solid var(--line); border-radius:999px; padding:6px 15px; font-size:14px; color:var(--mute); background:#0e1526aa}
+.seal{display:inline-flex; align-items:center; justify-content:center; width:76px; height:76px; border:2px solid var(--blood);
+  color:var(--blood); font-family:var(--serif); font-weight:900; font-size:19px; line-height:1.1; text-align:center;
+  border-radius:6px; transform:rotate(-6deg); opacity:.9; letter-spacing:.05em}
+
+/* 通用面板 */
+.grid{display:grid; grid-template-columns:1fr 1fr; gap:22px; align-items:start}
+.grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+.card{background:linear-gradient(160deg,#131C31,#0D1424); border:1px solid var(--line); border-radius:14px; padding:20px 22px; position:relative}
+.card.tight{padding:16px 18px}
+.card h3{color:var(--gold)}
+.note{font-size:14.5px; color:var(--mute); line-height:1.65}
+ul.tick{list-style:none; padding:0; margin:0}
+ul.tick li{padding:7px 0 7px 24px; position:relative; color:#DBD8CE}
+ul.tick li::before{content:"◆"; position:absolute; left:0; top:7px; color:var(--gold-dim); font-size:12px}
+
+/* 装备卡（signature） */
+.item{background:linear-gradient(155deg,#1A2440,#0C1223); border:1px solid var(--gold-dim); border-radius:14px; padding:0; overflow:hidden;
+  box-shadow:0 0 0 1px #00000060, 0 18px 40px -22px var(--gold)}
+.item-top{display:flex; gap:16px; padding:18px 20px 14px; border-bottom:1px dashed #2c3757; align-items:center}
+.hex{width:60px; height:66px; flex:none; display:grid; place-items:center; font-size:28px;
+  background:linear-gradient(160deg,#2A3352,#1a2136); border:1px solid var(--gold-dim);
+  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
+.item-name{font-family:var(--serif); font-weight:900; font-size:23px; color:var(--gold); line-height:1.25}
+.item-sub{font-size:13px; color:var(--mute); letter-spacing:.05em}
+.cost{margin-left:auto; font-family:var(--latin); font-size:26px; color:var(--gold); letter-spacing:.06em}
+.cost small{display:block; font-family:var(--sans); font-size:11px; color:var(--mute); letter-spacing:.16em; text-align:right}
+.stats{padding:14px 20px 6px; margin:0; list-style:none}
+.stats li{color:var(--jade); font-size:15px; padding:3px 0; font-variant-numeric:tabular-nums}
+.stats li.minus{color:var(--blood)}
+.passive{padding:12px 20px 20px; font-size:15px; color:#CFD6E6; border-top:1px dashed #2c3757; margin-top:10px}
+.passive b{color:var(--gold); font-family:var(--serif)}
+
+/* 练习台 */
+.drill{background:#0C1322; border:1px solid var(--line); border-radius:14px; padding:20px 22px}
+.drill-head{display:flex; align-items:baseline; gap:12px; margin-bottom:14px}
+.drill-head .t{font-family:var(--serif); font-weight:600; font-size:18px; color:var(--ink)}
+.drill-head .p{margin-left:auto; font-family:var(--latin); font-size:19px; color:var(--mute); letter-spacing:.08em}
+.qbody{font-size:20px; line-height:1.6; font-family:var(--serif); min-height:3.2em; margin-bottom:16px}
+.qbody .say{color:var(--gold)}
+.opts{display:flex; flex-wrap:wrap; gap:10px}
+.opt{flex:1 1 160px; background:#16203A; border:1px solid var(--line); color:var(--ink); font:inherit; font-size:16px;
+  padding:13px 14px; border-radius:10px; cursor:pointer; text-align:left; transition:.18s}
+.opt:hover:not(:disabled){border-color:var(--gold); transform:translateY(-2px)}
+.opt:focus-visible{outline:2px solid var(--gold); outline-offset:2px}
+.opt.right{border-color:var(--jade); background:#12332C; color:#BFF3E3}
+.opt.wrong{border-color:var(--blood); background:#33171A; color:#F3C9C6}
+.opt:disabled{cursor:default}
+.fb{margin-top:14px; border-left:3px solid var(--gold-dim); padding:10px 14px; background:#101827; border-radius:0 10px 10px 0;
+  font-size:15.5px; color:#CFD6E6; display:none}
+.fb.show{display:block; animation:rise .3s ease both}
+.fb b{color:var(--gold)}
+.drill-foot{display:flex; align-items:center; gap:12px; margin-top:16px}
+.btn{background:transparent; border:1px solid var(--gold-dim); color:var(--gold); font:inherit; font-size:15px; padding:9px 20px;
+  border-radius:999px; cursor:pointer; transition:.18s}
+.btn:hover{background:var(--gold); color:#0b1120}
+.btn:focus-visible{outline:2px solid var(--gold); outline-offset:2px}
+.btn.ghost{border-color:var(--line); color:var(--mute)}
+.btn.ghost:hover{background:var(--line); color:var(--ink)}
+.score{margin-left:auto; font-size:14px; color:var(--mute)}
+.score b{color:var(--gold); font-family:var(--latin); font-size:20px; letter-spacing:.06em}
+.done-msg{color:var(--jade); font-size:15px}
+
+/* 谬误按钮网格 */
+.opts.wrap10 .opt{flex:1 1 calc(33.333% - 10px); text-align:center; font-size:15px; padding:11px 8px}
+
+/* 天平 */
+.scale-wrap{text-align:center; padding:6px 0 2px}
+.scale{width:100%; max-width:420px; height:150px; margin:0 auto}
+.beam{transition:transform .55s cubic-bezier(.34,1.3,.5,1); transform-origin:210px 46px}
+.scenarios{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:10px}
+.scenarios .opt{flex:1 1 200px; font-size:14.5px; padding:10px 12px}
+
+/* 字源翻牌 */
+.flip{background:linear-gradient(155deg,#18213A,#0D1425); border:1px solid var(--line); border-radius:14px; padding:22px; cursor:pointer;
+  transition:.2s; min-height:170px}
+.flip:hover{border-color:var(--gold); transform:translateY(-3px)}
+.flip .glyph{font-family:var(--serif); font-weight:900; font-size:58px; color:var(--gold); line-height:1}
+.flip .back{display:none; margin-top:10px; font-size:15.5px; color:#CFD6E6}
+.flip.open .back{display:block; animation:rise .3s ease both}
+.flip .hint{font-size:13px; color:var(--mute); margin-top:8px}
+.flip.open .hint{display:none}
+
+/* 资源架 */
+.shelf{display:grid; grid-template-columns:repeat(2,1fr); gap:14px}
+.book{border:1px solid var(--line); border-left:4px solid var(--gold-dim); border-radius:0 12px 12px 0; padding:14px 18px; background:#0E1524}
+.book .bt{font-family:var(--serif); font-weight:600; font-size:17px; color:var(--ink)}
+.book .ba{font-size:13.5px; color:var(--mute); margin:2px 0 6px}
+.book .bw{font-size:14.5px; color:#CBD3E4}
+
+/* 底部 HUD */
+.hud{position:fixed; left:0; right:0; bottom:0; z-index:20; background:linear-gradient(180deg,#070B1600,#070B16 34%);
+  padding:22px 20px 14px; backdrop-filter:blur(6px)}
+.hud-inner{max-width:1180px; margin:0 auto; display:flex; align-items:center; gap:14px}
+.slots{display:flex; gap:9px; flex:none}
+.slot{width:50px; height:56px; display:grid; place-items:center; font-size:21px; position:relative;
+  background:#0F1729; border:1px solid #23304C; color:#3E4A68;
+  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); transition:.3s}
+.slot.got{background:linear-gradient(160deg,#2A3253,#141B2F); border-color:var(--gold); color:var(--gold);
+  box-shadow:0 0 22px -4px var(--gold)}
+.slot .lv{position:absolute; bottom:2px; font-family:var(--latin); font-size:11px; color:#5C6A88}
+.nav{margin-left:auto; display:flex; align-items:center; gap:10px}
+.gold-total{font-family:var(--latin); font-size:24px; color:var(--gold); letter-spacing:.08em}
+.gold-total small{font-family:var(--sans); font-size:11px; color:var(--mute); letter-spacing:.16em; display:block; text-align:right}
+.pager{font-size:13px; color:var(--mute); font-variant-numeric:tabular-nums}
+.jump{display:flex; flex-wrap:wrap; gap:6px; justify-content:center; max-width:1180px; margin:0 auto 8px}
+.jump button{width:9px; height:9px; padding:0; border-radius:50%; border:1px solid #2C3959; background:transparent; cursor:pointer}
+.jump button.now{background:var(--gold); border-color:var(--gold)}
+
+@media (max-width:860px){
+  body{font-size:16px}
+  .grid,.grid3,.shelf{grid-template-columns:1fr}
+  .stage{padding:20px 16px 210px}
+  .opts.wrap10 .opt{flex:1 1 calc(50% - 10px)}
+  .slot{width:40px; height:46px; font-size:17px}
+  .qbody{font-size:18px}
+}
+</style>
+</head>
+<body>
+<main class="stage" id="stage">
+
+<!-- 0 封面 -->
+<section class="slide on">
+  <div class="cover">
+    <div class="eyebrow">KEY PLAY SCHOOL <span>家长通识课 · 独立思考</span></div>
+    <h1>批判性思维<br>六神装</h1>
+    <p class="lead">六件装备，六个台阶。把《学会提问》里最实用的一条主线，做成一局可以边玩边打通的课。目标不是把你训练成逻辑学家，而是让你在下一次和孩子争执时，多出一点分辨的颗粒度。</p>
+    <div class="sig">
+      <span class="chip">6 个台阶</span>
+      <span class="chip">50+ 道现场判断题</span>
+      <span class="chip">案例多来自家庭日常</span>
+      <span class="chip">键盘 ← → 翻页</span>
+    </div>
+    <div style="margin-top:34px; display:flex; align-items:center; gap:20px; flex-wrap:wrap">
+      <button class="btn" data-go="1" style="font-size:17px; padding:12px 28px">进入商店，开始出装</button>
+      <div class="seal">钥匙<br>玩校</div>
+    </div>
+  </div>
+</section>
+
+<!-- 1 澄清 -->
+<section class="slide">
+  <div class="eyebrow">PRELUDE <span>开局前 · 先卸掉三个误解</span></div>
+  <h2>「批判」不是「批评」</h2>
+  <p class="lead">很多人一听批判性思维，就想到抬杠、找茬、说难听话。先拆开这两个字看看。点开下面两张牌。</p>
+  <div class="grid" style="margin:20px 0">
+    <div class="flip" tabindex="0" data-flip>
+      <div class="glyph">批</div>
+      <div class="hint">点击查看字源</div>
+      <div class="back">本义是反手打——「打」是正手一巴掌，「批」是手背划拉过去的那一下。引申为批改、批阅、批注：<b class="hl">评价、评点</b>。老师批作业，不等于骂作业。</div>
+    </div>
+    <div class="flip" tabindex="0" data-flip>
+      <div class="glyph">判</div>
+      <div class="hint">点击查看字源</div>
+      <div class="back">立刀旁加一个「半」，一刀两断。判的意思是<b class="hl">区分</b>。所以批判＝评价＋区分。我们常说自己「不会思考」，很多时候只是区分的颗粒度不够细。</div>
+    </div>
+  </div>
+  <div class="grid3">
+    <div class="card tight"><h3>误解一</h3><p class="note">批判＝只说负面。<br>实际上：评价包含肯定，强势批判者最先审的是自己。</p></div>
+    <div class="card tight"><h3>误解二</h3><p class="note">批判＝到处质疑。<br>实际上：没有证据就不质疑，谁主张谁举证，没人有义务自证清白。</p></div>
+    <div class="card tight"><h3>误解三</h3><p class="note">批判＝高深技术。<br>实际上：全球小学一年级就在教它的第一课——分清事实和观点。</p></div>
+  </div>
+  <p class="note" style="margin-top:18px">接下来的六个台阶，本质上是同一件事：<span class="hl">把区分的颗粒度一级一级调细</span>。</p>
+  <div style="margin-top:20px"><button class="btn" data-go="2">看看要买哪六件</button></div>
+</section>
+
+<!-- 2 商店总览 -->
+<section class="slide">
+  <div class="eyebrow">ITEM SHOP <span>出装路线 · 由易到难</span></div>
+  <h2>今天要合成的六件装备</h2>
+  <p class="lead">MOBA 里的「六神装」指的是装备栏六格全满。这里的六格，从最基础的接收姿态，一路装到最费功夫的假设识别。前四件很轻，第五件最贵，第六件靠日积月累补齐。</p>
+  <div class="grid3" style="margin-top:22px" id="shopGrid"></div>
+  <p class="note" style="margin-top:20px">每一关做完题就点亮下面的装备格，答对累计金币。全场共 <b class="hl">50 道</b>判断，适合投屏分组抢答。</p>
+  <div style="margin-top:18px"><button class="btn" data-go="3">装备一：淘金筛</button></div>
+</section>
+
+<!-- 3 台阶一 -->
+<section class="slide">
+  <div class="eyebrow">ITEM 01 <span>台阶一 · 接收信息的姿态</span></div>
+  <h2>海绵式思维 vs 淘金式思维</h2>
+  <div class="grid">
+    <div>
+      <div class="item" data-item="0"></div>
+      <p style="margin-top:18px">海绵式思维像海绵吸水，照单全收。它并不可耻——初学一件事时，先老老实实吸收是必要的，否则很容易站在<span class="hl">达克效应的愚昧之巅</span>上乱评价。愚是笨，昧是不知道自己笨，所以这个位置自己很难察觉。</p>
+      <p>淘金式思维则是主动探索：一边接收，一边筛。两者最大的区别是<span class="jade">被动吸收</span>与<span class="jade">主动提问</span>。成年人的问题通常不是不会吸收，而是该淘金的时候还在当海绵。</p>
+      <p class="note">教材出处：布朗 &amp; 基利《学会提问》第一章。原书把这两种风格并列，并不否定海绵式，只强调你要知道自己此刻在用哪一种。</p>
+    </div>
+    <div class="drill" data-drill="0"></div>
+  </div>
+</section>
+
+<!-- 4 台阶二 -->
+<section class="slide">
+  <div class="eyebrow">ITEM 02 <span>台阶二 · 这把刀朝谁</span></div>
+  <h2>弱势批判 vs 强势批判</h2>
+  <div class="grid">
+    <div>
+      <div class="item" data-item="1"></div>
+      <p style="margin-top:18px"><b class="hl">弱势批判</b>：用批判性思维捍卫自己已有的信念，专门用来拆别人的台。<br><b class="jade">强势批判</b>：用同一套标准评估所有信念，包括自己最珍视的那些。</p>
+      <p>说白了就是别双标。弱势批判是宽以待己、严于律人；强势批判先严于律己。判断自己在哪一边有个简单测试：<span class="hl">把说话人换成你讨厌的人，你的评价会变吗？</span></p>
+      <p class="note">这一关不难懂，难在做到。它也是后面每一关的前提——如果只对别人的假设感兴趣，第五关基本学不下去。</p>
+    </div>
+    <div class="drill" data-drill="1"></div>
+  </div>
+</section>
+
+<!-- 5 台阶三 -->
+<section class="slide">
+  <div class="eyebrow">ITEM 03 <span>台阶三 · 真正的第一课</span></div>
+  <h2>区分事实与观点</h2>
+  <div class="grid">
+    <div>
+      <div class="item" data-item="2"></div>
+      <p style="margin-top:18px"><b class="jade">事实判断</b>讲证据，有真假可查，争论方式是拿数据。<b class="hl">价值判断</b>看场景，难分对错，争论方式是把彼此的标准说清楚。辩论赛的辩题多半属于后者：双方守的价值观可能都是好的，只是在具体事务上撞车了。</p>
+      <p>一个常见的坑：<span class="hl">事实判断不等于事实为真</span>。「我们班一半同学上了课外班」即使说错了，它仍然是一个事实判断——只是一个假的事实判断。分类看的是这句话<b>能不能被证据检验</b>，不是它对不对。</p>
+      <p class="note">Fact / Opinion 的区分是各国小学低年级的常规内容。真实场景里更难的是混合句：「他考了 78 分（事实），说明他没努力（观点）」——一句话里两种成分，要拆开处理。</p>
+    </div>
+    <div class="drill" data-drill="2"></div>
+  </div>
+</section>
+
+<!-- 6 台阶四 -->
+<section class="slide">
+  <div class="eyebrow">ITEM 04 <span>台阶四 · 两种推理方向</span></div>
+  <h2>归纳 与 演绎</h2>
+  <div class="grid">
+    <div>
+      <div class="item" data-item="3"></div>
+      <p style="margin-top:18px"><b class="hl">归纳</b>是从若干事实里总结规律，总结过去。它有用，但脆弱：十七世纪之前欧洲人见过的天鹅都是白的，直到航海者在澳大利亚看见黑天鹅。<span class="note">（塔勒布后来借这个词指代小概率意外事件。）</span></p>
+      <p><b class="jade">演绎</b>是从已有前提推出结论，指向未来。基本公式是亚里士多德的三段论：大前提、小前提、结论——A&gt;B，B&gt;C，所以 A&gt;C。别被名字吓退，成长型思维，朋友。</p>
+      <p class="note">要点：归纳怕全称判断，破解办法是<b class="hl">举一反例即可证伪</b>，所以谨慎的说法会加限定词——「就现有证据看」「截至目前」。演绎怕前提有毛病：推理形式再工整，大前提是错的，结论照样是错的。</p>
+    </div>
+    <div class="drill" data-drill="3"></div>
+  </div>
+</section>
+
+<!-- 7 台阶五 -->
+<section class="slide">
+  <div class="eyebrow">ITEM 05 <span>台阶五 · 全场最贵的一件</span></div>
+  <h2>找出没说出口的假设</h2>
+  <div class="grid">
+    <div>
+      <div class="item" data-item="4"></div>
+      <p style="margin-top:18px">一个完整的论证由<b>理由</b>和<b>结论</b>组成。但只有理由，结论往往立不住，中间还缺一块没说出口、却必须成立的东西：</p>
+      <p style="font-family:var(--serif); font-size:21px; color:var(--gold); text-align:center; border:1px dashed var(--gold-dim); border-radius:12px; padding:14px">论证 ＝ 理由 ＋（假设）＋ 结论</p>
+      <p>「今天出太阳了，我心情很好。」理由是出太阳，结论是心情好，中间那块是：<span class="hl">出太阳会让我心情变好</span>。找假设，就是把这块补出来。</p>
+      <p class="note"><b class="hl">描述性假设</b>是没明说、却被当成事实的背景信念（世界是怎样的）。<b class="hl">价值观假设</b>是没明说、却在起作用的排序（什么更重要）。和人吵不明白的时候，冲突通常不在结论，而在这两层。</p>
+    </div>
+    <div class="drill" data-drill="4"></div>
+  </div>
+  <div class="card" style="margin-top:22px">
+    <h3>价值观天平：姐姐的秘密</h3>
+    <p class="note" style="margin-bottom:6px">《学会提问》里的经典题：你该不该把姐姐吸毒的事告诉父母？多数孩子会说该，理由是诚实、想帮姐姐。那什么情况下你会不说？点下面的情境，看天平往哪边倒。</p>
+    <div id="scaleBox"></div>
+  </div>
+</section>
+
+<!-- 8 抬杠 -->
+<section class="slide">
+  <div class="eyebrow">INTERLUDE <span>插播 · 举证责任</span></div>
+  <h2>学会抬杠，是为了不到处抬杠</h2>
+  <div class="grid">
+    <div>
+      <p class="lead">我们在钥匙玩校夏令营做过一个通识活动叫「学会抬杠」。名字是玩笑，规则是认真的：真正的独立思考不是逢事就质疑，而是<span class="hl">尊重基本的秩序</span>。</p>
+      <ul class="tick">
+        <li>没有足够证据，就先不质疑。</li>
+        <li>不做有罪推定——不先定罪再审判。</li>
+        <li>谁主张，谁举证。<b class="hl">没有人有义务为你自证清白。</b></li>
+        <li>质疑的对象是主张，不是提出主张的人。</li>
+      </ul>
+      <p class="note" style="margin-top:14px">这条规则同样适用于家里：当你说「我看你就是在敷衍」，举证责任在你，而不是让孩子证明自己没敷衍。</p>
+    </div>
+    <div class="card">
+      <h3>课堂小实验（3 分钟）</h3>
+      <p class="note">两人一组。A 随口提一个主张（「短视频让孩子变笨」），B 只做一件事：问「你的证据是什么」。A 每次回答后，B 继续追问一层，最多追三层。</p>
+      <p class="note">通常第二层就会出现「大家都这么说」「我感觉是」——这正是海绵式吸收留下的沉淀物。换角色再来一次，这次让 A 挑一个自己最相信的教育观念。</p>
+      <p class="note" style="color:var(--gold)">观察点：追问自己的信念时，是不是明显更不舒服？那种不舒服，就是弱势批判的手感。</p>
+    </div>
+  </div>
+  <div style="margin-top:20px"><button class="btn" data-go="9">最后一件：谬误猎弓</button></div>
+</section>
+
+<!-- 9 台阶六 -->
+<section class="slide">
+  <div class="eyebrow">ITEM 06 <span>台阶六 · 非形式逻辑</span></div>
+  <h2>谬误猎人</h2>
+  <div class="grid">
+    <div>
+      <div class="item" data-item="5"></div>
+      <p style="margin-top:18px">前面的三段论属于形式逻辑，讲结构对不对。谬误属于非形式逻辑，是历代总结出来的<span class="hl">常见翻车现场清单</span>，总结一个算一个，每个都值得引以为戒。</p>
+      <p>常见谬误二十来种，这里挑家庭场景中最高频的十种。右边的题目大多是真实的家长语录——不是为了让人尴尬，而是因为它们太顺口了，顺口到我们说的时候根本没在思考。</p>
+      <div class="card tight" style="margin-top:6px">
+        <p class="note" style="margin:0"><b class="hl">十种谬误速查</b><br>人身攻击 · 滑坡推理 · 诉诸完美 · 不当诉诸公众 · 诉诸可疑权威 · 诉诸情感 · 稻草人 · 晕轮效应 · 虚假两难 · 忽视常识</p>
+      </div>
+      <p class="note" style="margin-top:14px">补一句：孔子确实说过以德报怨，但全句是「以德报怨，何以报德？以直报怨，以德报德」。<b class="hl">以直报怨</b>才是他真正的建议——「传统美德」这个框里，装着不少没被检查过的东西。</p>
+    </div>
+    <div class="drill" data-drill="5"></div>
+  </div>
+</section>
+
+<!-- 10 结算 -->
+<section class="slide">
+  <div class="eyebrow">SCOREBOARD <span>结算 · 你的这一局</span></div>
+  <h2 id="endTitle">六神装 · 结算</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>本局战绩</h3>
+      <div id="endStats" style="font-size:17px; line-height:2"></div>
+      <p class="note" style="margin-top:12px">分数不重要。重要的是刚才有几道题，你第一反应答错了——那几道题指向的，正是你平时最容易松手的地方。</p>
+    </div>
+    <div class="card">
+      <h3>回家能用的三件事</h3>
+      <ul class="tick">
+        <li>吵架时先问一句：我们是在争事实，还是在争什么更重要？</li>
+        <li>说「所有」「从来」「永远」之前停半秒，换成「就我看到的」。</li>
+        <li>下命令之前，把自己没说出口的那半句补出来，说给孩子听。</li>
+      </ul>
+      <p class="note" style="margin-top:10px">给孩子的版本更简单：家里设一个「反例奖」，谁能给爸妈的全称句找到一个反例，谁得分。</p>
+    </div>
+  </div>
+  <h3 style="margin-top:26px; font-size:22px">装备的合成材料（延伸阅读）</h3>
+  <div class="shelf" id="shelf"></div>
+  <p class="note" style="margin-top:20px">课程框架来自钥匙玩校十年间开发的游戏化通识活动，主体方法论出自《学会提问》。<span class="hl">工具学再多，最后还是要回到常识。</span></p>
+  <div style="margin-top:18px; display:flex; gap:10px; flex-wrap:wrap">
+    <button class="btn ghost" data-go="0">回到封面</button>
+    <button class="btn ghost" id="resetAll">重置全场答题</button>
+  </div>
+</section>
+
+</main>
+
+<div class="hud">
+  <div class="jump" id="jump"></div>
+  <div class="hud-inner">
+    <div class="slots" id="slots"></div>
+    <div class="nav">
+      <div class="gold-total"><span id="goldNum">0</span><small>GOLD</small></div>
+      <button class="btn ghost" id="prev">←</button>
+      <span class="pager" id="pager">1 / 11</span>
+      <button class="btn ghost" id="next">→</button>
+    </div>
+  </div>
+</div>
+<script>
+const ITEMS = [
+  {icon:"⛏", name:"淘金筛", en:"PROSPECTOR'S SIEVE", cost:"500",
+   stats:["+20 主动提问","+15 信息辨识","−30 被带节奏"],
+   passive:"接收信息时可在两种模式间切换：入门期用海绵，判断期用淘金。"},
+  {icon:"🪞", name:"公正之镜", en:"MIRROR OF FAIR PLAY", cost:"900",
+   stats:["+25 自我审视","+20 论辩信誉","−40 双重标准"],
+   passive:"每次评价他人观点时，同一套标准自动施加于自己的观点。"},
+  {icon:"🔻", name:"事实棱镜", en:"FACT PRISM", cost:"1400",
+   stats:["+30 分辨精度","+15 讨论效率","−35 无效争吵"],
+   passive:"将一句话分解为事实成分与价值成分，两者分别处理。"},
+  {icon:"🧭", name:"归演罗盘", en:"COMPASS OF TWO PATHS", cost:"2100",
+   stats:["+25 规律提炼","+25 推理严密","−30 全称判断"],
+   passive:"归纳时自动附加限定词；演绎时先检查大前提是否成立。"},
+  {icon:"🔦", name:"假设显影灯", en:"ASSUMPTION LAMP", cost:"3200",
+   stats:["+40 洞察隐含前提","+30 冲突化解","−45 鸡同鸭讲"],
+   passive:"照出论证中没说出口、却必须成立的那一块。需长期充能。"},
+  {icon:"🏹", name:"谬误猎弓", en:"FALLACY HUNTER", cost:"4800",
+   stats:["+35 识破话术","+20 表达质量","−50 顺口说错话"],
+   passive:"标记十种常见谬误。命中后本人下次说话前会迟疑半秒。"}
+];
+
+const DRILLS = [
+{title:"该当海绵，还是该去淘金？", opts2:["海绵式：先照单全收","淘金式：边收边筛"],
+ qs:[
+  {q:"你第一次学一门完全陌生的手艺，师父正在示范最基础的动作。", a:0, why:"入门期先老实吸收。此时你的评价能力还没建立，急着批判容易停在愚昧之巅。"},
+  {q:"短视频说：孩子叛逆期，只要做好这一件事就够了。", a:1, why:"单一因果 ＋ 绝对化承诺 ＋ 没有信息源，三个淘金信号同时亮起。"},
+  {q:"家长会上，老师在通报下学期的作息时间安排。", a:0, why:"这是事实性通知，先完整接收再决定要不要提问，比边听边质疑效率高得多。"},
+  {q:"一篇文章说：研究证明，睡前读绘本能让孩子智商提高 20%。", a:1, why:"具体到小数点的效果承诺，必须追问：谁做的研究、样本多大、怎么测的智商。"},
+  {q:"你在读一本立场你并不认同的书，刚看到第三章。", a:0, why:"先完整理解对方说了什么再评价。太早开火，攻击的往往是你自己想象出来的版本，也就是稻草人。"},
+  {q:"亲戚说：我们那会儿都是打过来的，孩子就得打。", a:1, why:"这是经验归纳 ＋ 诉诸传统。可以追问：打过来的人后来都怎么样了？没被打的呢？"},
+  {q:"孩子在跟着老师纠正一个字的读音。", a:0, why:"约定俗成的规范，属于该记就记的部分。把有限的怀疑力气花在更值得的地方。"}
+ ]},
+
+{title:"这是弱势批判，还是强势批判？", opts2:["弱势批判","强势批判"],
+ qs:[
+  {q:"你收藏了三篇支持自己教育观的文章；反对的那篇，看了标题就划走了。", a:0, why:"典型的证实偏误。批判的力气只朝外用，就是弱势。"},
+  {q:"孩子说「手机没坏处」，你立刻能列五条反驳；他说「手机有好处」，你也认真想了想有没有道理。", a:1, why:"同一个人的两种说法，用同一套标准检验，这就是强势批判。"},
+  {q:"同一份数据，支持你观点时你说「研究表明」，反对你观点时你说「样本太小」。", a:0, why:"标准随立场浮动，是最常见的双标形态，而且当事人常常真心没察觉。"},
+  {q:"转发一条内容前，你先问自己：如果这话是我讨厌的人说的，我还会转吗？", a:1, why:"角色互换测试，是检验自己站在哪一边最快的办法。"},
+  {q:"你要求对方拿证据，而自己的结论从来不用给理由。", a:0, why:"举证责任只对别人生效，这已经不是思考，是权力。"},
+  {q:"你写下自己最坚信的一条教育信念，然后认真列出三条可能推翻它的证据。", a:1, why:"主动为自己的信念找反例，是强势批判的日常练法，也是波普尔式的自我证伪。"}
+ ]},
+
+{title:"事实判断，还是价值判断？", opts2:["事实判断（可查证真假）","价值判断（看标准与场景）"],
+ qs:[
+  {q:"小红帽的红帽子很漂亮。", a:1, why:"漂亮与否取决于审美标准，换个人可以有完全不同的答案，无法用证据裁决。"},
+  {q:"大灰狼吃掉了小红帽的外婆。", a:0, why:"在故事设定内，这是一个可以翻书核对的事实陈述——发生了还是没发生。"},
+  {q:"这次月考，小明数学考了 78 分。", a:0, why:"查卷子就能定真假。"},
+  {q:"78 分说明小明这次没努力。", a:1, why:"这句里藏着一个标准：多少分算努力。分数是事实，判断是评价，两者被塞进了一句话。"},
+  {q:"我们班一半同学报了课外班。", a:0, why:"注意：即使这句话说错了，它仍然是事实判断，只是一个假的事实判断。分类看的是能否被证据检验。"},
+  {q:"打孩子是不对的。", a:1, why:"关于「应当」的判断，属于价值层面。"},
+  {q:"体罚会提高儿童出现攻击行为的概率。", a:0, why:"这是可以被研究设计检验的因果主张，属于事实层面。上一题和这一题连起来看，是批判性思维最有用的一次拆分。"},
+  {q:"手机屏幕会发出蓝光。", a:0, why:"可测量。"},
+  {q:"这是本市最好的学校。", a:1, why:"「最好」必须先定义：升学率？师生关系？孩子的睡眠时间？标准一换，答案就换。"},
+  {q:"孩子应该在十点前睡觉。", a:1, why:"应该型陈述都是价值判断。而「十点前睡觉的孩子第二天注意力测试分数更高」才是事实主张。"}
+ ]},
+
+{title:"归纳、演绎与它们的坑",
+ qs:[
+  {q:"「我认识的三个学霸都早睡，所以早睡有利于学习。」这是——", opts:["归纳","演绎"], a:0, why:"从几个个案总结规律，是归纳。样本三个人，结论覆盖全体，风险很明显。"},
+  {q:"「所有哺乳动物都用肺呼吸；鲸是哺乳动物；所以鲸用肺呼吸。」这是——", opts:["归纳","演绎"], a:1, why:"标准三段论：大前提、小前提、结论。"},
+  {q:"「他连续五次都在年级前十，我判断这次也会。」这是——", opts:["归纳","演绎"], a:0, why:"由过去推未来，靠的是规律的稳定性——这正是休谟提出的归纳问题。"},
+  {q:"「校规规定迟到要写说明；他今天迟到了；所以他要写说明。」这是——", opts:["归纳","演绎"], a:1, why:"从既有规则推出个案结论。"},
+  {q:"十七世纪前，欧洲人见过的天鹅都是白的，于是断定「天鹅都是白的」。后来在澳大利亚发现了黑天鹅。这个故事说明——",
+   opts:["归纳法没有价值","归纳结论永远只是暂时成立","演绎比归纳可靠","应该多观察天鹅"], a:1,
+   why:"归纳能提高思维效率，但结论始终对新证据敞开。稳健的说法会加上限定：截至目前、就现有证据看。"},
+  {q:"要推翻「北京所有的吃的都不好吃」，最省力的做法是——",
+   opts:["统计全市餐厅评分","找到一家好吃的","证明说话的人没去过北京","问一百个北京人"], a:1,
+   why:"全称判断的软肋：举一反例即可证伪。所以全称句听起来过瘾，其实最不经打。"},
+  {q:"「所有会飞的都是鸟；蝙蝠会飞；所以蝙蝠是鸟。」问题出在哪？",
+   opts:["推理形式","大前提","小前提","结论的表述方式"], a:1,
+   why:"形式完全正确，错在大前提是假的。演绎只保证「前提真则结论真」，它不负责检查前提——那是事实判断的活。"},
+  {q:"下面哪句话最稳健？",
+   opts:["天下父母都爱孩子","不爱孩子的父母根本不配当父母","就现有研究看，多数父母在多数情况下会保护孩子","爱不爱孩子无法讨论"], a:2,
+   why:"限定范围、限定程度、注明证据来源。三个动作，一句全称判断就变成了一句可以继续讨论的话。"}
+ ]},
+
+{title:"把没说出口的那一块补出来",
+ qs:[
+  {q:"「政府应该大力发展公共交通，以减少城市空气污染。」这里必须成立的假设是——",
+   opts:["公共交通比私家车舒适","城市空气污染主要来自私人机动车","政府有足够预算","市民愿意换乘公交"], a:1,
+   why:"如果污染主要来自工业或外部输入，理由就撑不起结论了。这是典型的描述性假设：没明说，却被当成事实。"},
+  {q:"「孩子这次没考好，说明这个补习班没用，该退了。」这里的假设是——",
+   opts:["补习班老师不负责","一次考试成绩足以衡量补习班的效果","孩子不喜欢这个班","别的班会更好"], a:1,
+   why:"把单次结果当作唯一评价指标。补出这一块，讨论才能落到「那我们用什么来判断有没有用」。"},
+  {q:"「他连自己房间都收拾不好，怎么可能管好学习。」这里的假设是——",
+   opts:["房间乱的人学习都差","整理房间与管理学习靠的是同一种能力","他不愿意收拾房间","学习比房间重要"], a:1,
+   why:"两件事之间被默认存在一座桥。桥一旦说出口，就能检验了——事实上执行功能确实相关，但远不到「怎么可能」的程度。"},
+  {q:"「今天出太阳了，我心情很好。」这里的假设是——",
+   opts:["今天是晴天","我平时心情不好","出太阳会让我心情变好","阳光对健康有好处"], a:2,
+   why:"注意第一项是理由本身，不是假设。假设是连接理由与结论的那根看不见的绳子。"},
+  {q:"判断类型：「应该让孩子早点接触竞争，社会就是这样的。」", opts:["描述性假设","价值观假设"], a:1,
+   why:"背后是一个排序：适应社会 ＞ 保护童年。两个都是好东西，冲突发生在排序上。"},
+  {q:"判断类型：「多刷题，成绩就会好。」", opts:["描述性假设","价值观假设"], a:0,
+   why:"这是关于世界如何运作的信念，可以拿证据检验——比如刷题量与成绩的关系是否线性。"},
+  {q:"判断类型：「别买这个玩具了，它没有教育意义。」", opts:["描述性假设","价值观假设"], a:1,
+   why:"隐含的排序是：玩具的价值在于教育功能，而不在于快乐本身。"},
+  {q:"判断类型：「宁可让他现在恨我，也不能让他将来后悔。」", opts:["描述性假设","价值观假设"], a:1,
+   why:"长期利益 ＞ 当下关系。顺带还藏了一个描述性假设：我现在的做法确实能减少他将来的后悔。这一句里两层假设都在。"}
+ ]},
+
+{title:"谬误猎人：这句话踩了哪个坑？",
+ opts10:["人身攻击","滑坡推理","诉诸完美","不当诉诸公众","诉诸可疑权威","诉诸情感","稻草人","晕轮效应","虚假两难","忽视常识"],
+ qs:[
+  {q:"「考不上高中，你这辈子就完了。」", a:1, why:"把一连串概率极低的环节串成一条必然的下坡路。识别方法：数一数中间省略了多少步。"},
+  {q:"「别人家孩子都能坚持，凭什么你不行？」", a:3, why:"人多不等于有理。同款：我们这代人都是挨打长大的，凭什么现在不能打你。"},
+  {q:"「我天天上班这么累，说你两句怎么了？」", a:5, why:"用辛苦制造内疚，替换掉「这两句说得对不对」的讨论。"},
+  {q:"「你连作业都写不完，还谈什么理想。」", a:0, why:"对人不对事。一个人某方面做得不好，不构成他这句话错的理由。"},
+  {q:"孩子说：学校伙食可以更好。家长说：想不到你对学校这么不满，这么不爱校！", a:6, why:"把对方没说的意思立起来再打倒。稻草人最伤关系，因为被打的那个人是虚构的。"},
+  {q:"「学了这么多方法，又不能保证他上清华，学它干嘛。」", a:2, why:"达不到完美就否定全部。胡适那句话是解药：怕什么真理无穷，进一寸有一寸的欢喜。"},
+  {q:"「要么现在吃学习的苦，要么将来吃生活的苦。」", a:8, why:"人生的选项从来不止两个。听到「要么…要么…」，先去找第三种可能。"},
+  {q:"「这是某某育儿博主说的，肯定没错。」", a:4, why:"名气不等于该领域的专业资质。可以追问：他的结论基于什么证据，有没有同行不同意。"},
+  {q:"「金钱是万恶之源，把社会搞得这么脏。」", a:7, why:"「万恶之源」是一个笼统的光环式标签，罩住了本该细分的问题。"},
+  {q:"「忍让是中华民族的传统美德，你就让着弟弟。」", a:7, why:"正面词的光环更隐蔽。「传统美德」这个漂亮的框里，装着不少该被检查的旧习惯。"},
+  {q:"「自从换了这张书桌，他成绩就上去了，所以是书桌起的作用。」", a:9, why:"公鸡一叫太阳就升起，所以太阳是被叫起来的。前后相继不等于因果，同期还发生了什么，才是要问的。"},
+  {q:"「他初中就早恋，这种人的意见不用听。」", a:0, why:"用身份和过往给人贴标签，取消他说话的资格。讨论一旦变成审查发言人，就没法继续了。"}
+ ]}
+];
+
+const SCENES = [
+  {t:"姐姐已经三十多岁，独立生活多年", tilt:14, s:"成年人的自主权重了。你的「帮助」可能变成越界。"},
+  {t:"父母有家暴习惯，说了姐姐会挨打", tilt:20, s:"保护重于诚实。此时告知不再是帮忙，而是把人推进危险。"},
+  {t:"消息只是同学传的，你没亲眼见过", tilt:16, s:"事实层面都没站稳，价值层面的争论就该先暂停：先去核实。"},
+  {t:"姐姐十四岁，情况正在恶化", tilt:-22, s:"未成年 ＋ 高风险 ＋ 可逆窗口。此刻诚实与保护指向同一个动作。"},
+  {t:"姐姐主动告诉你，并让你保密", tilt:8, s:"多了一层承诺。要么劝她自己说，要么提前告诉她你可能会说。"},
+  {t:"把「吸毒」换成「谈恋爱」", tilt:22, s:"标签一换，多数人的答案立刻反转——说明我们排的从来不是抽象的诚实，而是具体情境下的轻重。"}
+];
+
+const BOOKS = [
+  {t:"《学会提问》", a:"尼尔·布朗、斯图尔特·基利", w:"本课主线的来源。海绵式与淘金式、弱势与强势批判、理由—假设—结论、价值观假设、谬误清单，都出自这本书。入门首选。"},
+  {t:"《批判性思维工具》", a:"理查德·保罗、琳达·埃尔德", w:"另一套主流框架：八个思维元素加九条智力标准（清晰、准确、相关、深度、广度、逻辑、重要性、公正性）。适合做课程设计时当评价量表用。"},
+  {t:"《工具论》中的三段论", a:"亚里士多德", w:"演绎推理的源头。不必通读，理解大前提、小前提、中项的作用即可。"},
+  {t:"《人性论》的归纳问题 / 《猜想与反驳》", a:"休谟 / 波普尔", w:"为什么归纳永远不能给出确定结论，以及为什么「可证伪」比「被证实」更值得追求。第四关的理论后台。"},
+  {t:"《黑天鹅》", a:"纳西姆·塔勒布", w:"把白天鹅悖论推到现实世界：我们如何被自己没见过的事情打败。适合和孩子讨论「意外」。"},
+  {t:"图尔敏论证模型", a:"斯蒂芬·图尔敏", w:"主张、根据、正当理由、支撑、限定词、反驳。第五关的进阶版，尤其适合教孩子写议论文。"},
+  {t:"《思考，快与慢》", a:"丹尼尔·卡尼曼", w:"解释我们为什么会犯这些错：系统一负责脱口而出，系统二才负责检查。谬误的心理学基础。"},
+  {t:"《明亮的对话》", a:"徐贲", w:"中文语境下的公共说理教材，讲怎样把这些原则用在日常表达与争论中。"}
+];
+
+/* ---------- 渲染 ---------- */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+let gold = 0, done = new Array(6).fill(false);
+
+document.querySelectorAll('.item').forEach(el=>{
+  const it = ITEMS[+el.dataset.item];
+  el.innerHTML = `<div class="item-top">
+      <div class="hex">${it.icon}</div>
+      <div><div class="item-name">${it.name}</div><div class="item-sub">${it.en}</div></div>
+      <div class="cost">${it.cost}<small>GOLD</small></div>
+    </div>
+    <ul class="stats">${it.stats.map(s=>`<li class="${s.startsWith('−')?'minus':''}">${s}</li>`).join('')}</ul>
+    <div class="passive"><b>被动 ·</b> ${it.passive}</div>`;
+});
+
+$('#shopGrid').innerHTML = ITEMS.map((it,i)=>`
+  <div class="card tight" style="cursor:pointer" data-go="${i<4?i+3:(i===4?7:9)}">
+    <div style="display:flex; align-items:center; gap:12px">
+      <div class="hex" style="width:44px;height:50px;font-size:20px">${it.icon}</div>
+      <div><div style="font-family:var(--serif);font-weight:600;color:var(--gold);font-size:18px">${it.name}</div>
+      <div style="font-size:12.5px;color:var(--mute)">台阶 ${i+1} · ${it.cost} 金</div></div>
+    </div>
+    <p class="note" style="margin:12px 0 0">${it.passive}</p>
+  </div>`).join('');
+
+$('#shelf').innerHTML = BOOKS.map(b=>`<div class="book"><div class="bt">${b.t}</div><div class="ba">${b.a}</div><div class="bw">${b.w}</div></div>`).join('');
+
+$('#slots').innerHTML = ITEMS.map((it,i)=>`<div class="slot" id="slot${i}" title="${it.name}">${it.icon}<span class="lv">${i+1}</span></div>`).join('');
+
+/* 练习台 */
+function buildDrill(el, idx){
+  const D = DRILLS[idx];
+  let i = 0, right = 0, answered = false;
+  el.innerHTML = `<div class="drill-head"><span class="t">${D.title}</span><span class="p" data-p></span></div>
+    <div class="qbody" data-q></div>
+    <div class="opts ${D.opts10?'wrap10':''}" data-o></div>
+    <div class="fb" data-f></div>
+    <div class="drill-foot"><button class="btn" data-n style="visibility:hidden">下一题 →</button>
+    <span class="score">答对 <b data-s>0</b> / ${D.qs.length}</span></div>`;
+  const qEl=el.querySelector('[data-q]'), oEl=el.querySelector('[data-o]'), fEl=el.querySelector('[data-f]'),
+        nEl=el.querySelector('[data-n]'), pEl=el.querySelector('[data-p]'), sEl=el.querySelector('[data-s]');
+
+  function render(){
+    const Q = D.qs[i];
+    const opts = Q.opts || D.opts2 || D.opts10;
+    answered = false;
+    pEl.textContent = `${String(i+1).padStart(2,'0')} / ${String(D.qs.length).padStart(2,'0')}`;
+    qEl.innerHTML = `<span class="say">${Q.q}</span>`;
+    fEl.className = 'fb'; fEl.innerHTML = '';
+    nEl.style.visibility = 'hidden';
+    oEl.innerHTML = opts.map((o,k)=>`<button class="opt" data-k="${k}">${o}</button>`).join('');
+    oEl.querySelectorAll('.opt').forEach(b=>b.addEventListener('click',()=>pick(+b.dataset.k)));
+  }
+  function pick(k){
+    if(answered) return; answered = true;
+    const Q = D.qs[i];
+    const btns = oEl.querySelectorAll('.opt');
+    btns.forEach(b=>b.disabled = true);
+    btns[Q.a].classList.add('right');
+    if(k !== Q.a) btns[k].classList.add('wrong'); else { right++; gold += 100; updateGold(); }
+    sEl.textContent = right;
+    fEl.innerHTML = `<b>${k===Q.a?'命中。':'差一点。'}</b> ${Q.why}`;
+    fEl.className = 'fb show';
+    nEl.style.visibility = 'visible';
+    nEl.textContent = (i === D.qs.length-1) ? '完成本关 ✦' : '下一题 →';
+  }
+  nEl.addEventListener('click',()=>{
+    if(i < D.qs.length-1){ i++; render(); }
+    else{
+      done[idx] = true;
+      document.getElementById('slot'+idx).classList.add('got');
+      gold += 300; updateGold();
+      el.innerHTML = `<div class="drill-head"><span class="t">${ITEMS[idx].name} · 已合成</span></div>
+        <div class="qbody" style="min-height:auto">本关 ${D.qs.length} 题，答对 <b class="hl">${right}</b> 题。装备栏第 ${idx+1} 格已点亮。</div>
+        <p class="note">${right === D.qs.length ? '全对。那就去找一道你答得犹豫的题，犹豫的地方比错的地方更值得回看。' : '错的那几题记一下——它们指向你平时最容易松手的位置。'}</p>
+        <div class="drill-foot"><button class="btn ghost" data-again>再打一遍</button>
+        <span class="score">本关获得 <b>${right*100+300}</b> 金</span></div>`;
+      el.querySelector('[data-again]').addEventListener('click',()=>buildDrill(el, idx));
+    }
+  });
+  render();
+}
+document.querySelectorAll('.drill').forEach(el=>buildDrill(el, +el.dataset.drill));
+
+/* 价值观天平 */
+$('#scaleBox').innerHTML = `
+  <div class="scale-wrap">
+    <svg class="scale" viewBox="0 0 420 150" aria-label="价值观天平">
+      <text x="70" y="22" fill="var(--jade)" font-size="15" text-anchor="middle">诚实 · 告诉父母</text>
+      <text x="350" y="22" fill="var(--gold)" font-size="15" text-anchor="middle">忠诚 · 保护姐姐</text>
+      <g class="beam" id="beam">
+        <line x1="60" y1="46" x2="360" y2="46" stroke="var(--gold)" stroke-width="3"/>
+        <circle cx="60" cy="46" r="7" fill="var(--jade)"/><circle cx="360" cy="46" r="7" fill="var(--gold)"/>
+      </g>
+      <path d="M210 46 L232 120 L188 120 Z" fill="none" stroke="var(--line)" stroke-width="2"/>
+      <line x1="170" y1="120" x2="250" y2="120" stroke="var(--line)" stroke-width="3"/>
+    </svg>
+    <div class="fb show" id="scaleMsg" style="text-align:left">两种价值观都是好的。冲突不在于谁对谁错，而在于<b>这一次</b>哪个更重。</div>
+    <div class="scenarios">${SCENES.map((s,i)=>`<button class="opt" data-sc="${i}">${s.t}</button>`).join('')}</div>
+  </div>`;
+$$('[data-sc]').forEach(b=>b.addEventListener('click',()=>{
+  const s = SCENES[+b.dataset.sc];
+  $('#beam').style.transform = `rotate(${s.tilt/2.2}deg)`;
+  $('#scaleMsg').innerHTML = `<b>${s.tilt>0?'天平偏向「保护姐姐」':'天平偏向「告诉父母」'}：</b> ${s.s}`;
+  $$('[data-sc]').forEach(x=>x.classList.remove('right'));
+  b.classList.add('right');
+}));
+
+/* 导航 */
+const slides = $$('.slide');
+let cur = 0;
+$('#jump').innerHTML = slides.map((_,i)=>`<button data-j="${i}" aria-label="第${i+1}页"></button>`).join('');
+function go(n){
+  cur = Math.max(0, Math.min(slides.length-1, n));
+  slides.forEach((s,i)=>s.classList.toggle('on', i===cur));
+  $('#pager').textContent = `${cur+1} / ${slides.length}`;
+  $$('#jump button').forEach((b,i)=>b.classList.toggle('now', i===cur));
+  window.scrollTo({top:0, behavior:'instant'});
+  if(cur === slides.length-1) endScreen();
+}
+$('#prev').addEventListener('click',()=>go(cur-1));
+$('#next').addEventListener('click',()=>go(cur+1));
+$$('#jump button').forEach(b=>b.addEventListener('click',()=>go(+b.dataset.j)));
+document.addEventListener('click',e=>{
+  const t = e.target.closest('[data-go]');
+  if(t) go(+t.dataset.go);
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='PageDown'){ go(cur+1); }
+  if(e.key==='ArrowLeft'||e.key==='PageUp'){ go(cur-1); }
+});
+$$('[data-flip]').forEach(el=>{
+  const t=()=>el.classList.toggle('open');
+  el.addEventListener('click',t);
+  el.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); t(); }});
+});
+function updateGold(){ $('#goldNum').textContent = gold; }
+function endScreen(){
+  const n = done.filter(Boolean).length;
+  $('#endTitle').textContent = n===6 ? '六神装成型' : `装备栏 ${n} / 6`;
+  $('#endStats').innerHTML = `
+    <div>已合成装备：<b class="hl">${n} 件</b> ${ITEMS.map((it,i)=>done[i]?it.icon:'▫').join(' ')}</div>
+    <div>累计金币：<b class="hl">${gold}</b></div>
+    <div>${n===6?'六格全满。接下来的事只有一件：在真实的对话里用它们。':'还有 '+(6-n)+' 格空着，回去补完再来结算。'}</div>`;
+}
+$('#resetAll').addEventListener('click',()=>location.reload());
+updateGold();
+
+</script>
+</body>
+</html>
