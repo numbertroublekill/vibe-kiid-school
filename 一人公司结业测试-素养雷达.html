@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>一人公司 × 高杠杆身份 · 结业测试 & 素养雷达</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=ZCOOL+QingKe+HuangYou&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0c0e1d; --panel:#151834; --panel2:#1c2044; --line:#31376b;
+  --gold:#ffcf4d; --red:#ff5d6c; --green:#57f2a2; --cyan:#5fd4ff;
+  --ink:#e8eaff; --dim:#9aa0d0;
+  --display:'ZCOOL QingKe HuangYou','PingFang SC','Microsoft YaHei',sans-serif;
+  --body:-apple-system,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.75;min-height:100vh;
+  background-image:radial-gradient(circle at 15% 10%, rgba(95,212,255,.06), transparent 40%),
+                   radial-gradient(circle at 85% 90%, rgba(255,207,77,.05), transparent 40%);
+}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:999;
+  background:repeating-linear-gradient(0deg, rgba(255,255,255,.015) 0 1px, transparent 1px 3px);}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+.wrap{max-width:720px;margin:0 auto;padding:20px 18px 80px}
+.pix{background:var(--panel);border:3px solid var(--line);
+  box-shadow:0 0 0 3px var(--bg),0 0 0 6px #23274e,6px 8px 0 rgba(0,0,0,.45);
+  padding:22px 20px;margin-bottom:26px}
+.pix.gold{border-color:var(--gold)}.pix.green{border-color:var(--green)}.pix.red{border-color:var(--red)}
+h1,h2,h3,.btn{font-family:var(--display);font-weight:400;letter-spacing:.04em}
+h1{font-size:1.9rem;line-height:1.25;color:var(--gold)}
+h2{font-size:1.35rem;color:var(--gold);margin-bottom:12px}
+h3{font-size:1.05rem;color:var(--cyan);margin:16px 0 6px}
+.small{font-size:.85rem;color:var(--dim)}
+.eyebrow{font-family:var(--display);font-size:.85rem;color:var(--cyan);letter-spacing:.25em;margin-bottom:6px}
+.btn{display:inline-block;cursor:pointer;border:3px solid var(--gold);background:var(--gold);color:#1a1500;
+  font-size:1.05rem;padding:10px 26px;box-shadow:4px 4px 0 rgba(0,0,0,.5);transition:transform .08s;user-select:none;text-align:center}
+.btn:hover{transform:translate(-1px,-1px)}
+.btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 rgba(0,0,0,.5)}
+.btn.ghost{background:transparent;color:var(--gold)}
+.btn.cyan{background:var(--cyan);border-color:var(--cyan);color:#00222f}
+.btnrow{display:flex;gap:14px;flex-wrap:wrap;margin-top:18px;justify-content:center}
+.screen{display:none}
+.screen.on{display:block;animation:pop .35s steps(6)}
+@keyframes pop{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+/* progress coins */
+#coins{display:flex;gap:6px;justify-content:center;margin-bottom:16px;flex-wrap:wrap}
+.coin{width:22px;height:22px;border-radius:50%;background:#0a0b18;border:2px solid var(--line);
+  font-family:var(--display);font-size:.7rem;color:var(--dim);display:flex;align-items:center;justify-content:center}
+.coin.done{background:var(--gold);border-color:var(--gold);color:#1a1500;box-shadow:inset -3px -3px 0 rgba(0,0,0,.3)}
+.coin.now{border-color:var(--cyan);color:var(--cyan)}
+/* question */
+.qmeta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.qlvl{font-family:var(--display);color:var(--gold);letter-spacing:.15em}
+.qdim{font-family:var(--display);font-size:.8rem;color:var(--cyan);border:2px solid var(--cyan);padding:1px 10px}
+.qtext{font-size:1.08rem;font-weight:700;margin-bottom:14px}
+.opt{display:block;width:100%;text-align:left;border:2px solid var(--line);background:var(--panel2);
+  color:var(--ink);padding:12px 14px;margin:10px 0;cursor:pointer;font-size:.98rem;font-family:var(--body);line-height:1.6;transition:border-color .15s}
+.opt:hover{border-color:var(--cyan)}
+.opt:disabled{cursor:default;opacity:.92}
+.opt .tag{font-family:var(--display);color:var(--gold);margin-right:8px}
+.opt.best{border-color:var(--green);background:rgba(87,242,162,.1)}
+.opt.picked-wrong{border-color:var(--red);background:rgba(255,93,108,.1)}
+.explain{display:none;border:2px dashed var(--cyan);background:rgba(95,212,255,.06);padding:12px 14px;margin-top:14px}
+.explain .stamp{font-family:var(--display);color:var(--cyan);font-size:.8rem;letter-spacing:.2em;display:block;margin-bottom:4px}
+.gain{font-family:var(--display);color:var(--gold);margin-top:10px;display:none}
+/* radar + result */
+#radarWrap{display:flex;justify-content:center;margin:10px 0}
+.rank-title{font-size:2rem;text-align:center;margin:4px 0}
+.rank-sub{text-align:center;font-family:var(--display);color:var(--dim);letter-spacing:.3em;margin-bottom:14px}
+.dimrow{display:flex;align-items:center;gap:10px;margin:8px 0}
+.dimname{font-family:var(--display);width:5.2em;flex:none;color:var(--cyan);font-size:.95rem}
+.dimbar{flex:1;height:14px;background:#0a0b18;border:2px solid var(--line);position:relative}
+.dimfill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--gold));width:0;transition:width 1s steps(12)}
+.dimscore{font-family:var(--display);width:3em;text-align:right;color:var(--gold)}
+.diag{border-left:4px solid var(--red);padding:8px 14px;margin:16px 0 4px;background:rgba(255,93,108,.06)}
+.diag.strong{border-color:var(--green);background:rgba(87,242,162,.06)}
+.diag .k{font-family:var(--display);display:block}
+.diag .k.weak{color:var(--red)}.diag .k.str{color:var(--green)}
+.footer-note{text-align:center;color:var(--dim);font-size:.85rem;margin-top:36px}
+.datachips{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+.chip{border:2px solid var(--line);background:var(--panel2);padding:6px 12px;font-size:.82rem;color:var(--dim)}
+.chip b{color:var(--gold);font-family:var(--display);font-size:1rem;display:block;line-height:1.3}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ===== START ===== -->
+<section class="screen on" id="s-start">
+  <div class="pix gold" style="text-align:center">
+    <div class="eyebrow">课程收尾 · FINAL EXAM</div>
+    <h1>一人公司基础通关测试</h1>
+    <p style="font-family:var(--display);color:var(--cyan);margin-top:2px">—— 高杠杆身份 · 素养雷达 ——</p>
+    <p style="margin:16px 0">10 道题,由易到难,覆盖一人公司的六项基础素养。<br>答完生成你的<b>素养雷达图</b>和结业称号。每题答完立刻揭晓解析——测试本身就是最后一课。</p>
+    <div class="datachips">
+      <div class="chip"><b>2980万</b>美国一人公司数量</div>
+      <div class="chip"><b>1.7万亿$</b>年贡献产值</div>
+      <div class="chip"><b>0.2%</b>年入破百万美元的比例</div>
+    </div>
+    <p class="small">最后一个数字看起来很残酷?最后一题见。</p>
+    <div class="btnrow"><button class="btn" onclick="startQuiz()">▶ 开始测试</button></div>
+  </div>
+  <div class="pix">
+    <h2>六项素养</h2>
+    <p><b style="color:var(--cyan)">杠杆思维</b>——能否识别并选择被时间、网络、内容放大的身份(Naval)<br>
+    <b style="color:var(--cyan)">价值定位</b>——能否从兴趣矿脉中挖出具体的微小价值(Dan Koe)<br>
+    <b style="color:var(--cyan)">内容力</b>——能否把注意力当资产,穿越断更之谷<br>
+    <b style="color:var(--cyan)">产品化</b>——能否停止卖时间,做出 MVO(Productize Yourself)<br>
+    <b style="color:var(--cyan)">系统化</b>——收入增长时选择自动化而非招人(Paul Jarvis)<br>
+    <b style="color:var(--cyan)">长期心态</b>——对真实速度与概率有清醒预期(Justin Welsh)</p>
+  </div>
+</section>
+
+<!-- ===== QUIZ ===== -->
+<section class="screen" id="s-quiz">
+  <div id="coins"></div>
+  <div class="pix">
+    <div class="qmeta"><span class="qlvl" id="qlvl"></span><span class="qdim" id="qdim"></span></div>
+    <div class="qtext" id="qtext"></div>
+    <div id="opts"></div>
+    <div class="explain" id="explain"><span class="stamp">📖 解析</span><span id="explainText"></span></div>
+    <div class="gain" id="gain"></div>
+    <div class="btnrow" style="justify-content:flex-start">
+      <button class="btn" id="nextBtn" onclick="nextQ()" style="display:none">下一题 →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== RESULT ===== -->
+<section class="screen" id="s-result">
+  <div class="pix" id="resultBox">
+    <p class="rank-sub">GRADUATION REPORT · 结业报告</p>
+    <h2 class="rank-title" id="rankTitle"></h2>
+    <p style="text-align:center" class="small" id="rankDesc"></p>
+    <div id="radarWrap"></div>
+    <div id="dimList"></div>
+    <div class="diag" id="weakDiag"><span class="k weak">⚠ 最薄弱素养</span><span id="weakText"></span></div>
+    <div class="diag strong" id="strongDiag"><span class="k str">★ 天赋点已点亮</span><span id="strongText"></span></div>
+    <div class="btnrow">
+      <button class="btn cyan" onclick="copyReport()">⧉ 复制结业报告</button>
+      <button class="btn ghost" onclick="location.reload()">↻ 重新测试</button>
+    </div>
+  </div>
+  <div class="pix green">
+    <h2>结业寄语</h2>
+    <p>测试结束,课程结束,但飞轮的第一圈从明天早上开始:<b>每天一小时内容分享,可以偷偷发,在群里 checkin。</b></p>
+    <p style="margin-top:8px">记住真实世界的数据:大多数人死于断更和换赛道,而不是死于不够聪明。世界是由并不比你聪明的人创造的。</p>
+  </div>
+  <p class="footer-note">一人公司大冒险 · 结业测试 · 好奇学习社区 × OOPS</p>
+</section>
+
+</div>
+
+<script>
+/* ===== 六个素养维度 ===== */
+const DIMS = ['杠杆思维','价值定位','内容力','产品化','系统化','长期心态'];
+const DIM_ADVICE = [
+  '重读 Naval:劳动和资本需要许可,代码和内容不需要。本周找一个能被内容放大的身份,停止只出售时间。',
+  '回到兴趣矿脉:独特经历 × 痛苦经验 × 兴趣组合。把定位缩小到「你能具体描述出来的一小群人」,「所有人」等于没有人。',
+  '内容力不靠灵感靠节奏。从明天的一小时开始,可以偷偷发;把坚持当系统问题设计,而不是道德问题硬扛。',
+  '把你的方法写成一页纸模板,标一个价格,这周发给 10 个可能需要的人——MVO 先丑陋地存在,再优雅地迭代。',
+  '每周找出一件你重复做了 3 次以上的事,交给模板、FAQ 或 AI。收入增长时的正确反应是优化系统,不是招人。',
+  '把目标从「一个月爆红」改成「连续发布 90 天」。Justin Welsh 走到 100 万美元用了 29 个月——慢就是快。'
+];
+
+/* ===== 题库:由易到难 ===== */
+/* opt: [文本, 得分0-10] 满分选项即最佳答案 */
+const QS = [
+ {lvl:'第 1 题 ★', dim:0,
+  q:'Naval 说财富来自四种杠杆:劳动、资本、代码、内容。其中哪两种「无需任何人许可」就能启动?',
+  opts:[['劳动与资本——先招人再融资',3],['代码与内容',10],['学历与人脉',0],['资本与内容',6]],
+  exp:'劳动杠杆需要有人愿意跟你干,资本杠杆需要有人愿意给你钱——都要「被许可」。而写作、拍视频、写代码,今晚就能开始,复制成本为零。这是普通人唯一不需要敲门的杠杆。'},
+ {lvl:'第 2 题 ★', dim:1,
+  q:'一人公司的正确起点是?',
+  opts:[['调研市场缺什么,缺什么就做什么',3],['先注册公司、设计 logo、印名片',0],['盘点你身上有什么:兴趣、独特经历、痛苦经验',10],['等一个别人都没想到过的完美点子',0]],
+  exp:'市场调研找到的往往是红海,自我盘点找到的才是护城河。Dan Koe 的路径:解决你自己的真实问题,把方法打包——你的伤疤,就是别人愿意付费绕开的坑。'},
+ {lvl:'第 3 题 ★', dim:2,
+  q:'Dan Koe 认为,一人公司的第一资产不是产品,而是?',
+  opts:[['启动资金',0],['注意力(Attention)',10],['人脉',3],['一个好域名',0]],
+  exp:'先有受众,再有产品。持续公开输出不是打广告,而是展示你的思考方式、解决问题的能力和世界观——受众因此信任你,信任才能变成第一笔收入。'},
+ {lvl:'第 4 题 ★★', dim:3,
+  q:'「我一小时咨询 500 元」——这个模式最大的问题是?',
+  opts:[['定价太低,应该涨到一小时 1000',0],['咨询这个行业本身不行',0],['没有问题,这就是标准的一人公司',2],['卖的是时间:收入 = 时间 × 单价,天花板被 24 小时焊死',10]],
+  exp:'Productize Yourself:把经历 + 知识 + 方法论打包成课程、模板、社群——做一次,卖无数次。年入百万美元的一人公司,几乎全部靠可复制资产,而不是计时收费。生病即停业的生意,不叫公司,叫岗位。'},
+ {lvl:'第 5 题 ★★', dim:2,
+  q:'断更之谷:你连更 14 天,共 37 个播放,唯一稳定的赞来自你妈。最优策略是?',
+  opts:[['停更休息,等状态好了再说',2],['数据差说明赛道错了,连夜换方向重开新号',0],['照常发布,并花 15 分钟研究 3 个同类账号在解决什么问题,小步迭代',10],['花钱投流买曝光',3]],
+  exp:'飞轮最脆弱的时刻是第一圈。频繁换赛道等于不断亲手拆掉自己的飞轮;投流买不来信任。转成「偷偷发」保节奏也可以——但节奏不能断,方向靠研究真实需求来修正。'},
+ {lvl:'第 6 题 ★★', dim:1,
+  q:'你想做「学习方法」方向的内容,以下哪个定位最可能活下来?',
+  opts:[['教所有人高效学习',0],['帮中学生提高成绩',5],['每天发布自己的学习 vlog',3],['帮备考雅思的上班族用通勤时间背单词',10]],
+  exp:'越小,越活。Kevin Kelly 的 1000 铁杆粉丝理论:你不需要讨好所有人,只需要对一小群人无可替代。「所有人」的反面不是「小众」,是「没有人」。能一句话叫出名字的人群,才找得到、留得住、愿付费。'},
+ {lvl:'第 7 题 ★★', dim:3,
+  q:'你的第一个产品应该怎么做?',
+  opts:[['打磨到完美再上线,首发即巅峰',0],['最小可行产品(MVO):先丑陋地存在,靠真实销售不断迭代',10],['直接开发一个 App,功能越全越好',0],['先免费送,等粉丝多了再考虑收费',4]],
+  exp:'Pieter Levels 在做出成功产品之前,公开做废了约 70 个项目——试错速度本身就是护城河。免费送验证不了付费意愿;敢标价、敢卖出第一份,才是产品的真正诞生日。'},
+ {lvl:'第 8 题 ★★★', dim:0,
+  q:'以下四个身份,哪个的「杠杆」最高?',
+  opts:[['时薪 1000 元的金牌家教',2],['管理 20 人团队的教培机构主管',4],['每周发布一篇教学方法专栏、粉丝稳定增长的老师',10],['开了三家分店的连锁店老板',5]],
+  exp:'主管和老板确实有杠杆,但那是劳动与资本杠杆——复杂度和许可成本随规模一起上升;金牌家教是纯卖时间的顶配。而专栏老师握着内容杠杆:写一次被读一万次,睡觉时也在积累。高杠杆身份的检验标准只有一个:能否被时间、网络、内容放大。'},
+ {lvl:'第 9 题 ★★★', dim:4,
+  q:'你的模板产品卖爆了,每天几十条客服消息回不过来,快撑不住了。一人公司的解法是?',
+  opts:[['招一个客服,专业的事交给专业的人',3],['全部亲自回复,客户就是上帝',2],['暂停销售,先喘口气',1],['整理 FAQ + 设置自动回复 + 把高频问题录成教程,同时涨价过滤',10]],
+  exp:'传统剧本:收入↑ → 招人 → 管理 → 复杂度↑。一人公司剧本:收入↑ → 优化系统 → 自动化 → 利润↑。参考 Pieter Levels:月入约 25 万美元,靠数百个自动化脚本(他称之为自己的 robots),正式员工数量:0。'},
+ {lvl:'第 10 题 ★★★', dim:5,
+  q:'关于一人公司的真实速度与概率,以下哪个说法最接近事实?',
+  opts:[['抓住风口,3 个月就能财务自由',0],['只要内容够好,第一个月就该有收入,否则趁早放弃',0],['大多数一人公司年收入不足 5 万美元、破百万美元的约千分之二;Justin Welsh 走到累计 100 万美元用了 29 个月',10],['一人公司注定只能赚点小钱,天花板很低',2]],
+  exp:'两面都要看清:概率上,约 78% 的一人公司年收入不足 5 万美元——这条路不是爽文。但天花板极高:2023 年美国有约 11.7 万家零雇员企业年收入破百万美元,两年翻了一倍;Dan Koe 每天写作 2 小时,年入超 400 万美元。它奖励的不是聪明,而是正确顺序(技能→分发→产品→自动化)加上长期主义。'}
+];
+
+/* ===== state ===== */
+let cur=0;
+const earned=new Array(QS.length).fill(0);
+const picked=new Array(QS.length).fill(-1);
+
+function startQuiz(){
+  document.getElementById('s-start').classList.remove('on');
+  document.getElementById('s-quiz').classList.add('on');
+  renderCoins(); renderQ();
+}
+function renderCoins(){
+  const c=document.getElementById('coins');
+  c.innerHTML=QS.map((_,i)=>`<div class="coin ${i<cur?'done':''} ${i===cur?'now':''}">${i+1}</div>`).join('');
+}
+function renderQ(){
+  const q=QS[cur];
+  document.getElementById('qlvl').textContent=q.lvl;
+  document.getElementById('qdim').textContent=DIMS[q.dim];
+  document.getElementById('qtext').textContent=q.q;
+  const box=document.getElementById('opts');
+  box.innerHTML='';
+  const letters=['A','B','C','D'];
+  q.opts.forEach((o,i)=>{
+    const b=document.createElement('button');
+    b.className='opt';
+    b.innerHTML=`<span class="tag">${letters[i]}</span>${escapeHtml(o[0])}`;
+    b.onclick=()=>answer(i);
+    box.appendChild(b);
+  });
+  document.getElementById('explain').style.display='none';
+  document.getElementById('gain').style.display='none';
+  document.getElementById('nextBtn').style.display='none';
+  renderCoins();
+  window.scrollTo({top:0});
+}
+function answer(i){
+  const q=QS[cur];
+  picked[cur]=i; earned[cur]=q.opts[i][1];
+  const best=q.opts.findIndex(o=>o[1]===10);
+  const btns=document.querySelectorAll('#opts .opt');
+  btns.forEach((b,j)=>{
+    b.disabled=true;
+    if(j===best) b.classList.add('best');
+    else if(j===i) b.classList.add('picked-wrong');
+  });
+  document.getElementById('explainText').textContent=q.exp;
+  document.getElementById('explain').style.display='block';
+  const g=document.getElementById('gain');
+  const s=q.opts[i][1];
+  g.textContent = s===10 ? '⚡ +10 金币!完美判断' : (s>=5 ? `🪙 +${s} 金币,方向对了但还差半步` : (s>0 ? `🪙 +${s} 金币,擦到一点边` : '💨 +0 金币,这是本关最经典的陷阱'));
+  g.style.display='block';
+  const nb=document.getElementById('nextBtn');
+  nb.textContent = cur===QS.length-1 ? '生成素养雷达 →' : '下一题 →';
+  nb.style.display='inline-block';
+}
+function nextQ(){
+  if(cur<QS.length-1){ cur++; renderQ(); }
+  else showResult();
+}
+
+/* ===== result ===== */
+function dimScores(){
+  const got=new Array(6).fill(0), max=new Array(6).fill(0);
+  QS.forEach((q,i)=>{ got[q.dim]+=earned[i]; max[q.dim]+=10; });
+  return DIMS.map((_,d)=> Math.round(100*got[d]/max[d]));
+}
+function rankOf(total){
+  if(total>=90) return ['🏆 传说 · 高杠杆身份持有者','六维几乎全亮。你缺的不是认知,是明天早上的那一小时。'];
+  if(total>=75) return ['💎 史诗 · 一人公司准创始人','认知框架已经完整,个别维度还有陷阱没识破。'];
+  if(total>=60) return ['⚙️ 稀有 · 飞轮工程师','大方向清晰,细节判断还会掉进经典陷阱,多复盘解析。'];
+  if(total>=40) return ['🎒 普通 · 背着手册的冒险者','手册你翻过了,但还没长在身上——建议重玩一遍大冒险。'];
+  return ['🌱 新手村 · 见习学徒','恭喜,你的提升空间是全场最大的。从攻略本第①节重新出发。'];
+}
+function showResult(){
+  document.getElementById('s-quiz').classList.remove('on');
+  document.getElementById('s-result').classList.add('on');
+  const ds=dimScores();
+  const total=Math.round(earned.reduce((a,b)=>a+b,0));
+  const [title,desc]=rankOf(total);
+  document.getElementById('rankTitle').textContent=title;
+  document.getElementById('rankDesc').textContent=`总分 ${total} / 100 · ${desc}`;
+  document.getElementById('resultBox').classList.add(total>=60?'green':'red');
+  document.getElementById('radarWrap').innerHTML=radarSVG(ds);
+  const list=document.getElementById('dimList');
+  list.innerHTML=ds.map((s,d)=>`
+    <div class="dimrow"><span class="dimname">${DIMS[d]}</span>
+    <div class="dimbar"><div class="dimfill" data-w="${s}"></div></div>
+    <span class="dimscore">${s}</span></div>`).join('');
+  requestAnimationFrame(()=>{ setTimeout(()=>{
+    document.querySelectorAll('.dimfill').forEach(f=>f.style.width=f.dataset.w+'%');
+  },80); });
+  let weak=0, strong=0;
+  ds.forEach((s,d)=>{ if(s<ds[weak])weak=d; if(s>ds[strong])strong=d; });
+  document.getElementById('weakText').textContent=`${DIMS[weak]}(${ds[weak]} 分)—— ${DIM_ADVICE[weak]}`;
+  document.getElementById('strongText').textContent=`${DIMS[strong]}(${ds[strong]} 分)—— 这是你先天的兵器,让其他五维围绕它展开。`;
+  window.scrollTo({top:0});
+  window._report={total,title,ds};
+}
+
+/* ===== radar chart (pure SVG) ===== */
+function radarSVG(ds){
+  const W=340,H=320,cx=W/2,cy=H/2+4,R=104,n=6;
+  const ang=i=>(-90+i*60)*Math.PI/180;
+  const pt=(i,r)=>[cx+r*Math.cos(ang(i)), cy+r*Math.sin(ang(i))];
+  let grid='';
+  [20,40,60,80,100].forEach(lv=>{
+    const pts=[...Array(n)].map((_,i)=>pt(i,R*lv/100).map(v=>v.toFixed(1)).join(',')).join(' ');
+    grid+=`<polygon points="${pts}" fill="none" stroke="#31376b" stroke-width="${lv===100?2:1}" opacity="${lv===100?1:.55}"/>`;
+  });
+  let axes='',labels='';
+  for(let i=0;i<n;i++){
+    const [x,y]=pt(i,R);
+    axes+=`<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#31376b" stroke-width="1" opacity=".55"/>`;
+    const [lx,ly]=pt(i,R+26);
+    labels+=`<text x="${lx.toFixed(1)}" y="${(ly+5).toFixed(1)}" text-anchor="middle" font-size="14" fill="#5fd4ff" font-family="ZCOOL QingKe HuangYou,PingFang SC,sans-serif">${DIMS[i]}</text>
+             <text x="${lx.toFixed(1)}" y="${(ly+21).toFixed(1)}" text-anchor="middle" font-size="12" fill="#ffcf4d" font-family="ZCOOL QingKe HuangYou,sans-serif">${ds[i]}</text>`;
+  }
+  const poly=[...Array(n)].map((_,i)=>pt(i,R*Math.max(ds[i],4)/100).map(v=>v.toFixed(1)).join(',')).join(' ');
+  const dots=[...Array(n)].map((_,i)=>{const[x,y]=pt(i,R*Math.max(ds[i],4)/100);return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4" fill="#ffcf4d"/>`;}).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:380px" role="img" aria-label="一人公司素养雷达图">
+    ${grid}${axes}
+    <polygon points="${poly}" fill="rgba(255,207,77,.22)" stroke="#ffcf4d" stroke-width="2.5">
+      <animate attributeName="opacity" from="0" to="1" dur="0.6s"/>
+    </polygon>
+    ${dots}${labels}
+  </svg>`;
+}
+
+function copyReport(){
+  const r=window._report; if(!r)return;
+  const lines=DIMS.map((d,i)=>`· ${d}:${r.ds[i]}`).join('\n');
+  const txt=`【一人公司结业报告】\n称号:${r.title}\n总分:${r.total} / 100\n\n素养雷达:\n${lines}\n\n下一步:每天一小时内容分享,连续 90 天。`;
+  navigator.clipboard.writeText(txt).then(()=>alert('结业报告已复制,发到群里吧!'));
+}
+function escapeHtml(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+</script>
+</body>
+</html>
