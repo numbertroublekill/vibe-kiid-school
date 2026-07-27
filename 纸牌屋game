@@ -1,0 +1,141 @@
+看什么看？<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>钥匙玩校经济学纸牌屋</title>
+
+<style>
+body { font-family: Arial; padding: 20px; }
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  border: 1px solid #333;
+  padding: 6px;
+}
+
+.bar-container {
+  height: 16px;
+  background: #eee;
+}
+
+.bar {
+  height: 100%;
+  background: steelblue;
+}
+
+.up { color: green; font-weight: bold; }
+.down { color: red; font-weight: bold; }
+
+button {
+  margin-top: 20px;
+  padding: 10px 20px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>钥匙玩校真好玩！今年夏天还要来！</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>股票</th>
+      <th>价值</th>
+      <th>数值</th>
+    </tr>
+  </thead>
+  <tbody id="tbody"></tbody>
+</table>
+
+<button id="btn">无论市场如何波动，小池操作始终稳健</button>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const tbody = document.getElementById("tbody");
+  const btn = document.getElementById("btn");
+
+  // 花色定义，低波动资产略高上涨概率
+  const suits = [
+    { s: "♥", min: 1.0, max: 2, upProb: 0.45 }, // 红桃下降到0.4
+    { s: "♦", min: 1.0, max: 1.5, upProb: 0.5 },
+    { s: "♣", min: 1.0, max: 1.2, upProb: 0.6 },
+    { s: "♠", min: 1.05, max: 1.1, upProb: 0.7 } // 黑桃提高到0.7
+  ];
+
+  const ranks = [
+    ["A",1],["2",2],["3",3],["4",4],["5",5],
+    ["6",6],["7",7],["8",8],["9",9],["10",10],
+    ["J",11],["Q",12],["K",13]
+  ];
+
+  const stocks = [];
+
+  suits.forEach(suit => {
+    ranks.forEach(r => {
+      stocks.push({
+        name: suit.s + r[0],
+        rankValue: r[1],
+        suit: suit,
+        value: r[1]  10,
+        prev: r[1]  10
+      });
+    });
+  });
+
+  function render() {
+    tbody.innerHTML = "";
+    const max = Math.max(...stocks.map(x => x.value), 1);
+
+    stocks.forEach(st => {
+      const tr = document.createElement("tr");
+      const cls = st.value > st.prev ? "up" : st.value < st.prev ? "down" : "";
+
+      tr.innerHTML = 
+        <td>${st.name}</td>
+        <td>
+          <div class="bar-container">
+            <div class="bar" style="width:${st.value / max  100}%"></div>
+          </div>
+        </td>
+        <td class="${cls}">${st.value.toFixed(2)}</td>
+      ;
+      tbody.appendChild(tr);
+    });
+  }
+
+  btn.onclick = function () {
+    stocks.forEach(st => {
+      st.prev = st.value;
+
+      // 判断是否是 A/2/3 小牌
+      const isSmallRank = (st.rankValue === 1 || st.rankValue === 2 || st.rankValue === 3);
+
+      // 设置上涨概率，小牌略高
+      let upProb = st.suit.upProb;
+      if (isSmallRank) {
+        upProb += 0.1; // 小牌上涨概率提升5%
+      }
+
+      // 原有涨跌逻辑
+      const f = st.suit.min + Math.random()  (st.suit.max - st.suit.min);
+      const isUp = Math.random() < upProb;
+
+      st.value = isUp ? st.value  f : st.value / f;
+      st.value = Math.max(0, +st.value.toFixed(2));
+    });
+
+    render();
+  };
+
+  render();
+});
+</script>
+
+</body>
+</html>
