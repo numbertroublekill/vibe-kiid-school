@@ -1,0 +1,680 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>记了，就是学了吗？| 六种笔记法实操课</title>
+<style>
+:root{
+  --paper:#E6E9DF;
+  --card:#F7F8F2;
+  --ink:#17232E;
+  --ink-soft:#4A5A63;
+  --pencil:#8A9389;
+  --red:#B23A32;
+  --blue:#2F5D8C;
+  --marker:#F0C64B;
+  --line:rgba(23,35,46,.10);
+  --grid:rgba(23,35,46,.055);
+  --display:"Songti SC","STSong","Noto Serif CJK SC","Source Han Serif SC",Georgia,serif;
+  --body:"PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",system-ui,sans-serif;
+  --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);
+  overflow:hidden;-webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;color:inherit}
+
+/* ---------- 页面骨架：整个课件就是一页康奈尔笔记 ---------- */
+.deck{
+  height:100dvh;display:grid;
+  grid-template-columns:clamp(210px,20vw,300px) 1fr;
+  grid-template-rows:1fr auto;
+  grid-template-areas:"rail main" "sum sum";
+}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--red);z-index:50;transition:width .35s ease}
+
+/* 索引栏 */
+.rail{
+  grid-area:rail;position:relative;padding:clamp(20px,3vh,40px) 26px;
+  display:flex;flex-direction:column;gap:18px;
+  border-right:1.5px solid var(--red);
+}
+.rail::before{
+  content:"";position:absolute;inset:0;left:auto;right:-1px;width:1px;
+}
+.holes{position:absolute;left:12px;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center;gap:22vh}
+.holes i{width:11px;height:11px;border-radius:50%;background:var(--paper);box-shadow:inset 0 1px 2px rgba(0,0,0,.28);display:block}
+.rail-num{font-family:var(--mono);font-size:clamp(30px,4vw,46px);line-height:1;color:var(--red);letter-spacing:-.02em}
+.rail-stage{font-size:13px;letter-spacing:.34em;color:var(--pencil);text-transform:uppercase}
+.rail-keys{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+.rail-keys span{
+  font-family:var(--display);font-size:clamp(17px,1.5vw,22px);color:var(--blue);
+  border-bottom:1px dashed var(--line);padding-bottom:8px;
+}
+.rail-note{font-size:12.5px;color:var(--pencil);line-height:1.7}
+
+/* 笔记栏 */
+.main{
+  grid-area:main;position:relative;overflow-y:auto;overflow-x:hidden;
+  padding:clamp(24px,4.4vh,54px) clamp(26px,4vw,72px) 30px;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:26px 26px;
+}
+.slide{display:none;max-width:1080px;margin:0 auto;padding-bottom:10px}
+.slide.on{display:block}
+.eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:.16em;color:var(--red);margin-bottom:12px}
+h1{font-family:var(--display);font-size:clamp(34px,5.4vw,74px);line-height:1.12;margin:0 0 18px;font-weight:600;letter-spacing:-.01em}
+h2{font-family:var(--display);font-size:clamp(27px,3.7vw,48px);line-height:1.2;margin:0 0 20px;font-weight:600}
+.lede{font-size:clamp(17px,1.8vw,23px);line-height:1.75;color:var(--ink-soft);max-width:62ch;margin:0 0 20px}
+
+/* 提问 */
+.ask{
+  border-left:4px solid var(--red);padding:4px 0 4px 20px;margin:22px 0;
+  font-family:var(--display);font-size:clamp(21px,2.6vw,34px);line-height:1.5;
+}
+.ask small{display:block;font-family:var(--body);font-size:14px;color:var(--pencil);letter-spacing:.05em;margin-bottom:8px}
+.asklist{list-style:none;padding:0;margin:22px 0;counter-reset:q}
+.asklist li{
+  counter-increment:q;position:relative;padding:14px 0 14px 52px;border-bottom:1px solid var(--line);
+  font-family:var(--display);font-size:clamp(19px,2.2vw,29px);line-height:1.5;
+}
+.asklist li::before{
+  content:counter(q);position:absolute;left:0;top:14px;width:30px;height:30px;border-radius:50%;
+  border:1.5px solid var(--red);color:var(--red);font-family:var(--mono);font-size:14px;
+  display:grid;place-items:center;
+}
+
+/* 揭晓块 */
+.step{opacity:0;transform:translateY(10px);transition:opacity .4s ease,transform .4s ease}
+.step.shown{opacity:1;transform:none}
+.reveal{
+  background:var(--card);border:1px solid var(--line);border-radius:2px;
+  padding:20px 24px;margin:20px 0;box-shadow:0 1px 0 rgba(23,35,46,.06);
+  font-size:clamp(16px,1.7vw,21px);line-height:1.75;position:relative;
+}
+.reveal::before{
+  content:"揭晓";position:absolute;top:-11px;left:18px;background:var(--red);color:#fff;
+  font-size:11px;letter-spacing:.22em;padding:3px 9px;
+}
+.reveal b{color:var(--red);font-weight:600}
+.reveal p{margin:0 0 10px}
+.reveal p:last-child{margin:0}
+.quote{font-family:var(--display);font-size:clamp(19px,2.1vw,27px);line-height:1.6;color:var(--blue);margin:6px 0}
+
+/* 通用小件 */
+.row{display:flex;flex-wrap:wrap;gap:14px;margin:20px 0}
+.chip{
+  border:1.5px solid var(--ink);border-radius:999px;padding:9px 18px;font-size:15px;background:transparent;cursor:default;
+}
+.chip.hot{border-color:var(--red);color:var(--red)}
+.tag{font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--pencil)}
+.chain{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:26px 0}
+.chain b{
+  font-family:var(--display);font-weight:600;font-size:clamp(20px,2.4vw,32px);
+  background:var(--card);border:1px solid var(--line);padding:10px 20px;
+}
+.chain i{color:var(--pencil);font-style:normal;font-size:22px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin:22px 0}
+.box{background:var(--card);border:1px solid var(--line);padding:18px 20px}
+.box h4{margin:0 0 8px;font-family:var(--display);font-size:20px;font-weight:600}
+.box p{margin:0;font-size:15.5px;line-height:1.7;color:var(--ink-soft)}
+.mark{background:linear-gradient(transparent 58%,var(--marker) 58%);padding:0 2px}
+
+/* 康奈尔示意图 */
+.cornell{display:grid;grid-template-columns:1fr 2fr;grid-template-rows:auto auto;gap:0;border:1.5px solid var(--ink);max-width:640px;margin:22px 0;background:var(--card)}
+.cornell div{padding:16px 18px;min-height:78px}
+.cornell .c-idx{border-right:1.5px solid var(--red)}
+.cornell .c-sum{grid-column:1/3;border-top:1.5px solid var(--ink)}
+.cornell strong{display:block;font-family:var(--display);font-size:17px;margin-bottom:6px}
+.cornell em{font-style:normal;font-size:14px;color:var(--pencil);line-height:1.6}
+
+/* 计时器 */
+.timer{display:flex;align-items:center;gap:20px;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);padding:18px 22px;margin:22px 0}
+.timer output{font-family:var(--mono);font-size:clamp(38px,5vw,62px);line-height:1;letter-spacing:-.02em;min-width:3.4ch}
+.timer.ring output{color:var(--red)}
+.btn{
+  border:1.5px solid var(--ink);background:transparent;padding:10px 20px;font-size:15px;cursor:pointer;
+  transition:background .18s ease,color .18s ease;
+}
+.btn:hover{background:var(--ink);color:var(--paper)}
+.btn.red{border-color:var(--red);color:var(--red)}
+.btn.red:hover{background:var(--red);color:#fff}
+.btn:focus-visible,.bin:focus-visible,.piece:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+
+/* 抽卡 */
+.card-face{
+  background:var(--card);border:1px solid var(--line);border-radius:2px;padding:26px;margin:20px 0;min-height:150px;
+  box-shadow:3px 3px 0 rgba(23,35,46,.07);
+}
+.card-face .front{font-family:var(--display);font-size:clamp(20px,2.4vw,30px);line-height:1.5;margin-bottom:16px}
+.card-face .back{font-size:15.5px;color:var(--pencil);border-top:1px dashed var(--line);padding-top:14px}
+
+/* 剪报归类 */
+.pieces{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
+.piece{
+  background:var(--card);border:1px dashed var(--ink-soft);padding:10px 15px;font-size:15px;cursor:pointer;
+  transition:transform .15s ease,border-color .15s ease;
+}
+.piece[aria-pressed="true"]{border-style:solid;border-color:var(--red);color:var(--red);transform:translateY(-3px)}
+.piece.done{display:none}
+.bins{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}
+.bin{
+  background:transparent;border:1.5px solid var(--line);border-top:3px solid var(--blue);
+  padding:12px;min-height:130px;text-align:left;cursor:pointer;font-size:14px;
+}
+.bin h5{margin:0 0 8px;font-family:var(--display);font-size:18px;font-weight:600}
+.bin ul{margin:0;padding-left:16px;color:var(--ink-soft);line-height:1.7}
+.bin.shake{animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+/* 空雨伞 */
+.kus{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1.5px solid var(--ink);margin:20px 0;background:var(--card)}
+.kus section{padding:16px;border-right:1.5px solid var(--ink)}
+.kus section:last-child{border-right:0}
+.kus h5{margin:0 0 4px;font-family:var(--display);font-size:22px;font-weight:600}
+.kus span{display:block;font-size:13px;color:var(--pencil);margin-bottom:10px}
+.kus textarea{
+  width:100%;min-height:130px;border:0;background:transparent;resize:vertical;
+  font-family:var(--body);font-size:16px;line-height:1.7;color:var(--ink);
+  background-image:repeating-linear-gradient(transparent,transparent 27px,var(--line) 27px,var(--line) 28px);
+}
+.kus textarea:focus{outline:none}
+
+/* 对照表 */
+table{border-collapse:collapse;width:100%;margin:20px 0;font-size:clamp(15px,1.6vw,19px)}
+th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line)}
+th{font-family:var(--mono);font-size:12px;letter-spacing:.16em;color:var(--pencil);font-weight:400}
+td:first-child{font-family:var(--display);font-size:1.1em}
+td b{color:var(--red);font-weight:600}
+
+/* 总结栏 */
+.sum{
+  grid-area:sum;border-top:1.5px solid var(--ink);background:var(--paper);
+  display:flex;align-items:center;gap:20px;padding:12px clamp(18px,3vw,40px);
+}
+.sum p{margin:0;font-family:var(--display);font-size:clamp(15px,1.6vw,21px);flex:1;line-height:1.4}
+.sum .keys{font-size:11.5px;color:var(--pencil);letter-spacing:.1em;white-space:nowrap}
+.sum .count{font-family:var(--mono);font-size:14px;color:var(--ink);cursor:pointer;background:none;border:0;padding:6px}
+.navbtn{border:1px solid var(--line);background:var(--card);width:38px;height:38px;font-size:17px;cursor:pointer}
+.navbtn:hover{background:var(--ink);color:var(--paper)}
+
+/* 目录 */
+.overview{position:fixed;inset:0;background:rgba(230,233,223,.98);z-index:60;padding:40px;overflow:auto;display:none}
+.overview.on{display:block}
+.overview h3{font-family:var(--display);font-size:26px;margin:0 0 22px}
+.ovgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.ovgrid button{
+  text-align:left;background:var(--card);border:1px solid var(--line);padding:14px;cursor:pointer;font-size:15px;line-height:1.5;
+}
+.ovgrid button:hover{border-color:var(--red)}
+.ovgrid button span{display:block;font-family:var(--mono);font-size:11px;color:var(--red);margin-bottom:6px}
+
+@media (max-width:860px){
+  .deck{grid-template-columns:1fr;grid-template-rows:auto 1fr auto;grid-template-areas:"rail" "main" "sum"}
+  .rail{flex-direction:row;align-items:center;gap:14px;border-right:0;border-bottom:1.5px solid var(--red);padding:12px 16px}
+  .holes,.rail-note{display:none}
+  .rail-keys{margin:0;flex-direction:row;flex-wrap:wrap;gap:8px}
+  .rail-keys span{border-bottom:0;font-size:15px;padding:0}
+  .bins{grid-template-columns:repeat(2,1fr)}
+  .kus{grid-template-columns:1fr}
+  .kus section{border-right:0;border-bottom:1.5px solid var(--ink)}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="progress" id="progress"></div>
+<div class="deck">
+  <aside class="rail">
+    <div class="holes"><i></i><i></i><i></i></div>
+    <div class="rail-num" id="railNum">00</div>
+    <div class="rail-stage" id="railStage">开场</div>
+    <div class="rail-keys" id="railKeys"></div>
+    <div class="rail-note">索引栏 · 只写关键词<br>回家遮住右栏，凭它复述</div>
+  </aside>
+
+  <main class="main" id="main">
+
+    <!-- 1 -->
+    <section class="slide on" data-num="00" data-stage="开场" data-keys="笔记|学会|试一试" data-sum="今天不背方法，今天试方法。">
+      <div class="eyebrow">六种笔记法 · 实操课</div>
+      <h1>记了，<br>就是学了吗？</h1>
+      <p class="lede">从「记得下」到「用得上」，中间隔着三道坎。这节课我们一道一道过。</p>
+      <div class="row">
+        <span class="chip hot">全程举手回答</span><span class="chip">每种方法都要现场试一次</span><span class="chip">带笔和纸</span>
+      </div>
+      <p class="tag">空格 揭晓答案 · ← → 翻页 · O 打开目录</p>
+    </section>
+
+    <!-- 2 -->
+    <section class="slide" data-num="01" data-stage="开场" data-keys="三道坎|举手数一数" data-sum="三个问题，就是笔记的三道坎。">
+      <div class="eyebrow">开场 · 举手投票</div>
+      <h2>先回答三个问题，能答「是」就举手</h2>
+      <ol class="asklist">
+        <li>上周三的课堂笔记，你现在能<strong>找到</strong>吗？</li>
+        <li>找到了，你还<strong>看得懂</strong>吗？</li>
+        <li>看得懂，它帮你<strong>解决过</strong>一个问题吗？</li>
+      </ol>
+      <div class="step reveal">
+        <p>我们数一数：第一问举手的有多少人，第三问还剩几只手？</p>
+        <p>这三问对应三道坎——<b>找得到 / 看得懂 / 用得上</b>。手放下的地方，就是你的笔记断掉的地方。</p>
+      </div>
+    </section>
+
+    <!-- 3 -->
+    <section class="slide" data-num="02" data-stage="总纲" data-keys="记得下|整理好|找得到|用得上" data-sum="六种方法，各修一环。你断在哪一环？">
+      <div class="eyebrow">总纲</div>
+      <h2>笔记是一条链子，四个环</h2>
+      <div class="chain"><b>记得下</b><i>→</i><b>整理好</b><i>→</i><b>找得到</b><i>→</i><b>用得上</b></div>
+      <div class="ask"><small>提问</small>你的笔记，断在哪一环？说说你的证据。</div>
+      <div class="step reveal">
+        <p>今天六种方法，正好一环一环往下修：康奈尔修前两环，卡片和剪报修「整理好」，洛克的索引修「找得到」，空雨伞修「用得上」。</p>
+        <p><b>学习的终点不是攒知识，是解决问题。</b></p>
+      </div>
+    </section>
+
+    <!-- 4 -->
+    <section class="slide" data-num="03" data-stage="方法一" data-keys="三块|自己先想" data-sum="先自己设计一次，再看别人的答案。">
+      <div class="eyebrow">方法一 · 康奈尔笔记法</div>
+      <h2>如果规定一页纸只能分三块，你会怎么分？</h2>
+      <p class="lede">请两位同学上来画，并且说明：每一块分别用来干什么？为什么是这三块？</p>
+      <div class="ask"><small>追问</small>第三块，为什么大部分人想不出来？</div>
+      <div class="step reveal">
+        <p>因为前两块是「上课时」用的，第三块是<b>「下课后」</b>用的。想不到它，说明我们默认笔记记完就结束了。</p>
+        <p>康奈尔大学的沃尔特·鲍克，给出的答案是这样的 →</p>
+      </div>
+    </section>
+
+    <!-- 5 -->
+    <section class="slide" data-num="04" data-stage="方法一" data-keys="笔记栏|索引栏|总结栏|5R" data-sum="记录 / 简化 / 背诵 / 思考 / 复习。">
+      <div class="eyebrow">方法一 · 结构</div>
+      <h2>右边记、左边提、底下总结</h2>
+      <div class="cornell">
+        <div class="c-idx"><strong>索引栏</strong><em>关键词、问题<br>回家再写</em></div>
+        <div><strong>笔记栏</strong><em>课堂上记具体的概念、数据、例子</em></div>
+        <div class="c-sum"><strong>总结栏</strong><em>自己做系统化的梳理，一句话就够</em></div>
+      </div>
+      <div class="row">
+        <span class="chip">记录</span><span class="chip">简化</span><span class="chip">背诵</span><span class="chip">思考</span><span class="chip">复习</span>
+      </div>
+      <div class="ask"><small>提问</small>这五步里，哪一步最多人跳过？为什么？</div>
+      <div class="step reveal"><p>是<b>简化</b>。它最花脑子——要从一整页里挑出三个词，你必须先判断什么重要。跳过它，笔记就只剩下抄写。</p></div>
+    </section>
+
+    <!-- 6 -->
+    <section class="slide" data-num="05" data-stage="方法一" data-keys="三个词|一句话" data-sum="挑不出关键词，就是没听懂。">
+      <div class="eyebrow">方法一 · 简化版</div>
+      <h2>小学生这样用就够了</h2>
+      <div class="grid2">
+        <div class="box"><h4>右栏</h4><p>照常记，怎么顺手怎么记。</p></div>
+        <div class="box"><h4>左栏</h4><p>当天回家，提炼 <b>1–3 个</b>关键词。</p></div>
+        <div class="box"><h4>底栏</h4><p>一句话回答：今天这节课最重要的一件事是什么？</p></div>
+      </div>
+      <div class="ask"><small>提问</small>为什么关键词要限制在三个以内？多写几个不是更保险吗？</div>
+      <div class="step reveal"><p>限制是<b>逼你做判断</b>。允许写十个，你就会全抄；只能写三个，你必须想「哪个更重要」。<span class="mark">挑不出来，就是没听懂。</span></p></div>
+    </section>
+
+    <!-- 7 -->
+    <section class="slide" data-num="06" data-stage="练习一" data-keys="遮住右栏|讲出来" data-sum="能凭关键词讲出来的，才是学会了的。">
+      <div class="eyebrow">现场练习 · 60 秒</div>
+      <h2>遮盖挑战</h2>
+      <p class="lede">拿出你今天任意一页笔记。用手遮住右栏，只看左栏的关键词，向同桌复述内容。</p>
+      <div class="timer" data-seconds="60">
+        <output>01:00</output>
+        <button class="btn start">开始</button>
+        <button class="btn reset">重置</button>
+      </div>
+      <div class="ask"><small>练完提问</small>卡住的地方在哪？那是你没记住，还是当初就没听懂？</div>
+      <div class="step reveal"><p><b>能凭关键词讲出来的，才是学会了的。</b>这块试金石，从今天起每天用一次。</p></div>
+    </section>
+
+    <!-- 8 -->
+    <section class="slide" data-num="07" data-stage="方法二" data-keys="不许动笔|课后默写" data-sum="写得出来，才叫听懂了。">
+      <div class="eyebrow">方法二 · 一次性复写法</div>
+      <h2>如果上课全程不许动笔，下课再默写，你敢吗？</h2>
+      <div class="ask"><small>先说理由</small>敢的同学，你凭什么敢？不敢的同学，你怕丢掉什么？</div>
+      <div class="step reveal">
+        <p><b>第一步：</b>专注听，一个字都不记。线下课就和老师眼神交流、随时提问；录播课就全神贯注，把别人的思想变成自己的。</p>
+        <p><b>第二步：</b>听完合上，拿出本子，把你认为有价值的内容一次性写出来。</p>
+      </div>
+    </section>
+
+    <!-- 9 -->
+    <section class="slide" data-num="08" data-stage="方法二" data-keys="知识缺口|不可复现" data-sum="想写却写不出来的地方，就是要补的地方。">
+      <div class="eyebrow">方法二 · 代价</div>
+      <h2>这个方法的风险是什么？</h2>
+      <div class="grid2">
+        <div class="box"><h4>好处</h4><p>写得出来 = 真的懂了。想写却写不出来 = <b>知识缺口</b>，马上回去补。忘掉的多半不重要。</p></div>
+        <div class="box"><h4>代价</h4><p>不可复现的信息——老师随口说的一句、只出现一次的数据——当时不记，就永远错过了。</p></div>
+      </div>
+      <div class="ask"><small>提问</small>那什么内容适合用复写法？什么内容必须当场记？</div>
+      <div class="step reveal"><p>可复现的（书上有、课件有）→ 复写；不可复现的（随口说的、临时的）→ 当场记。<br>用第一性原理抓精髓，用奥卡姆剃刀删冗余。<b>克服完美主义，放过自己。</b></p></div>
+    </section>
+
+    <!-- 10 -->
+    <section class="slide" data-num="09" data-stage="练习二" data-keys="合上|讲给同桌" data-sum="磕巴的地方，就是知识缺口。">
+      <div class="eyebrow">现场练习 · 90 秒</div>
+      <h2>讲述法：合上，讲给同桌听</h2>
+      <p class="lede">什么都不许翻。回答两个问题：刚才这半节课讲了什么？哪里最有意思？</p>
+      <div class="timer" data-seconds="90">
+        <output>01:30</output>
+        <button class="btn start">开始</button>
+        <button class="btn reset">重置</button>
+      </div>
+      <div class="row">
+        <span class="chip">低年级：讲满三句话就算达标</span>
+        <span class="chip">高年级：讲完再动笔写几行</span>
+      </div>
+      <div class="step reveal"><p>讲得<b>磕磕绊绊</b>的地方，就是知识缺口，现在打开书补上。<br>下一步，把「讲给别人」变成「讲给自己」——一个人的时候也能练，这就叫<span class="mark">慎独</span>。</p></div>
+    </section>
+
+    <!-- 11 -->
+    <section class="slide" data-num="10" data-stage="插问" data-keys="越厉害越记" data-sum="不是记忆力好才不用记，是肯记才显得记忆力好。">
+      <div class="eyebrow">插问</div>
+      <h2>越厉害的人，是不是越不用记笔记？</h2>
+      <div class="ask"><small>先猜</small>你身边最厉害的那个人，记不记笔记？</div>
+      <div class="step reveal">
+        <p>恰恰相反。一位很受敬佩的企业家前辈，出国旅行途中听到有价值的信息，第一时间掏出手机打字；罗振宇老师见面时也是随时掏本子。</p>
+        <p class="quote">不要站在问题一边打败孩子，要站在孩子一边打败问题。</p>
+        <p>这句话，就是从一句随口的闲聊，被认真的笔记捞起来，一路打磨成跨年演讲上的金句的。</p>
+      </div>
+      <div class="ask step"><small>再追问</small>那么，笔记记下的到底是信息，还是<b>态度</b>？</div>
+    </section>
+
+    <!-- 12 -->
+    <section class="slide" data-num="11" data-stage="方法三" data-keys="后汉书|两年|多少张" data-sum="一千多张卡片，奠定了一生的研究基础。">
+      <div class="eyebrow">方法三 · 余英时的卡片法</div>
+      <h2>两年精读一部《后汉书》，他做了多少张卡片？</h2>
+      <p class="lede">二十岁的余英时投入钱穆门下。钱穆给了两条要求：第一，从头至尾通读全书；第二，把一切相关资料系统整理记录，以便将来查考和运用。</p>
+      <div class="row"><span class="chip">30 张</span><span class="chip">300 张</span><span class="chip hot">1000 张以上</span></div>
+      <div class="step reveal">
+        <p><b>一千多张。</b>凡涉及社会、经济、政治、思想的变动，无论直接间接、重大细微，全部搜集，分门别类加上标识。短的原文直接抄在卡片上，长的摘关键词句做提要。</p>
+        <p>晚年他在回忆录里说，这些卡片<b>奠定了我中国史研究的基础</b>。</p>
+      </div>
+    </section>
+
+    <!-- 13 -->
+    <section class="slide" data-num="12" data-stage="练习三" data-keys="正面抄|背面写为什么" data-sum="先攒够十张，就是了不起的开始。">
+      <div class="eyebrow">现场练习 · 抽卡片</div>
+      <h2>一张卡片，两面都要写</h2>
+      <div class="card-face">
+        <div class="front" id="cardFront">点「抽一张」，被抽到的同学讲讲这张卡背后的故事。</div>
+        <div class="back" id="cardBack">正面：抄下那句话 ｜ 背面：用自己的话写一句「为什么我觉得它有意思」</div>
+      </div>
+      <div class="row">
+        <button class="btn red" id="drawBtn">抽一张</button>
+        <span class="chip">先攒够十张，就是了不起的开始</span>
+      </div>
+      <div class="ask"><small>提问</small>如果只准写正面，不准写背面，这堆卡片会变成什么？</div>
+      <div class="step reveal"><p>变成一堆<b>别人的句子</b>。背面那一句「为什么我觉得它有意思」，才是把它变成你自己的东西的那一步。</p></div>
+    </section>
+
+    <!-- 14 -->
+    <section class="slide" data-num="13" data-stage="方法四" data-keys="买两本|一本剪" data-sum="他不是记忆力超群，是剪报本在替他工作。">
+      <div class="eyebrow">方法四 · 李敖的剪报法</div>
+      <h2>他每本书买两本，第二本用来干什么？</h2>
+      <div class="ask"><small>猜一猜</small>为什么要买两本？说出你的理由。</div>
+      <div class="step reveal">
+        <p><b>一本用来看，一本用来剪。</b>一本书读完，也就剪得七零八落了。剪下来的内容，按他感兴趣的主题，贴进一个巨大的剪报本。</p>
+        <p>他打笔仗时能一天写出一篇引经据典的长文，很多人以为是才思敏捷、记忆超群——其实是<b>剪报本在替他工作</b>。</p>
+      </div>
+    </section>
+
+    <!-- 15 -->
+    <section class="slide" data-num="14" data-stage="练习四" data-keys="按主题|归类=思考" data-sum="按主题归类的那个动作，本身就是思考。">
+      <div class="eyebrow">现场练习 · 归类</div>
+      <h2>兴趣是散的，怎么聚起来？</h2>
+      <p class="lede">恐龙的知识散在十本书里，太空的知识散在杂志、绘本和纪录片里。先点一张碎片，再点它该去的格子。</p>
+      <div class="pieces" id="pieces"></div>
+      <div class="bins" id="bins"></div>
+      <div class="ask"><small>提问</small>放的时候，你脑子里在干什么？</div>
+      <div class="step reveal"><p>在比较、在判断、在给它找位置——<b>按主题归类的那个动作，本身就是思考。</b><br>电子版同理：收藏夹按主题分文件夹，而不是一股脑丢进「稍后再看」。</p></div>
+    </section>
+
+    <!-- 16 -->
+    <section class="slide" data-num="15" data-stage="方法五" data-keys="首页目录|两字标题|页码" data-sum="留白的第一页，让笔记本变成能查的书。">
+      <div class="eyebrow">方法五 · 洛克的摘录本</div>
+      <h2>一本写满的笔记本，怎么才能像字典一样「查」？</h2>
+      <div class="ask"><small>先想办法</small>不许换本子、不许重抄，只能加东西。你会加什么？</div>
+      <div class="step reveal">
+        <p>洛克的答案：<b>第一页留白当目录。</b>每记一条新内容，先给它起一个两个字的标题，把标题和页码登记在首页，再翻到那一页详细写。</p>
+        <p>他在牛津第一年就开始用，十年后提炼出这套索引系统，附在《人类理解论》里。达尔文给爷爷写传记时，发现爷爷用的正是这一套。后来它被做成一本《灵感笔记》，十年里送给了几千个来参加夏令营的孩子。</p>
+      </div>
+    </section>
+
+    <!-- 17 -->
+    <section class="slide" data-num="16" data-stage="练习五" data-keys="起标题=分类" data-sum="起标题难，是因为它逼你想：这到底属于哪一类。">
+      <div class="eyebrow">现场练习 · 两个字</div>
+      <h2>给这三条内容，各起一个两字标题</h2>
+      <p class="lede">全班先各写各的，再对比——同一条内容，会出现几种不同的标题？</p>
+      <table>
+        <tr><th>内容</th><th>你的两字标题</th></tr>
+        <tr><td>上课一个字不记，下课凭记忆默写出来</td><td class="step"><b>复写</b></td></tr>
+        <tr><td>遇事分三格：事实、原因、行动</td><td class="step"><b>空伞</b></td></tr>
+        <tr><td>把喜欢的句子抄在卡片正面，背面写为什么</td><td class="step"><b>卡片</b></td></tr>
+      </table>
+      <div class="step reveal"><p>起标题之所以难，是因为它逼你回答：<b>这到底属于哪一类？</b>一个学期下来，你会拥有一件很有成就感的东西——<span class="mark">一本自己能查的书。</span></p></div>
+    </section>
+
+    <!-- 18 -->
+    <section class="slide" data-num="17" data-stage="方法六" data-keys="空|雨|伞" data-sum="任何问题都从事实开始，不从情绪开始。">
+      <div class="eyebrow">方法六 · 麦肯锡笔记法</div>
+      <h2>出门前看见乌云密布，你会做什么？为什么？</h2>
+      <div class="ask"><small>拆开问</small>你看见的是什么？你判断出什么？你决定做什么？这是三件不同的事。</div>
+      <div class="step reveal">
+        <p><b>空</b>＝乌云密布的天空，这是<b>事实</b>；<b>雨</b>＝乌云会下雨，这是<b>解释</b>；<b>伞</b>＝带伞出门，这是<b>行动</b>。</p>
+        <p>把一页纸三等分，任何问题都能这样走一遍。<span class="mark">从事实开始，不从情绪开始。</span></p>
+      </div>
+    </section>
+
+    <!-- 19 -->
+    <section class="slide" data-num="18" data-stage="练习六" data-keys="三格|写完再说" data-sum="写完你会发现：情绪顺了，思路也顺了。">
+      <div class="eyebrow">现场练习 · 三格</div>
+      <h2>选一件真实的麻烦，走一遍空雨伞</h2>
+      <div class="row">
+        <button class="btn case" data-case="这次考砸了">这次考砸了</button>
+        <button class="btn case" data-case="和好朋友闹翻了">和好朋友闹翻了</button>
+        <button class="btn case" data-case="小组作业乱成一团">小组作业乱成一团</button>
+      </div>
+      <div class="kus">
+        <section><h5>空</h5><span>发生了什么（只写事实）</span><textarea id="kuKong" placeholder="不带评价地写：几点、谁、做了什么、结果是什么"></textarea></section>
+        <section><h5>雨</h5><span>为什么会这样（解释）</span><textarea placeholder="至少写出两种可能的原因"></textarea></section>
+        <section><h5>伞</h5><span>我可以做点什么（行动）</span><textarea placeholder="写今天就能做的第一步"></textarea></section>
+      </div>
+      <div class="ask"><small>提问</small>哪一格最难写？</div>
+      <div class="step reveal"><p>多数人卡在「空」——因为我们习惯一开口就是评价（我太笨了、他针对我）。<b>能把事实和评价分开，一半的问题就已经解决了。</b></p></div>
+    </section>
+
+    <!-- 20 -->
+    <section class="slide" data-num="19" data-stage="收网" data-keys="六法归位" data-sum="不是学六种方法，是修四个环节。">
+      <div class="eyebrow">收网</div>
+      <h2>六种方法，各修哪一环？</h2>
+      <table>
+        <tr><th>方法</th><th>解决的问题</th></tr>
+        <tr><td>康奈尔三栏</td><td>课堂上<b>记得下</b>，回家能<b>整理好</b></td></tr>
+        <tr><td>复写法 / 讲述法</td><td>检验到底记没记住——<b>试金石</b></td></tr>
+        <tr><td>余英时卡片</td><td>一本书里的零散好东西，<b>整理好</b></td></tr>
+        <tr><td>李敖剪报</td><td>十本书里的同一主题，<b>聚起来</b></td></tr>
+        <tr><td>洛克索引</td><td>写满的本子，<b>找得到</b></td></tr>
+        <tr><td>空雨伞</td><td>遇到真问题时，<b>用得上</b></td></tr>
+      </table>
+      <div class="ask"><small>提问</small>这一周，你最需要补的是哪一环？只挑一个。</div>
+    </section>
+
+    <!-- 21 -->
+    <section class="slide" data-num="20" data-stage="作业" data-keys="三选一|下周验收" data-sum="下周同一时间，我问你同一个问题。">
+      <div class="eyebrow">课后 · 三选一</div>
+      <h2>这一周，只做一件事</h2>
+      <div class="grid2">
+        <div class="box"><h4>① 遮盖挑战</h4><p>任选一节课，用康奈尔简化版记，当晚遮住右栏复述一次。</p></div>
+        <div class="box"><h4>② 攒五张卡片</h4><p>正面抄句子，背面写「为什么我觉得它有意思」。</p></div>
+        <div class="box"><h4>③ 做一页目录</h4><p>给现在用的本子补一页目录，每条两个字加页码。</p></div>
+      </div>
+      <div class="ask"><small>下周第一问</small>你的笔记，这周帮你解决了什么问题？</div>
+    </section>
+
+    <!-- 22 -->
+    <section class="slide" data-num="21" data-stage="结课" data-keys="聪明可以训练" data-sum="耳聪目明——聪明就是信息量，就是记忆的存储和提取。">
+      <div class="eyebrow">结课</div>
+      <h1>聪明不是天赋，<br>聪明可以训练。</h1>
+      <p class="lede">耳听六路，眼观八方。聪明就是信息量，就是记忆的存储和提取——而笔记，是这两件事最便宜的工具。</p>
+      <div class="ask"><small>最后一问</small>今天六种方法，你打算从哪一种开始？现在就说出口。</div>
+    </section>
+
+  </main>
+
+  <div class="sum">
+    <button class="navbtn" id="prev" aria-label="上一页">←</button>
+    <button class="navbtn" id="next" aria-label="下一页">→</button>
+    <p id="sumText"></p>
+    <span class="keys">空格 揭晓 · O 目录 · F 全屏</span>
+    <button class="count" id="count" aria-label="打开目录">01 / 22</button>
+  </div>
+</div>
+
+<div class="overview" id="overview">
+  <h3>目录（点击跳转，Esc 关闭）</h3>
+  <div class="ovgrid" id="ovgrid"></div>
+</div>
+
+<script>
+const slides=[...document.querySelectorAll('.slide')];
+const railNum=document.getElementById('railNum'),railStage=document.getElementById('railStage'),
+      railKeys=document.getElementById('railKeys'),sumText=document.getElementById('sumText'),
+      count=document.getElementById('count'),progress=document.getElementById('progress'),
+      main=document.getElementById('main');
+let i=0;
+
+function render(){
+  slides.forEach((s,n)=>s.classList.toggle('on',n===i));
+  const s=slides[i];
+  railNum.textContent=s.dataset.num;
+  railStage.textContent=s.dataset.stage;
+  railKeys.innerHTML=(s.dataset.keys||'').split('|').filter(Boolean).map(k=>`<span>${k}</span>`).join('');
+  sumText.textContent=s.dataset.sum||'';
+  count.textContent=String(i+1).padStart(2,'0')+' / '+slides.length;
+  progress.style.width=((i+1)/slides.length*100)+'%';
+  main.scrollTop=0;
+}
+function go(n){i=Math.max(0,Math.min(slides.length-1,n));render();}
+function revealNext(){
+  const s=slides[i].querySelector('.step:not(.shown)');
+  if(s){s.classList.add('shown');return true;}
+  return false;
+}
+document.getElementById('next').onclick=()=>go(i+1);
+document.getElementById('prev').onclick=()=>go(i-1);
+
+document.addEventListener('keydown',e=>{
+  if(['TEXTAREA','INPUT'].includes(e.target.tagName))return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'){go(i+1);e.preventDefault();}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){go(i-1);e.preventDefault();}
+  else if(e.key===' '||e.key==='ArrowDown'){if(!revealNext())go(i+1);e.preventDefault();}
+  else if(e.key.toLowerCase()==='o'){ov.classList.toggle('on');}
+  else if(e.key.toLowerCase()==='f'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}
+  else if(e.key==='Escape'){ov.classList.remove('on');}
+});
+
+/* 目录 */
+const ov=document.getElementById('overview'),ovgrid=document.getElementById('ovgrid');
+slides.forEach((s,n)=>{
+  const b=document.createElement('button');
+  const t=s.querySelector('h1,h2');
+  b.innerHTML=`<span>${String(n+1).padStart(2,'0')} · ${s.dataset.stage}</span>${t?t.textContent.replace(/\s+/g,' '):''}`;
+  b.onclick=()=>{go(n);ov.classList.remove('on');};
+  ovgrid.appendChild(b);
+});
+count.onclick=()=>ov.classList.toggle('on');
+
+/* 计时器 */
+document.querySelectorAll('.timer').forEach(t=>{
+  const total=+t.dataset.seconds,out=t.querySelector('output');
+  let left=total,id=null;
+  const fmt=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+  const paint=()=>out.textContent=fmt(left);
+  const beep=()=>{try{const c=new(window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();
+    o.connect(g);g.connect(c.destination);o.frequency.value=660;g.gain.setValueAtTime(.18,c.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.9);o.start();o.stop(c.currentTime+.9);}catch(e){}};
+  const startBtn=t.querySelector('.start');
+  startBtn.onclick=()=>{
+    if(id){clearInterval(id);id=null;startBtn.textContent='继续';return;}
+    startBtn.textContent='暂停';
+    id=setInterval(()=>{
+      left--;paint();
+      if(left<=0){clearInterval(id);id=null;t.classList.add('ring');startBtn.textContent='开始';beep();}
+    },1000);
+  };
+  t.querySelector('.reset').onclick=()=>{clearInterval(id);id=null;left=total;paint();t.classList.remove('ring');startBtn.textContent='开始';};
+  paint();
+});
+
+/* 抽卡片 */
+const prompts=[
+  '把你今天笔记里最想留下的一句话，念出来。',
+  '你最近读到的哪一句话，让你想停下来想一想？',
+  '举一个例子：哪句话你当时抄了，现在完全想不起为什么抄。',
+  '你书架上最喜欢的那本书，第一句是什么？',
+  '说一句你听过、但一直不太同意的话，并说说为什么。',
+  '如果只能给今天这节课留一张卡片，正面写什么？'
+];
+let last=-1;
+document.getElementById('drawBtn').onclick=()=>{
+  let n;do{n=Math.floor(Math.random()*prompts.length)}while(n===last&&prompts.length>1);
+  last=n;
+  const f=document.getElementById('cardFront');
+  f.style.opacity=0;
+  setTimeout(()=>{f.textContent=prompts[n];f.style.opacity=1;},150);
+  document.getElementById('cardBack').textContent='抽到的同学：讲完之后，再用一句话说说「为什么我觉得它有意思」。';
+};
+document.getElementById('cardFront').style.transition='opacity .15s ease';
+
+/* 剪报归类 */
+const items=[
+  ['霸王龙的咬合力有多大','恐龙'],['恐龙蛋化石是怎么形成的','恐龙'],
+  ['火星车怎么取样','太空'],['空间站里怎么睡觉','太空'],
+  ['蛋炒饭为什么要用隔夜饭','美食'],['高汤为什么要撇浮沫','美食'],
+  ['任意球为什么会拐弯','球场'],['越位到底怎么算','球场']
+];
+const themes=['恐龙','太空','美食','球场'];
+const piecesEl=document.getElementById('pieces'),binsEl=document.getElementById('bins');
+let picked=null,placed=0;
+items.forEach(([txt,ans],n)=>{
+  const b=document.createElement('button');
+  b.className='piece';b.textContent=txt;b.dataset.ans=ans;b.setAttribute('aria-pressed','false');
+  b.onclick=()=>{
+    piecesEl.querySelectorAll('.piece').forEach(p=>p.setAttribute('aria-pressed','false'));
+    picked=b;b.setAttribute('aria-pressed','true');
+  };
+  piecesEl.appendChild(b);
+});
+themes.forEach(t=>{
+  const b=document.createElement('button');
+  b.className='bin';b.innerHTML=`<h5>${t}</h5><ul></ul>`;
+  b.onclick=()=>{
+    if(!picked)return;
+    if(picked.dataset.ans===t){
+      const li=document.createElement('li');li.textContent=picked.textContent;
+      b.querySelector('ul').appendChild(li);
+      picked.classList.add('done');picked=null;placed++;
+      if(placed===items.length){
+        const done=document.createElement('p');
+        done.className='tag';done.style.marginTop='10px';
+        done.textContent='八张碎片，四个主题。你刚才做的事，就是李敖的剪报本。';
+        binsEl.after(done);
+      }
+    }else{b.classList.add('shake');setTimeout(()=>b.classList.remove('shake'),320);}
+  };
+  binsEl.appendChild(b);
+});
+
+/* 空雨伞题目切换 */
+document.querySelectorAll('.case').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('.case').forEach(x=>x.classList.remove('red'));
+    b.classList.add('red');
+    document.getElementById('kuKong').placeholder='「'+b.dataset.case+'」——只写事实：几点、谁、做了什么、结果是什么';
+  };
+});
+
+render();
+</script>
