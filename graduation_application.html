@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>好奇学习社区 · 毕业申请书</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --ink-light: #3d3d5c;
+    --paper: #faf7f2;
+    --paper-dark: #f0ebe0;
+    --accent: #b85c38;
+    --accent-light: #d4845e;
+    --gold: #c9a84c;
+    --gold-light: #e8d08a;
+    --seal: #8b1a1a;
+    --border: #d4c9b0;
+    --muted: #7a7060;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #e8e0d0;
+    font-family: 'Noto Sans SC', sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 40px 20px;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(180,160,120,0.15) 28px),
+      radial-gradient(ellipse at 20% 50%, rgba(201,168,76,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(184,92,56,0.06) 0%, transparent 50%);
+  }
+
+  .document {
+    max-width: 860px;
+    margin: 0 auto;
+    background: var(--paper);
+    box-shadow:
+      0 2px 4px rgba(0,0,0,0.08),
+      0 8px 24px rgba(0,0,0,0.12),
+      0 24px 64px rgba(0,0,0,0.1),
+      inset 0 0 0 1px rgba(212,201,176,0.5);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Paper texture */
+  .document::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Left binding edge */
+  .document::after {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 6px;
+    background: linear-gradient(to right, var(--gold), var(--gold-light), transparent);
+    z-index: 1;
+  }
+
+  /* Header */
+  .doc-header {
+    position: relative;
+    z-index: 2;
+    padding: 48px 64px 36px;
+    border-bottom: 2px solid var(--border);
+    background: linear-gradient(135deg, #fff9f0 0%, var(--paper) 100%);
+  }
+
+  .header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .org-name {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .doc-serial {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-align: right;
+    line-height: 1.8;
+  }
+
+  .doc-serial span {
+    display: block;
+    font-family: 'Noto Serif SC', serif;
+  }
+
+  .doc-title-wrap {
+    text-align: center;
+    padding: 8px 0;
+  }
+
+  .doc-title-en {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--accent-light);
+    letter-spacing: 0.15em;
+    margin-bottom: 6px;
+  }
+
+  .doc-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: 0.2em;
+    line-height: 1.2;
+  }
+
+  .doc-title-deco {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 10px;
+  }
+
+  .deco-line {
+    height: 1px;
+    width: 80px;
+    background: linear-gradient(to right, transparent, var(--gold));
+  }
+  .deco-line.rev { background: linear-gradient(to left, transparent, var(--gold)); }
+
+  .deco-diamond {
+    width: 6px; height: 6px;
+    background: var(--gold);
+    transform: rotate(45deg);
+  }
+
+  /* Sections */
+  .doc-body {
+    position: relative;
+    z-index: 2;
+    padding: 0 64px;
+  }
+
+  /* Notice banner */
+  .notice-banner {
+    margin: 32px 0 0;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, rgba(201,168,76,0.12), rgba(201,168,76,0.06));
+    border-left: 3px solid var(--gold);
+    border-radius: 0 4px 4px 0;
+    font-size: 12.5px;
+    color: var(--ink-light);
+    line-height: 1.9;
+  }
+
+  .notice-banner strong {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* Section */
+  .section {
+    margin-top: 36px;
+    page-break-inside: avoid;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .section-num {
+    width: 32px; height: 32px;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Noto Serif SC', serif;
+    font-size: 14px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: 0.08em;
+    border-bottom: 1.5px solid var(--border);
+    padding-bottom: 8px;
+    flex: 1;
+  }
+
+  .req-tag {
+    font-size: 10px;
+    padding: 2px 8px;
+    background: var(--accent);
+    color: white;
+    letter-spacing: 0.05em;
+    font-weight: 500;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  .req-tag.optional {
+    background: var(--gold);
+    color: var(--ink);
+  }
+
+  /* Sub-requirement blocks */
+  .sub-req {
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .sub-req-head {
+    background: var(--paper-dark);
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-light);
+    border-bottom: 1px solid var(--border);
+    letter-spacing: 0.05em;
+  }
+
+  .sub-req-head .sub-num {
+    font-family: 'Noto Serif SC', serif;
+    color: var(--accent);
+    font-weight: 700;
+    margin-right: 6px;
+  }
+
+  .sub-req-body {
+    padding: 14px 16px;
+    font-size: 13px;
+    color: var(--ink-light);
+    line-height: 1.85;
+  }
+
+  .req-hint {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 11.5px;
+    color: var(--muted);
+    font-style: italic;
+    border-left: 2px solid var(--gold-light);
+    padding-left: 8px;
+  }
+
+  /* Tag list for standing projects */
+  .project-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 10px 0 4px;
+  }
+
+  .project-tag {
+    padding: 3px 10px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    font-size: 12px;
+    color: var(--ink-light);
+    letter-spacing: 0.05em;
+  }
+
+  /* Fill-in fields */
+  .field-group {
+    margin: 14px 0;
+  }
+
+  .field-label {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+  }
+
+  .field-input {
+    width: 100%;
+    border: none;
+    border-bottom: 1.5px solid var(--border);
+    background: transparent;
+    padding: 6px 2px;
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+    resize: none;
+  }
+
+  .field-input:focus {
+    border-bottom-color: var(--accent);
+  }
+
+  .field-input::placeholder {
+    color: #bbb;
+    font-size: 12px;
+  }
+
+  textarea.field-input {
+    min-height: 60px;
+    border: 1.5px solid var(--border);
+    border-radius: 2px;
+    padding: 8px 10px;
+    margin-top: 2px;
+  }
+
+  textarea.field-input:focus {
+    border-color: var(--accent);
+  }
+
+  /* Grid fields */
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 14px 0;
+  }
+
+  .field-row.three { grid-template-columns: 1fr 1fr 1fr; }
+
+  /* Table */
+  .fill-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 12.5px;
+  }
+
+  .fill-table th {
+    background: var(--paper-dark);
+    padding: 8px 10px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--ink-light);
+    border: 1px solid var(--border);
+    font-size: 11.5px;
+    letter-spacing: 0.05em;
+  }
+
+  .fill-table td {
+    border: 1px solid var(--border);
+    padding: 0;
+  }
+
+  .fill-table td input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 8px 10px;
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 12.5px;
+    color: var(--ink);
+    outline: none;
+  }
+
+  .fill-table td input:focus {
+    background: rgba(201,168,76,0.06);
+  }
+
+  .fill-table .td-note {
+    padding: 8px 10px;
+    color: #bbb;
+    font-size: 12px;
+    font-style: italic;
+  }
+
+  /* Season grid */
+  .season-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+    margin: 12px 0;
+  }
+
+  .season-cell {
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .season-cell-label {
+    background: var(--paper-dark);
+    text-align: center;
+    font-size: 10px;
+    color: var(--muted);
+    padding: 3px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .season-cell input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    text-align: center;
+    padding: 5px 2px;
+    font-size: 11px;
+    font-family: 'Noto Sans SC', sans-serif;
+    color: var(--ink);
+    outline: none;
+  }
+
+  /* Checklist */
+  .checklist {
+    list-style: none;
+    margin: 12px 0;
+  }
+
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 7px 0;
+    border-bottom: 1px dashed var(--border);
+    font-size: 13px;
+    color: var(--ink-light);
+    line-height: 1.7;
+  }
+
+  .checklist li:last-child { border-bottom: none; }
+
+  .check-box {
+    width: 16px; height: 16px;
+    border: 1.5px solid var(--border);
+    flex-shrink: 0;
+    margin-top: 3px;
+    cursor: pointer;
+    position: relative;
+    background: white;
+    transition: all 0.15s;
+  }
+
+  .check-box:hover { border-color: var(--accent); }
+
+  .check-box.checked {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .check-box.checked::after {
+    content: '✓';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  /* Early graduation section */
+  .early-section {
+    margin-top: 36px;
+    border: 1.5px solid var(--gold);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .early-head {
+    background: linear-gradient(135deg, rgba(201,168,76,0.2), rgba(201,168,76,0.08));
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--gold-light);
+  }
+
+  .early-head-icon {
+    font-size: 16px;
+  }
+
+  .early-head-text {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: 0.08em;
+  }
+
+  .early-body {
+    padding: 16px 20px;
+    background: rgba(255,255,255,0.5);
+    font-size: 13px;
+    color: var(--ink-light);
+    line-height: 1.9;
+  }
+
+  .early-reqs {
+    margin: 12px 0 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .early-req-item {
+    background: rgba(201,168,76,0.07);
+    border: 1px solid var(--gold-light);
+    border-radius: 2px;
+    padding: 10px 14px;
+    font-size: 12.5px;
+    color: var(--ink-light);
+    line-height: 1.7;
+  }
+
+  .early-req-item strong {
+    display: block;
+    color: var(--gold);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+
+  /* Attachments */
+  .attach-section {
+    margin-top: 28px;
+    padding: 16px 20px;
+    background: var(--paper-dark);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+  }
+
+  .attach-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .attach-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .attach-list li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    color: var(--ink-light);
+  }
+
+  .attach-num {
+    width: 20px; height: 20px;
+    background: var(--muted);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* Footer */
+  .doc-footer {
+    position: relative;
+    z-index: 2;
+    margin-top: 40px;
+    padding: 28px 64px 48px;
+    border-top: 2px solid var(--border);
+  }
+
+  .signature-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+
+  .sig-block { }
+
+  .sig-label {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .sig-line {
+    border-bottom: 1.5px solid var(--border);
+    height: 36px;
+    position: relative;
+  }
+
+  .sig-line input {
+    position: absolute;
+    inset: 0;
+    border: none;
+    background: transparent;
+    padding: 0 4px;
+    font-family: 'Noto Serif SC', serif;
+    font-size: 14px;
+    color: var(--ink);
+    outline: none;
+    width: 100%;
+    bottom: 2px;
+  }
+
+  .final-note {
+    text-align: center;
+    font-size: 11.5px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    line-height: 2;
+  }
+
+  .seal-area {
+    width: 80px; height: 80px;
+    border: 2px dashed var(--border);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 10px;
+    color: var(--border);
+    letter-spacing: 0.05em;
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  /* Print */
+  @media print {
+    body { background: white; padding: 0; }
+    .document { box-shadow: none; max-width: 100%; }
+    .field-input, .fill-table td input { border-bottom-color: #999; }
+  }
+
+  /* Divider */
+  .section-divider {
+    border: none;
+    border-top: 1px dashed var(--border);
+    margin: 28px 0;
+  }
+
+  .required-star { color: var(--accent); margin-left: 2px; }
+
+  .info-block {
+    background: rgba(184,92,56,0.05);
+    border-left: 2px solid var(--accent-light);
+    padding: 10px 14px;
+    margin: 10px 0;
+    font-size: 12.5px;
+    color: var(--ink-light);
+    line-height: 1.8;
+  }
+</style>
+</head>
+<body>
+
+<div class="document">
+
+  <!-- Header -->
+  <div class="doc-header">
+    <div class="header-top">
+      <div class="org-name">好奇学习社区</div>
+      <div class="doc-serial">
+        <span>申请编号</span>
+        <input style="border:none;border-bottom:1px solid var(--border);background:transparent;width:120px;font-size:11px;color:var(--ink);outline:none;padding:2px;" placeholder="由学务处填写">
+        <span style="margin-top:4px;">申请日期：<input style="border:none;border-bottom:1px solid var(--border);background:transparent;width:100px;font-size:11px;color:var(--ink);outline:none;padding:2px;" placeholder="年 / 月 / 日"></span>
+      </div>
+    </div>
+    <div class="doc-title-wrap">
+      <div class="doc-title-en">Graduation Application Form</div>
+      <div class="doc-title">毕业申请书</div>
+      <div class="doc-title-deco">
+        <div class="deco-line rev"></div>
+        <div class="deco-diamond"></div>
+        <div class="deco-line"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="doc-body">
+
+    <!-- Notice -->
+    <div class="notice-banner">
+      📋 申请须知：毕业申请须在每年 <strong>1月1日—3月1日</strong> 期间提交，并于 <strong>6月1日前</strong> 完成毕业答辩。请仔细阅读各项要求，完整填写本申请书并附上所需材料。满足全部条件方可毕业，未能完成则自动延迟毕业。
+    </div>
+
+    <!-- 基本信息 -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-num">一</div>
+        <div class="section-title">学员基本信息</div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <div class="field-label">姓名 <span class="required-star">*</span></div>
+          <input class="field-input" type="text" placeholder="请填写真实姓名">
+        </div>
+        <div class="field-group">
+          <div class="field-label">入学年份 <span class="required-star">*</span></div>
+          <input class="field-input" type="text" placeholder="例：2022">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <div class="field-label">联系方式 <span class="required-star">*</span></div>
+          <input class="field-input" type="text" placeholder="手机号 / 微信号">
+        </div>
+        <div class="field-group">
+          <div class="field-label">□ 申请普通毕业　　□ 申请提前毕业</div>
+          <div style="display:flex;gap:24px;margin-top:8px;">
+            <label style="font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;">
+              <input type="radio" name="grad-type" style="accent-color:var(--accent)"> 普通毕业
+            </label>
+            <label style="font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;">
+              <input type="radio" name="grad-type" style="accent-color:var(--accent)"> 提前毕业（附加要求适用）
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- 毕业要求 1 -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-num">二</div>
+        <div class="section-title">毕业要求一：课程修读情况 <span class="req-tag">必修</span></div>
+      </div>
+
+      <!-- 1.1 常设项目 -->
+      <div class="sub-req">
+        <div class="sub-req-head">
+          <span class="sub-num">1.1</span>常设项目成绩
+        </div>
+        <div class="sub-req-body">
+          以下六项常设项目，每项绩点要求 <strong>1.0 以上</strong>。未参与项目须通过老师基础能力判定以证明同等学力。
+          <div class="project-tags">
+            <span class="project-tag">运动通识</span>
+            <span class="project-tag">极限飞盘</span>
+            <span class="project-tag">语言游戏</span>
+            <span class="project-tag">尤里卡</span>
+            <span class="project-tag">发现的乐趣</span>
+            <span class="project-tag">戏剧</span>
+          </div>
+
+          <table class="fill-table" style="margin-top:14px;">
+            <thead>
+              <tr>
+                <th style="width:28%">项目名称</th>
+                <th style="width:15%">绩点</th>
+                <th style="width:15%">是否参与</th>
+                <th>替代方案说明（如适用）</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><div class="td-note">运动通识</div></td><td><input placeholder="—"></td><td><input placeholder="是 / 否"></td><td><input placeholder="如以替代方案，请说明具体情境"></td></tr>
+              <tr><td><div class="td-note">极限飞盘</div></td><td><input placeholder="—"></td><td><input placeholder="是 / 否"></td><td><input placeholder="如以替代方案，请说明具体情境"></td></tr>
+              <tr><td><div class="td-note">语言游戏</div></td><td><input placeholder="—"></td><td><input placeholder="是 / 否"></td><td><input placeholder="如以替代方案，请说明具体情境"></td></tr>
+              <tr><td><div class="td-note">尤里卡</div></td><td><input placeholder="—"></td><td><input placeholder="是 / 否"></td><td><input placeholder="如以替代方案，请说明具体情境"></td></tr>
+              <tr><td><div class="td-note">发现的乐趣</div></td><td><input placeholder="—"></td><td><input placeholder="是 / 否"></td><td><input placeholder="如以替代方案，请说明具体情境"></td></tr>
+              <tr><td><div class="td-note">戏剧</div></td><td><input placeholder="—"></td><td><input placeholder="是 / 否"></td><td><input placeholder="如以替代方案，请说明具体情境"></td></tr>
+            </tbody>
+          </table>
+          <div class="req-hint">请附完整成绩单；如有替代方案，请提供具体方案文件作为附件。</div>
+        </div>
+      </div>
+
+      <!-- 1.2 通识项目 -->
+      <div class="sub-req">
+        <div class="sub-req-head">
+          <span class="sub-num">1.2</span>通识项目成绩
+        </div>
+        <div class="sub-req-body">
+          通识项目修 <strong>不少于20门</strong>，每门课绩点要求 <strong>1.0 以上</strong>；累积 NY 项目 <strong>3门以下</strong>。
+
+          <div class="field-row" style="margin-top:14px;">
+            <div class="field-group">
+              <div class="field-label">已修通识项目总门数</div>
+              <input class="field-input" type="text" placeholder="填写数字">
+            </div>
+            <div class="field-group">
+              <div class="field-label">累积 NY 项目门数</div>
+              <input class="field-input" type="text" placeholder="填写数字（须 < 3）">
+            </div>
+          </div>
+
+          <div class="field-group">
+            <div class="field-label">通识项目清单（可另附成绩单）</div>
+            <textarea class="field-input" rows="5" placeholder="课程名称 | 绩点&#10;课程名称 | 绩点&#10;课程名称 | 绩点&#10;…（如空间不足请附成绩单文件）"></textarea>
+          </div>
+          <div class="req-hint">请附完整通识课项目及成绩单。</div>
+        </div>
+      </div>
+
+      <!-- 1.3 做事课 -->
+      <div class="sub-req">
+        <div class="sub-req-head">
+          <span class="sub-num">1.3</span>做事课任务
+        </div>
+        <div class="sub-req-body">
+          至少参与 <strong>五项</strong> 做事课任务，并担任项目负责人 <strong>至少一次</strong>。
+
+          <table class="fill-table" style="margin-top:14px;">
+            <thead>
+              <tr>
+                <th style="width:18%">项目编号</th>
+                <th style="width:38%">项目成果</th>
+                <th style="width:20%">担任角色</th>
+                <th>备注</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><input placeholder="编号"></td><td><input placeholder="成果描述"></td><td><input placeholder="成员 / 负责人"></td><td><input placeholder="—"></td></tr>
+              <tr><td><input placeholder="编号"></td><td><input placeholder="成果描述"></td><td><input placeholder="成员 / 负责人"></td><td><input placeholder="—"></td></tr>
+              <tr><td><input placeholder="编号"></td><td><input placeholder="成果描述"></td><td><input placeholder="成员 / 负责人"></td><td><input placeholder="—"></td></tr>
+              <tr><td><input placeholder="编号"></td><td><input placeholder="成果描述"></td><td><input placeholder="成员 / 负责人"></td><td><input placeholder="—"></td></tr>
+              <tr><td><input placeholder="编号"></td><td><input placeholder="成果描述"></td><td><input placeholder="成员 / 负责人"></td><td><input placeholder="—"></td></tr>
+              <tr><td><input placeholder="如有第6项请填写"></td><td><input placeholder="—"></td><td><input placeholder="—"></td><td><input placeholder="—"></td></tr>
+            </tbody>
+          </table>
+          <div class="req-hint">请注明每项的项目编号、成果及担任角色；担任项目负责人的行请特别标注。</div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- 毕业要求 2 -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-num">三</div>
+        <div class="section-title">毕业要求二：毕业设计与答辩 <span class="req-tag">必修</span></div>
+      </div>
+
+      <div class="info-block">
+        须完成毕业设计 / 作品及个人综述，并于 <strong>6月1日前</strong> 通过毕业答辩。
+      </div>
+
+      <div class="field-group" style="margin-top:16px;">
+        <div class="field-label">毕业设计 / 作品方案描述 <span class="required-star">*</span></div>
+        <textarea class="field-input" rows="5" placeholder="请简述毕业设计的主题、内容、形式及预期成果…"></textarea>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">个人综述 <span class="required-star">*</span></div>
+        <textarea class="field-input" rows="8" placeholder="请撰写个人综述，回顾在好奇学习社区的学习历程、收获与成长…"></textarea>
+      </div>
+
+      <div class="field-row">
+        <div class="field-group">
+          <div class="field-label">预计答辩日期</div>
+          <input class="field-input" type="text" placeholder="年 / 月 / 日（须于6月1日前）">
+        </div>
+        <div class="field-group">
+          <div class="field-label">答辩形式</div>
+          <input class="field-input" type="text" placeholder="例：线上 / 线下 / 作品展示">
+        </div>
+      </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- 毕业要求 3 -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-num">四</div>
+        <div class="section-title">毕业要求三：就读学季记录 <span class="req-tag">必修</span></div>
+      </div>
+
+      <div class="info-block">
+        须在好奇就读 <strong>完整6季以上</strong>，其中至少 <strong>连续就读完整4季以上</strong>。
+      </div>
+
+      <div style="margin-top:16px;">
+        <div class="field-label" style="margin-bottom:10px;">就读学季明细（请填写所有就读学季，例：2026S1）</div>
+        <div class="season-grid">
+          <div class="season-cell"><div class="season-cell-label">学季 1</div><input placeholder="如 2024S1"></div>
+          <div class="season-cell"><div class="season-cell-label">学季 2</div><input placeholder="—"></div>
+          <div class="season-cell"><div class="season-cell-label">学季 3</div><input placeholder="—"></div>
+          <div class="season-cell"><div class="season-cell-label">学季 4</div><input placeholder="—"></div>
+          <div class="season-cell"><div class="season-cell-label">学季 5</div><input placeholder="—"></div>
+          <div class="season-cell"><div class="season-cell-label">学季 6</div><input placeholder="—"></div>
+        </div>
+      </div>
+
+      <table class="fill-table" style="margin-top:16px;">
+        <thead>
+          <tr>
+            <th>学季</th>
+            <th>学季成绩</th>
+            <th>信用分</th>
+            <th>备注（如有中断请说明）</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><input placeholder="例：2024S1"></td><td><input placeholder="—"></td><td><input placeholder="—"></td><td><input placeholder="—"></td></tr>
+          <tr><td><input placeholder="—"></td><td><input placeholder="—"></td><td><input placeholder="—"></td><td><input placeholder="—"></td></tr>
+          <tr><td><input placeholder="—"></td><td><input placeholder="—"></td><td><input placeholder="—"></td><td><input placeholder="—"></td></tr>
+          <tr><td><input placeholder="—"></td><td><input placeholder="—"></td><td><input placeholder="—"></td><td><input placeholder="—"></td></tr>
+          <tr><td><input placeholder="—"></td><td><input placeholder="—"></td><td><input placeholder="—"></td><td><input placeholder="—"></td></tr>
+          <tr><td><input placeholder="—"></td><td><input placeholder="—"></td><td><input placeholder="—"></td><td><input placeholder="—"></td></tr>
+        </tbody>
+      </table>
+
+      <div class="field-row" style="margin-top:4px;">
+        <div class="field-group">
+          <div class="field-label">连续就读最长学季段</div>
+          <input class="field-input" type="text" placeholder="例：2024S2 — 2025S3（连续4季）">
+        </div>
+        <div class="field-group">
+          <div class="field-label">总就读学季数</div>
+          <input class="field-input" type="text" placeholder="填写数字（须 ≥ 6）">
+        </div>
+      </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- 毕业要求 4 -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-num">五</div>
+        <div class="section-title">毕业要求四：信用积分 <span class="req-tag">必修</span></div>
+      </div>
+
+      <div class="info-block">
+        就读期间信用积分 <strong>平均绩点不少于1.0</strong>。快速加分至多 <strong>两次</strong>。
+      </div>
+
+      <div class="field-row" style="margin-top:14px;">
+        <div class="field-group">
+          <div class="field-label">信用积分平均绩点 <span class="required-star">*</span></div>
+          <input class="field-input" type="text" placeholder="填写数字（须 ≥ 1.0）">
+        </div>
+        <div class="field-group">
+          <div class="field-label">快速加分次数</div>
+          <input class="field-input" type="text" placeholder="填写次数（须 ≤ 2）">
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">快速加分情境说明（如有）</div>
+        <textarea class="field-input" rows="3" placeholder="如有快速加分，请说明每次的具体情境…"></textarea>
+      </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- 毕业要求 5 -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-num">六</div>
+        <div class="section-title">毕业要求五：成人礼 <span class="req-tag">必修</span></div>
+      </div>
+
+      <div class="info-block">
+        须参加好奇学习社区成人礼并发表成人礼演讲。
+      </div>
+
+      <div class="field-row" style="margin-top:14px;">
+        <div class="field-group">
+          <div class="field-label">参加成人礼日期</div>
+          <input class="field-input" type="text" placeholder="年 / 月 / 日">
+        </div>
+        <div class="field-group">
+          <div class="field-label">是否已发表演讲</div>
+          <div style="display:flex;gap:24px;margin-top:8px;">
+            <label style="font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;">
+              <input type="radio" name="speech" style="accent-color:var(--accent)"> 是
+            </label>
+            <label style="font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;">
+              <input type="radio" name="speech" style="accent-color:var(--accent)"> 否（请说明）
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">演讲逐字稿</div>
+        <textarea class="field-input" rows="8" placeholder="请在此粘贴成人礼演讲逐字稿，或在附件中上传文件…"></textarea>
+      </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- 提前毕业 -->
+    <div class="early-section">
+      <div class="early-head">
+        <span class="early-head-icon">⭐</span>
+        <span class="early-head-text">附加项：提前毕业申请</span>
+        <span class="req-tag optional" style="margin-left:auto;">选填</span>
+      </div>
+      <div class="early-body">
+        至多可提前 <strong>一年</strong> 申请毕业。选择提前毕业须同时满足以下附加要求：
+
+        <div class="early-reqs">
+          <div class="early-req-item">
+            <strong>绩点要求</strong>
+            信用积分及项目平均绩点均达到 <strong>3.0 以上</strong>
+          </div>
+          <div class="early-req-item">
+            <strong>领导力要求</strong>
+            作为团队第一负责人带领完成项目 <strong>至少3次</strong>，且成果评估达到 <strong>优秀</strong>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;">
+          <div class="field-group">
+            <div class="field-label">当前信用积分平均绩点</div>
+            <input class="field-input" type="text" placeholder="须 ≥ 3.0">
+          </div>
+          <div class="field-group">
+            <div class="field-label">项目平均绩点</div>
+            <input class="field-input" type="text" placeholder="须 ≥ 3.0">
+          </div>
+        </div>
+
+        <table class="fill-table" style="margin-top:14px;">
+          <thead>
+            <tr>
+              <th>项目编号</th>
+              <th>项目名称</th>
+              <th>成果评估</th>
+              <th>说明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><input placeholder="编号"></td><td><input placeholder="项目名称"></td><td><input placeholder="优秀 / 良好 / …"></td><td><input placeholder="—"></td></tr>
+            <tr><td><input placeholder="编号"></td><td><input placeholder="项目名称"></td><td><input placeholder="优秀 / 良好 / …"></td><td><input placeholder="—"></td></tr>
+            <tr><td><input placeholder="编号"></td><td><input placeholder="项目名称"></td><td><input placeholder="优秀 / 良好 / …"></td><td><input placeholder="—"></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 核查清单 -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-num">七</div>
+        <div class="section-title">自查清单</div>
+      </div>
+      <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px;">请在提交前逐项确认，点击方框标记已完成项。</p>
+      <ul class="checklist" id="checklist">
+        <li><div class="check-box" onclick="this.classList.toggle('checked')"></div>1.1 已填写全部常设项目绩点，并附完整成绩单或替代方案说明</li>
+        <li><div class="check-box" onclick="this.classList.toggle('checked')"></div>1.2 已填写通识项目清单（≥20门），并附成绩单</li>
+        <li><div class="check-box" onclick="this.classList.toggle('checked')"></div>1.3 已填写至少5项做事课任务，含至少1次负责人经历</li>
+        <li><div class="check-box" onclick="this.classList.toggle('checked')"></div>已填写毕业设计方案及个人综述</li>
+        <li><div class="check-box" onclick="this.classList.toggle('checked')"></div>已填写全部就读学季（≥6季，含连续≥4季）</li>
+        <li><div class="check-box" onclick="this.classList.toggle('checked')"></div>信用积分平均绩点 ≥ 1.0，快速加分 ≤ 2次</li>
+        <li><div class="check-box" onclick="this.classList.toggle('checked')"></div>已附成人礼演讲逐字稿</li>
+        <li><div class="check-box" onclick="this.classList.toggle('checked')"></div>如申请提前毕业，已填写附加要求相关内容</li>
+      </ul>
+    </div>
+
+    <!-- 附件说明 -->
+    <div class="attach-section">
+      <div class="attach-title">需随申请书提交的附件</div>
+      <ul class="attach-list">
+        <li><div class="attach-num">1</div>常设项目完整成绩单（或替代方案证明文件）</li>
+        <li><div class="attach-num">2</div>通识课完整成绩单</li>
+        <li><div class="attach-num">3</div>毕业设计 / 作品成果文件</li>
+        <li><div class="attach-num">4</div>成人礼演讲逐字稿（文字版或音视频文件）</li>
+        <li><div class="attach-num">5</div>提前毕业附加材料（如适用）</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="doc-footer">
+    <div class="seal-area">官方<br>盖章处</div>
+
+    <div class="signature-row">
+      <div class="sig-block">
+        <div class="sig-label">申请人签名</div>
+        <div class="sig-line"><input type="text" placeholder="手写签名或键入姓名"></div>
+      </div>
+      <div class="sig-block">
+        <div class="sig-label">指导老师确认</div>
+        <div class="sig-line"><input type="text" placeholder="老师签名"></div>
+      </div>
+      <div class="sig-block">
+        <div class="sig-label">学务处审核</div>
+        <div class="sig-line"><input type="text" placeholder="审核人签名"></div>
+      </div>
+    </div>
+
+    <div class="final-note">
+      好奇学习社区 · 毕业申请表<br>
+      本表格申请窗口期：每年 1月1日 — 3月1日　·　答辩截止：6月1日<br>
+      满足全部要求方可毕业，未能完成则自动延迟毕业
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
