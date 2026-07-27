@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>费曼讲台 · 以教代学工作坊</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --board:#1E332C;
+  --board-deep:#16241F;
+  --chalk:#F2EFE4;
+  --chalk-dim:rgba(242,239,228,.55);
+  --chalk-faint:rgba(242,239,228,.18);
+  --yellow:#F2C94C;
+  --cyan:#6FC3D9;
+  --rose:#E88C8C;
+  --hand:'Caveat',cursive;
+  --mono:'Space Mono',ui-monospace,Menlo,monospace;
+  --cn:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Source Han Sans SC",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--board);
+  color:var(--chalk);
+  font-family:var(--cn);
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+/* 粉笔灰质感 */
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:99;
+  opacity:.16;mix-blend-mode:screen;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+body::after{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:98;
+  background:radial-gradient(120% 90% at 50% 0%,rgba(255,255,255,.05),transparent 60%),
+             radial-gradient(80% 60% at 80% 100%,rgba(0,0,0,.35),transparent 70%);
+}
+.shell{height:100%;display:flex;flex-direction:column}
+
+/* ── 顶栏 ── */
+.rail{
+  display:flex;align-items:center;gap:clamp(8px,1.6vw,26px);
+  padding:14px clamp(14px,3vw,42px) 12px;
+  border-bottom:1px solid var(--chalk-faint);
+  flex-wrap:wrap;
+}
+.mark{font-family:var(--hand);font-size:clamp(24px,2.4vw,36px);letter-spacing:.02em;color:var(--yellow);line-height:1;white-space:nowrap}
+.mark small{display:block;font-family:var(--cn);font-size:11px;letter-spacing:.32em;color:var(--chalk-dim)}
+.tabs{display:flex;gap:clamp(4px,1vw,14px);flex:1;flex-wrap:wrap}
+.tab{
+  background:none;border:none;cursor:pointer;color:var(--chalk-dim);
+  font-family:var(--cn);font-size:clamp(11px,1vw,14px);letter-spacing:.06em;
+  padding:6px 2px;border-bottom:2px solid transparent;transition:.2s;
+}
+.tab b{font-family:var(--mono);font-size:.8em;opacity:.6;margin-right:6px}
+.tab:hover{color:var(--chalk)}
+.tab.on{color:var(--yellow);border-bottom-color:var(--yellow)}
+.tab:focus-visible,button:focus-visible,input:focus-visible{outline:2px dashed var(--cyan);outline-offset:3px}
+.roundtag{font-family:var(--mono);font-size:12px;color:var(--chalk-dim);letter-spacing:.1em;white-space:nowrap}
+
+/* ── 舞台 ── */
+main{flex:1;overflow-y:auto;padding:clamp(18px,3.2vh,44px) clamp(16px,4vw,64px)}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.34em;color:var(--cyan);margin-bottom:14px;text-transform:uppercase}
+h1{font-size:clamp(30px,4.4vw,66px);line-height:1.12;font-weight:800;letter-spacing:-.01em;margin-bottom:18px}
+h1 em{font-style:normal;color:var(--yellow);position:relative}
+h1 em::after{content:"";position:absolute;left:0;right:0;bottom:.02em;height:.09em;background:var(--yellow);opacity:.45;border-radius:2px}
+h2{font-size:clamp(20px,2.1vw,30px);margin-bottom:12px;font-weight:700}
+p.lead{font-size:clamp(15px,1.35vw,20px);line-height:1.8;color:var(--chalk-dim);max-width:60ch}
+
+/* 四步 */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:clamp(12px,1.6vw,22px);margin-top:clamp(18px,3vh,34px)}
+.step{border:1px solid var(--chalk-faint);border-radius:3px;padding:20px 18px;background:rgba(0,0,0,.14)}
+.step .n{font-family:var(--hand);font-size:44px;line-height:.9;color:var(--yellow);margin-bottom:8px}
+.step h3{font-size:17px;margin-bottom:8px}
+.step p{font-size:13.5px;line-height:1.75;color:var(--chalk-dim)}
+.step .home{margin-top:12px;padding-top:10px;border-top:1px dashed var(--chalk-faint);font-size:12.5px;color:var(--cyan);line-height:1.7}
+
+/* 收集 */
+.collect{display:grid;grid-template-columns:minmax(280px,360px) 1fr;gap:clamp(18px,3vw,44px);align-items:start}
+@media(max-width:860px){.collect{grid-template-columns:1fr}}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12px;letter-spacing:.14em;color:var(--chalk-dim);margin-bottom:6px}
+input[type=text]{
+  width:100%;background:rgba(0,0,0,.22);border:1px solid var(--chalk-faint);
+  border-radius:2px;padding:10px 12px;color:var(--chalk);font-family:var(--cn);font-size:15px;
+}
+input::placeholder{color:rgba(242,239,228,.28)}
+.btn{
+  background:none;border:1px solid var(--chalk);color:var(--chalk);
+  font-family:var(--cn);font-size:14px;letter-spacing:.08em;padding:10px 20px;
+  border-radius:2px;cursor:pointer;transition:.18s;
+}
+.btn:hover{background:var(--chalk);color:var(--board)}
+.btn.solid{background:var(--yellow);border-color:var(--yellow);color:var(--board-deep);font-weight:700}
+.btn.solid:hover{filter:brightness(1.12)}
+.btn.ghost{border-color:var(--chalk-faint);color:var(--chalk-dim)}
+.btn.ghost:hover{background:none;border-color:var(--chalk);color:var(--chalk)}
+.btn.lg{font-size:clamp(15px,1.4vw,19px);padding:14px 34px}
+.btn:disabled{opacity:.3;cursor:not-allowed}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.chip{
+  background:none;border:1px dashed var(--chalk-faint);color:var(--chalk-dim);
+  font-family:var(--cn);font-size:12px;padding:5px 10px;border-radius:20px;cursor:pointer;
+}
+.chip:hover{border-color:var(--cyan);color:var(--cyan)}
+.wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
+.card{
+  border:1px solid var(--chalk-faint);border-radius:2px;padding:14px;background:rgba(0,0,0,.14);
+  position:relative;transition:.2s;
+}
+.card:hover{border-color:var(--chalk-dim)}
+.card.used{opacity:.34}
+.card .who{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--cyan)}
+.card .cpt{font-size:18px;font-weight:700;margin:6px 0 4px;line-height:1.35}
+.card .pain{font-size:12.5px;color:var(--chalk-dim);line-height:1.6}
+.card .del{
+  position:absolute;top:6px;right:8px;background:none;border:none;color:var(--chalk-faint);
+  cursor:pointer;font-size:16px;line-height:1;
+}
+.card .del:hover{color:var(--rose)}
+.empty{border:1px dashed var(--chalk-faint);border-radius:3px;padding:36px;text-align:center;color:var(--chalk-dim);font-size:14px;line-height:1.8}
+
+/* 抽签 */
+.draw{display:grid;grid-template-columns:1fr 1fr;gap:clamp(18px,3vw,40px);align-items:stretch}
+@media(max-width:860px){.draw{grid-template-columns:1fr}}
+.slot{
+  border:1px solid var(--chalk-faint);border-radius:3px;padding:clamp(22px,3vw,38px);
+  background:rgba(0,0,0,.16);min-height:260px;display:flex;flex-direction:column;justify-content:center;
+}
+.slot .tagline{font-family:var(--mono);font-size:11px;letter-spacing:.3em;color:var(--chalk-dim);margin-bottom:16px}
+.slot .big{font-size:clamp(26px,3.4vw,48px);font-weight:800;line-height:1.2;min-height:1.2em}
+.slot .sub{margin-top:12px;font-size:14.5px;color:var(--chalk-dim);line-height:1.75}
+.slot.rolling .big{color:var(--yellow);opacity:.65}
+
+/* 讲台 */
+.podium{display:grid;grid-template-columns:1fr minmax(280px,400px);gap:clamp(18px,3vw,44px);align-items:start}
+@media(max-width:960px){.podium{grid-template-columns:1fr}}
+.clockwrap{display:flex;align-items:center;gap:clamp(16px,2.4vw,34px);flex-wrap:wrap}
+.ring{
+  --pct:100;
+  width:clamp(150px,17vw,240px);aspect-ratio:1;border-radius:50%;
+  background:conic-gradient(var(--yellow) calc(var(--pct)*1%),rgba(242,239,228,.12) 0);
+  display:grid;place-items:center;position:relative;flex:none;
+}
+.ring::after{content:"";position:absolute;inset:9px;border-radius:50%;background:var(--board)}
+.ring.warn{background:conic-gradient(var(--rose) calc(var(--pct)*1%),rgba(242,239,228,.12) 0)}
+.ring span{
+  position:relative;z-index:1;font-family:var(--mono);font-weight:700;
+  font-size:clamp(30px,3.6vw,54px);letter-spacing:-.02em;
+}
+.clockside{flex:1;min-width:200px}
+.clockside .now{font-size:clamp(20px,2.2vw,32px);font-weight:800;margin-bottom:6px}
+.clockside .task{font-size:14.5px;color:var(--chalk-dim);line-height:1.8;margin-bottom:14px}
+.ctrls{display:flex;gap:8px;flex-wrap:wrap}
+.tallybox{border:1px solid var(--chalk-faint);border-radius:3px;padding:18px;margin-bottom:14px;background:rgba(0,0,0,.16)}
+.tallybox .hd{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.tallybox .hd h3{font-size:16px}
+.tallybox .hd em{font-style:normal;font-family:var(--mono);font-size:12px;color:var(--chalk-dim)}
+.tally{min-height:44px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.tally svg{display:block}
+.tally .zero{font-size:13px;color:var(--chalk-faint)}
+.hitrow{display:flex;gap:8px}
+.hit{
+  flex:1;border:1px solid;background:none;cursor:pointer;padding:12px;border-radius:2px;
+  font-family:var(--cn);font-size:15px;font-weight:700;letter-spacing:.05em;transition:.12s;
+}
+.hit.jargon{border-color:var(--rose);color:var(--rose)}
+.hit.jargon:hover{background:var(--rose);color:var(--board-deep)}
+.hit.meta{border-color:var(--yellow);color:var(--yellow)}
+.hit.meta:hover{background:var(--yellow);color:var(--board-deep)}
+.hit.undo{flex:none;border-color:var(--chalk-faint);color:var(--chalk-dim);font-weight:400;font-size:13px;padding:12px 14px}
+.rolecard{border:1px solid var(--cyan);border-radius:3px;padding:16px 18px;background:rgba(111,195,217,.07)}
+.rolecard .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.24em;color:var(--cyan);margin-bottom:6px}
+.rolecard .nm{font-size:22px;font-weight:800;margin-bottom:6px}
+.rolecard .ds{font-size:13.5px;line-height:1.75;color:var(--chalk-dim)}
+.prompts{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:22px}
+.prompt{border-left:2px solid var(--cyan);padding:10px 0 10px 14px;font-size:clamp(15px,1.4vw,19px);line-height:1.55}
+.prompt small{display:block;font-size:12px;color:var(--chalk-dim);margin-top:4px}
+
+/* 打分 */
+.votes{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 26px}
+.vote{
+  flex:1;min-width:110px;border:1px solid var(--chalk-faint);background:none;color:var(--chalk);
+  border-radius:2px;padding:18px 10px;cursor:pointer;font-family:var(--cn);transition:.16s;
+}
+.vote .num{font-family:var(--hand);font-size:44px;line-height:.9;display:block;margin-bottom:8px;color:var(--yellow)}
+.vote .txt{font-size:12.5px;color:var(--chalk-dim);line-height:1.5}
+.vote:hover{border-color:var(--yellow)}
+.vote.on{background:var(--yellow);border-color:var(--yellow)}
+.vote.on .num,.vote.on .txt{color:var(--board-deep)}
+.mathrow{font-family:var(--mono);font-size:14px;color:var(--chalk-dim);letter-spacing:.04em;line-height:2}
+.mathrow b{color:var(--chalk)}
+.finalscore{font-family:var(--mono);font-size:clamp(44px,6vw,88px);font-weight:700;color:var(--yellow);line-height:1}
+
+/* 榜单 */
+table{width:100%;border-collapse:collapse;font-size:14.5px}
+th,td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--chalk-faint)}
+th{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--chalk-dim);font-weight:400}
+td.sc{font-family:var(--mono);font-weight:700;color:var(--yellow)}
+tr:first-child td.rk{color:var(--yellow)}
+td.rk{font-family:var(--hand);font-size:26px;width:50px;color:var(--chalk-dim)}
+.quote{
+  margin-top:clamp(24px,4vh,48px);border-left:2px solid var(--yellow);padding:6px 0 6px 20px;
+  max-width:66ch;font-size:clamp(15px,1.5vw,21px);line-height:1.85;
+}
+.quote cite{display:block;margin-top:10px;font-style:normal;font-size:13px;color:var(--chalk-dim);letter-spacing:.1em}
+
+/* 底栏 */
+.foot{
+  display:flex;align-items:center;gap:16px;padding:12px clamp(14px,3vw,42px);
+  border-top:1px solid var(--chalk-faint);
+}
+.foot .tip{flex:1;font-size:12.5px;color:var(--chalk-dim);letter-spacing:.04em}
+kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--chalk-faint);border-radius:3px;padding:1px 5px;color:var(--chalk)}
+.savenote{font-size:11.5px;color:var(--chalk-faint);margin-top:10px;line-height:1.6}
+.switch{display:inline-flex;align-items:center;gap:7px;cursor:pointer;font-size:12px;color:var(--chalk-dim);margin-top:10px}
+.switch input{accent-color:var(--yellow)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="rail">
+    <div class="mark">费曼讲台<small>以教代学</small></div>
+    <nav class="tabs" id="tabs"></nav>
+    <div class="roundtag" id="roundtag"></div>
+  </div>
+  <main id="stage"></main>
+  <div class="foot">
+    <button class="btn ghost" id="prev">← 返回</button>
+    <div class="tip" id="tip"></div>
+    <button class="btn solid" id="next">继续 →</button>
+  </div>
+</div>
+
+<script>
+/* ══ 数据 ══ */
+const PHASES = ["规则","收集概念","抽签","开讲","追问","再讲一次","计分","荣誉榜"];
+
+const ROLES = [
+  {nm:"八岁小孩",   ds:"只会问“为什么”和“那是什么意思”。听到任何术语就举手打断。", tag:"最难的听众"},
+  {nm:"好奇的外行", ds:"真心想听懂，每隔一会儿复述一遍：“你的意思是不是……”", tag:"标准模式"},
+  {nm:"外星来客",   ds:"不懂任何地球常识。水、钱、学校、比赛，都得从头解释。", tag:"地狱模式"},
+  {nm:"同行专家",   ds:"懂行。直接问边界情况和反例，逼讲的人走到知识的尽头。", tag:"ICAP 高阶"},
+  {nm:"爱打岔的奶奶", ds:"总用生活经验打比方，问“这跟腌泡菜是一回事吗”。", tag:"类比训练"}
+];
+
+const SEEDS = [
+  ["天文","洛希极限"],["生物","内共生理论"],["经济学","比较优势"],
+  ["数学","极限的 ε-δ 定义"],["计算机","递归"],["音乐","十二平均律"],
+  ["游戏","取消后摇与帧数据"],["化学","熵"],["篮球","挡拆的四种拆解"],
+  ["动画","中割与作画崩坏"],["语言学","音位"],["物理","量子隧穿"]
+];
+
+const ASKS = [
+  ["你刚才说的“____”，是什么意思？","把术语原样念回去，让他换句话说。"],
+  ["能举一个我生活里见过的例子吗？","例子落不了地，说明理解还悬在半空。"],
+  ["如果没有它，会发生什么？","反过来问，最容易暴露没想透的地方。"],
+  ["它和 ____ 有什么区别？","找一个近亲概念，逼他划边界。"],
+  ["你怎么知道这是真的？","追证据，不追结论。"],
+  ["哪一步我彻底跟丢了？","听众要诚实说出断点，这才是最贵的反馈。"]
+];
+
+const VOTES = [
+  [1,"完全没跟上"],[2,"听懂了开头"],[3,"大意懂了"],[4,"能复述给别人"],[5,"我也想学这个"]
+];
+
+const S = {phase:0, concepts:[], results:[], round:0, cur:null, shared:false};
+const T = {id:null, remain:0, total:0, running:false, onEnd:null};
+const KEY = "feynman:workshop";
+
+/* ══ 存档 ══ */
+async function save(){
+  if(!window.storage) return;
+  try{ await window.storage.set(KEY, JSON.stringify({concepts:S.concepts,results:S.results,round:S.round}), S.shared); }
+  catch(e){ console.warn("保存失败",e); }
+}
+async function load(){
+  if(!window.storage) return;
+  try{
+    const r = await window.storage.get(KEY, S.shared);
+    if(r && r.value){ const d = JSON.parse(r.value); S.concepts=d.concepts||[]; S.results=d.results||[]; S.round=d.round||0; }
+  }catch(e){ /* 第一次打开，没有存档，正常 */ }
+}
+
+/* ══ 计时 ══ */
+function setT(sec,label,onEnd){ clearInterval(T.id); T.id=null; T.remain=sec; T.total=sec; T.running=false; T.label=label; T.onEnd=onEnd||null; }
+function toggleT(){
+  if(!document.getElementById("ring")) return;
+  if(T.running){ clearInterval(T.id); T.running=false; }
+  else{
+    if(T.remain<=0) T.remain=T.total;
+    T.running=true;
+    T.id=setInterval(()=>{ T.remain--; paintT(); if(T.remain<=0){ clearInterval(T.id); T.running=false; ding(); paintT(); if(T.onEnd)T.onEnd(); } },1000);
+  }
+  paintT();
+}
+function bumpT(d){ T.remain=Math.max(0,T.remain+d); T.total=Math.max(T.total,T.remain); paintT(); }
+function paintT(){
+  const r=document.getElementById("ring"); if(!r) return;
+  const m=Math.floor(T.remain/60), s=T.remain%60;
+  r.querySelector("span").textContent = m+":"+String(s).padStart(2,"0");
+  r.style.setProperty("--pct", T.total? (T.remain/T.total*100).toFixed(1) : 0);
+  r.classList.toggle("warn", T.remain<=15);
+  const b=document.getElementById("playBtn"); if(b) b.textContent = T.running? "暂停" : (T.remain<T.total? "继续走" : "开始计时");
+}
+function ding(){
+  try{
+    const a=new (window.AudioContext||window.webkitAudioContext)();
+    const o=a.createOscillator(), g=a.createGain();
+    o.connect(g); g.connect(a.destination); o.frequency.value=880; o.type="sine";
+    g.gain.setValueAtTime(.0001,a.currentTime);
+    g.gain.exponentialRampToValueAtTime(.25,a.currentTime+.02);
+    g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+1.1);
+    o.start(); o.stop(a.currentTime+1.15);
+  }catch(e){}
+}
+
+/* ══ 正字计数 ══ */
+function tallySVG(n,color){
+  if(!n) return '<span class="zero">还是白纸一张</span>';
+  const full=Math.floor(n/5), rest=n%5, out=[];
+  const stroke=(i)=>{
+    const P=[ "M4 6 H30", "M17 6 V34", "M6 20 H17", "M17 34 H17", "M4 34 H30" ];
+    const alt=[ "M4 6 H30", "M17 6 V34", "M6 20 H17", "M8 34 V20", "M4 34 H30" ];
+    return alt[i];
+  };
+  const draw=(k)=>{
+    let p="";
+    for(let i=0;i<k;i++) p+=`<path d="${stroke(i)}" stroke="${color}" stroke-width="2.6" stroke-linecap="round" fill="none" opacity=".9"/>`;
+    return `<svg width="34" height="40" viewBox="0 0 34 40">${p}</svg>`;
+  };
+  for(let i=0;i<full;i++) out.push(draw(5));
+  if(rest) out.push(draw(rest));
+  return out.join("") + `<b style="font-family:var(--mono);color:${color};font-size:18px;margin-left:6px">${n}</b>`;
+}
+
+/* ══ 渲染 ══ */
+const stage=document.getElementById("stage");
+const tabsEl=document.getElementById("tabs");
+const tipEl=document.getElementById("tip");
+
+function tabs(){
+  tabsEl.innerHTML = PHASES.map((p,i)=>
+    `<button class="tab ${i===S.phase?"on":""}" data-go="${i}"><b>${String(i).padStart(2,"0")}</b>${p}</button>`).join("");
+  document.getElementById("roundtag").textContent =
+    S.round? `第 ${S.round} 轮 · 已讲 ${S.results.length} 人 / 共 ${S.concepts.length} 个概念` : `${S.concepts.length} 个概念在墙上`;
+}
+function go(i){ clearInterval(T.id); T.running=false; S.phase=Math.max(0,Math.min(PHASES.length-1,i)); render(); }
+
+function render(){
+  tabs();
+  stage.innerHTML = VIEWS[S.phase]();
+  wire();
+  paintT();
+}
+
+const VIEWS = {};
+
+/* 0 规则 */
+VIEWS[0]=()=>`
+<div class="eyebrow">Workshop · 04 steps</div>
+<h1>今天没有听众，<em>只有讲台</em></h1>
+<p class="lead">费曼说，只有发现自己能教别人时，才代表自己真的学会。所以这堂课的规矩很简单：每个人都要挑一个自己领域里最硬的概念，站上来，讲到一个外行点头为止。</p>
+<div class="steps">
+  <div class="step"><div class="n">1</div><h3>概念学习</h3><p>用你能想到的所有方法学一个知识：看书、听课、看纪录片、问 AI。</p>
+    <div class="home">在家里：来源越杂越好，家长先别急着检查，把兴趣保住。</div></div>
+  <div class="step"><div class="n">2</div><h3>讲授</h3><p>找一个对这领域一无所知的人讲给他听。也可以挑专业人士，反馈更一针见血。</p>
+    <div class="home">在家里：晚饭后十分钟，家长真诚地当那个什么都不懂的学生。</div></div>
+  <div class="step"><div class="n">3</div><h3>照着反馈补课</h3><p>盯住两件事：我哪里没讲清楚，他哪里没听懂。这就是下一步要学的地方。</p>
+    <div class="home">在家里：不评判、不纠正，只诚实地说哪里没懂，再多问几个为什么。</div></div>
+  <div class="step"><div class="n">4</div><h3>简化，再讲</h3><p>把思路重新收拾一遍，再讲第二次，再收反馈，如此循环。</p>
+    <div class="home">在家里：过几天换个听众——爷爷奶奶、弟弟妹妹，甚至玩偶。讲台越小，收获越大。</div></div>
+</div>`;
+
+/* 1 收集 */
+VIEWS[1]=()=>`
+<div class="eyebrow">Step 01 · 上墙</div>
+<h1>把你领域里<em>最硬的那个概念</em>写上来</h1>
+<div class="collect" style="margin-top:26px">
+  <div>
+    <div class="field"><label>讲的人</label><input type="text" id="f-who" placeholder="名字"></div>
+    <div class="field"><label>领域</label><input type="text" id="f-dom" placeholder="天文 / 电竞 / 烘焙……"></div>
+    <div class="field"><label>概念</label><input type="text" id="f-cpt" placeholder="一个具体到能被追问的概念"></div>
+    <div class="field"><label>它难在哪（一句话）</label><input type="text" id="f-pain" placeholder="我一开口就得先解释三个别的词"></div>
+    <button class="btn solid" id="addBtn">贴上墙</button>
+    <div class="chips">${SEEDS.map((s,i)=>`<button class="chip" data-seed="${i}">${s[0]}·${s[1]}</button>`).join("")}</div>
+    <label class="switch"><input type="checkbox" id="shareTgl" ${S.shared?"checked":""}> 联机收集：让学生用手机打开同一页面提交</label>
+    <div class="savenote">${S.shared
+      ? "已开启联机：所有打开这个页面的人都能看到并添加概念。"
+      : "概念只存在这台设备上，刷新不会丢。"}</div>
+  </div>
+  <div>
+    ${S.concepts.length? `<div class="wall">${S.concepts.map(c=>`
+      <div class="card ${c.used?"used":""}">
+        <button class="del" data-del="${c.id}" title="撕下来">×</button>
+        <div class="who">${esc(c.who)} · ${esc(c.dom)}</div>
+        <div class="cpt">${esc(c.cpt)}</div>
+        ${c.pain? `<div class="pain">难在：${esc(c.pain)}</div>`:""}
+      </div>`).join("")}</div>`
+      : `<div class="empty">墙还是空的。<br>先让每个人写一个——挑那种“我懂，但一说就乱”的概念，别挑容易的。</div>`}
+  </div>
+</div>`;
+
+/* 2 抽签 */
+VIEWS[2]=()=>{
+  const pool=S.concepts.filter(c=>!c.used);
+  const c=S.cur? S.concepts.find(x=>x.id===S.cur.cid) : null;
+  const r=S.cur? ROLES[S.cur.role] : null;
+  return `
+<div class="eyebrow">Step 02 · 抽签</div>
+<h1>抽讲的人，<em>也抽听的人</em></h1>
+<p class="lead">听众不是随便坐着听——他要按抽到的角色来听、来问。角色越难，讲的人收获越大。</p>
+<div class="draw" style="margin-top:26px">
+  <div class="slot" id="slotC">
+    <div class="tagline">今天的讲台归谁</div>
+    <div class="big">${c? esc(c.cpt) : (pool.length? "—" : "概念不够了")}</div>
+    <div class="sub">${c? `${esc(c.who)} · ${esc(c.dom)}${c.pain? "<br>难在："+esc(c.pain):""}` : `墙上还剩 ${pool.length} 个没讲过的概念`}</div>
+  </div>
+  <div class="slot" id="slotR">
+    <div class="tagline">听众今天是谁</div>
+    <div class="big">${r? esc(r.nm) : "—"}</div>
+    <div class="sub">${r? esc(r.ds)+`<br><span style="color:var(--cyan)">${esc(r.tag)}</span>` : "抽一张角色卡，交给对面那位同学"}</div>
+  </div>
+</div>
+<div class="ctrls" style="margin-top:26px">
+  <button class="btn lg solid" id="drawBtn" ${pool.length?"":"disabled"}>${S.cur?"重抽一次":"开始抽签"}</button>
+  ${S.cur? `<button class="btn lg" id="toPodium">上讲台 →</button>`:""}
+</div>`;
+};
+
+/* 3 开讲 */
+VIEWS[3]=()=>{
+  const c=cur(); if(!c) return needDraw();
+  const r=ROLES[S.cur.role];
+  return `
+<div class="eyebrow">Step 03 · 开讲 · 3 分钟</div>
+<div class="podium">
+  <div>
+    <div class="clockwrap">
+      <div class="ring" id="ring"><span>3:00</span></div>
+      <div class="clockside">
+        <div class="now">${esc(c.cpt)}</div>
+        <div class="task">${esc(c.who)} 讲，全场听。规则只有一条：<b style="color:var(--chalk)">不许用听众不认识的词</b>。真要用，先花十秒把它解释掉。</div>
+        <div class="ctrls">
+          <button class="btn solid" id="playBtn">开始计时</button>
+          <button class="btn ghost" id="add30">+30 秒</button>
+          <button class="btn ghost" id="resetT">重置</button>
+        </div>
+      </div>
+    </div>
+    <div class="prompts">
+      <div class="prompt">讲之前先说一句：“如果你只记住一件事……”<small>逼自己先给结论，再给推导。</small></div>
+      <div class="prompt">卡住的时候，画一张图。<small>费曼的办法：能画出来的，通常就想明白了。</small></div>
+    </div>
+  </div>
+  <div>
+    <div class="rolecard" style="margin-bottom:14px">
+      <div class="lbl">听众角色</div><div class="nm">${esc(r.nm)}</div><div class="ds">${esc(r.ds)}</div>
+    </div>
+    <div class="tallybox">
+      <div class="hd"><h3>黑话警报</h3><em>全场都可以按</em></div>
+      <div class="tally" id="tJ">${tallySVG(S.cur.j,"#E88C8C")}</div>
+      <div class="hd"><h3>好比喻</h3><em>听懂了就按</em></div>
+      <div class="tally" id="tM">${tallySVG(S.cur.m,"#F2C94C")}</div>
+      <div class="hitrow">
+        <button class="hit jargon" id="hitJ">黑话！</button>
+        <button class="hit meta" id="hitM">好比喻</button>
+        <button class="hit undo" id="undoH">撤销</button>
+      </div>
+    </div>
+  </div>
+</div>`;
+};
+
+/* 4 追问 */
+VIEWS[4]=()=>{
+  const c=cur(); if(!c) return needDraw();
+  const r=ROLES[S.cur.role];
+  return `
+<div class="eyebrow">Step 04 · 追问 · 90 秒</div>
+<h1>现在换<em>听众说话</em></h1>
+<div class="clockwrap" style="margin:22px 0 8px">
+  <div class="ring" id="ring"><span>1:30</span></div>
+  <div class="clockside">
+    <div class="now">${esc(r.nm)}：请至少问出两个问题</div>
+    <div class="task">讲的人这一轮不辩解、不补讲，只做一件事：把答不上来的地方记下来。答不上来的地方，就是他今晚要回去翻书的地方。</div>
+    <div class="ctrls">
+      <button class="btn solid" id="playBtn">开始计时</button>
+      <button class="btn ghost" id="add30">+30 秒</button>
+      <button class="btn ghost" id="resetT">重置</button>
+    </div>
+  </div>
+</div>
+<div class="prompts">${ASKS.map(a=>`<div class="prompt">${a[0]}<small>${a[1]}</small></div>`).join("")}</div>`;
+};
+
+/* 5 再讲 */
+VIEWS[5]=()=>{
+  const c=cur(); if(!c) return needDraw();
+  return `
+<div class="eyebrow">Step 05 · 简化后再讲 · 60 秒</div>
+<h1>同一个概念，<em>这次只给一分钟</em></h1>
+<div class="clockwrap" style="margin:22px 0 8px">
+  <div class="ring" id="ring"><span>1:00</span></div>
+  <div class="clockside">
+    <div class="now">${esc(c.cpt)} · 第二遍</div>
+    <div class="task">三条硬要求：开头一句话说清它是什么；中间必须有一个比喻；全程不许出现刚才被按过警报的那些词。</div>
+    <div class="ctrls">
+      <button class="btn solid" id="playBtn">开始计时</button>
+      <button class="btn ghost" id="add30">+30 秒</button>
+      <button class="btn ghost" id="resetT">重置</button>
+    </div>
+  </div>
+</div>
+<div class="tallybox" style="max-width:520px;margin-top:24px">
+  <div class="hd"><h3>第二遍继续记</h3><em>黑话 ${S.cur.j} · 比喻 ${S.cur.m}</em></div>
+  <div class="hitrow">
+    <button class="hit jargon" id="hitJ">黑话！</button>
+    <button class="hit meta" id="hitM">好比喻</button>
+    <button class="hit undo" id="undoH">撤销</button>
+  </div>
+</div>
+<p class="lead" style="margin-top:24px">觉得“我其实懂了，只是讲不清楚”？说不清楚，就是还没想好。</p>`;
+};
+
+/* 6 计分 */
+VIEWS[6]=()=>{
+  const c=cur(); if(!c) return needDraw();
+  const v=S.cur.v;
+  const sc=score(S.cur);
+  return `
+<div class="eyebrow">Step 06 · 计分</div>
+<h1>听众说了算：<em>你懂了几分</em></h1>
+<p class="lead">举手表决，老师点一下。分数不评价这个概念有多难，只评价它有没有落进别人脑子里。</p>
+<div class="votes">${VOTES.map(x=>`
+  <button class="vote ${v===x[0]?"on":""}" data-v="${x[0]}"><span class="num">${x[0]}</span><span class="txt">${x[1]}</span></button>`).join("")}</div>
+<div style="display:flex;gap:clamp(20px,4vw,60px);flex-wrap:wrap;align-items:center">
+  <div class="mathrow">
+    懂了指数 <b>${v||"—"}</b> × 20 <br>
+    好比喻 <b>${S.cur.m}</b> × 5 <br>
+    黑话 <b>${S.cur.j}</b> × −5
+  </div>
+  <div>
+    <div class="finalscore">${v? sc : "--"}</div>
+    <div style="font-family:var(--mono);font-size:12px;color:var(--chalk-dim);letter-spacing:.2em;margin-top:6px">${esc(c.who)} · ${esc(c.cpt)}</div>
+  </div>
+  <button class="btn lg solid" id="saveRound" ${v?"":"disabled"}>记上榜，换下一位</button>
+</div>`;
+};
+
+/* 7 榜单 */
+VIEWS[7]=()=>{
+  const rows=[...S.results].sort((a,b)=>b.sc-a.sc);
+  return `
+<div class="eyebrow">Honours</div>
+<h1>今天的<em>讲台记录</em></h1>
+${rows.length? `<table style="margin-top:22px">
+  <tr><th>名次</th><th>讲的人</th><th>概念</th><th>听众角色</th><th>比喻</th><th>黑话</th><th>得分</th></tr>
+  ${rows.map((r,i)=>`<tr>
+    <td class="rk">${i+1}</td><td>${esc(r.who)}</td><td>${esc(r.cpt)}</td>
+    <td style="color:var(--chalk-dim)">${esc(r.role)}</td>
+    <td style="color:var(--yellow)">${r.m}</td><td style="color:var(--rose)">${r.j}</td>
+    <td class="sc">${r.sc}</td></tr>`).join("")}
+</table>`
+: `<div class="empty" style="margin-top:22px">还没有人讲过。回到抽签，开第一轮。</div>`}
+<div class="quote">
+  说不清楚，就是还没想好。真的想好了，一定就能说得好。一个人的语言品质约等于思维品质，而思维品质约等于生活品质。
+  <cite>—— 语文教师 郭初阳</cite>
+</div>
+<div class="ctrls" style="margin-top:26px">
+  <button class="btn" id="again">再开一轮</button>
+  <button class="btn ghost" id="wipe">清空今天的记录</button>
+</div>`;
+};
+
+function needDraw(){ return `<div class="empty" style="margin-top:60px">还没抽签。<br><button class="btn" style="margin-top:16px" onclick="go(2)">去抽签</button></div>`; }
+function cur(){ return S.cur? S.concepts.find(x=>x.id===S.cur.cid) : null; }
+function score(x){ return Math.max(0, Math.min(100, (x.v||0)*20 + x.m*5 - x.j*5)); }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m])); }
+
+/* ══ 交互接线 ══ */
+function wire(){
+  const p=S.phase;
+  const $=(id)=>document.getElementById(id);
+
+  if(p===1){
+    $("addBtn").onclick=addConcept;
+    ["f-who","f-dom","f-cpt","f-pain"].forEach(id=>{
+      $(id).addEventListener("keydown",e=>{ if(e.key==="Enter") addConcept(); });
+    });
+    stage.querySelectorAll("[data-seed]").forEach(b=>b.onclick=()=>{
+      const s=SEEDS[+b.dataset.seed]; $("f-dom").value=s[0]; $("f-cpt").value=s[1]; $("f-who").focus();
+    });
+    stage.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
+      S.concepts=S.concepts.filter(c=>c.id!==b.dataset.del); save(); render();
+    });
+    $("shareTgl").onchange=async e=>{ S.shared=e.target.checked; await load(); render(); };
+  }
+
+  if(p===2){
+    const db=$("drawBtn"); if(db) db.onclick=doDraw;
+    const tp=$("toPodium"); if(tp) tp.onclick=()=>go(3);
+  }
+
+  if(p===3||p===4||p===5){
+    const secs = p===3?180 : p===4?90 : 60;
+    if(T.total!==secs){ setT(secs); }
+    $("playBtn").onclick=toggleT;
+    $("add30").onclick=()=>bumpT(30);
+    $("resetT").onclick=()=>{ clearInterval(T.id); T.running=false; T.remain=secs; T.total=secs; paintT(); };
+    paintT();
+  }
+  if(p===3||p===5){
+    $("hitJ").onclick=()=>{ S.cur.j++; refreshTally(); };
+    $("hitM").onclick=()=>{ S.cur.m++; refreshTally(); };
+    $("undoH").onclick=()=>{ if(S.cur.j>0) S.cur.j--; else if(S.cur.m>0) S.cur.m--; refreshTally(); };
+  }
+
+  if(p===6){
+    stage.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{ S.cur.v=+b.dataset.v; render(); });
+    const sr=$("saveRound"); if(sr) sr.onclick=commit;
+  }
+
+  if(p===7){
+    $("again").onclick=()=>{ S.cur=null; go(2); };
+    $("wipe").onclick=()=>{
+      if(confirm("清空今天的所有讲台记录？墙上的概念会保留。")){
+        S.results=[]; S.round=0; S.concepts.forEach(c=>c.used=false); save(); render();
+      }
+    };
+  }
+
+  tipEl.innerHTML = [
+    "四个步骤讲完，再往下走。",
+    "每人一个概念，越硬越好。",
+    "抽到的角色卡，念给全场听。",
+    "<kbd>空格</kbd> 开始 / 暂停计时 · 全场都可以喊黑话",
+    "讲的人这一轮只记录，不辩解。",
+    "一分钟，一个比喻，零黑话。",
+    "举手表决，老师点一下就行。",
+    "换下一位，或者收工。"
+  ][p];
+
+  document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(+b.dataset.go));
+}
+
+function refreshTally(){
+  const j=document.getElementById("tJ"), m=document.getElementById("tM");
+  if(j) j.innerHTML=tallySVG(S.cur.j,"#E88C8C");
+  if(m) m.innerHTML=tallySVG(S.cur.m,"#F2C94C");
+  const hd=document.querySelector(".tallybox .hd em");
+  if(S.phase===5 && hd) hd.textContent=`黑话 ${S.cur.j} · 比喻 ${S.cur.m}`;
+}
+
+function addConcept(){
+  const who=document.getElementById("f-who").value.trim();
+  const dom=document.getElementById("f-dom").value.trim();
+  const cpt=document.getElementById("f-cpt").value.trim();
+  const pain=document.getElementById("f-pain").value.trim();
+  if(!cpt){ document.getElementById("f-cpt").focus(); return; }
+  S.concepts.push({id:Math.random().toString(36).slice(2,9), who:who||"匿名", dom:dom||"未标注", cpt, pain, used:false});
+  save(); render();
+  document.getElementById("f-who").value=""; document.getElementById("f-cpt").value="";
+  document.getElementById("f-pain").value=""; document.getElementById("f-who").focus();
+}
+
+function doDraw(){
+  const pool=S.concepts.filter(c=>!c.used);
+  if(!pool.length) return;
+  const sc=document.getElementById("slotC"), sr=document.getElementById("slotR");
+  sc.classList.add("rolling"); sr.classList.add("rolling");
+  let n=0;
+  const spin=setInterval(()=>{
+    const a=pool[Math.floor(Math.random()*pool.length)];
+    const b=ROLES[Math.floor(Math.random()*ROLES.length)];
+    sc.querySelector(".big").textContent=a.cpt;
+    sr.querySelector(".big").textContent=b.nm;
+    if(++n>16){
+      clearInterval(spin);
+      const pick=pool[Math.floor(Math.random()*pool.length)];
+      const role=Math.floor(Math.random()*ROLES.length);
+      S.cur={cid:pick.id, role, j:0, m:0, v:null};
+      S.round++;
+      render();
+    }
+  },70);
+}
+
+function commit(){
+  const c=cur(); if(!c||!S.cur.v) return;
+  S.results.push({who:c.who, cpt:c.cpt, role:ROLES[S.cur.role].nm, j:S.cur.j, m:S.cur.m, sc:score(S.cur)});
+  c.used=true; S.cur=null; save(); go(7);
+}
+
+/* ══ 键盘 ══ */
+document.addEventListener("keydown",e=>{
+  if(e.target.tagName==="INPUT") return;
+  if(e.code==="Space"){ e.preventDefault(); toggleT(); }
+  if(e.key==="ArrowRight") go(S.phase+1);
+  if(e.key==="ArrowLeft") go(S.phase-1);
+});
+document.getElementById("next").onclick=()=>go(S.phase+1);
+document.getElementById("prev").onclick=()=>go(S.phase-1);
+
+/* ══ 启动 ══ */
+(async()=>{ await load(); render(); })();
+</script>
+</body>
+</html>
