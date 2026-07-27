@@ -1,0 +1,709 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OOPS · Open One Person School｜好奇学习社区</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,900&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@500;600;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0E2238;        /* primary oxford/ink field */
+    --ink-deep:#081627;   /* deepest */
+    --ink-2:#173453;      /* raised ink panel */
+    --paper:#F4EFE3;      /* parchment / charter */
+    --paper-2:#EAE2D0;    /* deeper paper */
+    --paper-line:#D8CDB5;
+    --gold:#C19A48;       /* heraldic gold */
+    --gold-soft:#D9BC7E;
+    --crimson:#B23A2D;    /* the OOPS spark */
+    --crimson-bright:#CF5240;
+    --ink-soft:#5E6E80;   /* secondary text on paper */
+    --paper-soft:#9FAEBE; /* secondary text on ink */
+    --maxw:1180px;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--ink);
+    color:#EDE7DA;
+    font-family:"Inter","Noto Sans SC",system-ui,sans-serif;
+    font-size:17px;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  a{color:inherit;text-decoration:none;}
+  img{max-width:100%;}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px;}
+
+  .serif{font-family:"Fraunces","Noto Serif SC",serif;}
+  .mono{font-family:"IBM Plex Mono",ui-monospace,monospace;}
+
+  .eyebrow{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:12px;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--gold-soft);
+    display:inline-flex;align-items:center;gap:12px;
+  }
+  .eyebrow::before{content:"";width:26px;height:1px;background:var(--gold);display:inline-block;opacity:.8;}
+
+  /* ---------- NAV ---------- */
+  header.nav{
+    position:sticky;top:0;z-index:50;
+    background:rgba(8,22,39,.82);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid rgba(193,154,72,.22);
+  }
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:68px;}
+  .brand{display:flex;align-items:center;gap:14px;}
+  .brand .mark{width:34px;height:34px;flex:0 0 34px;}
+  .brand .wordmark{line-height:1.05;}
+  .brand .wordmark b{font-family:"Fraunces",serif;font-weight:600;font-size:21px;letter-spacing:.06em;color:#F6EFE1;}
+  .brand .wordmark span{display:block;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.22em;color:var(--paper-soft);text-transform:uppercase;}
+  .nav-links{display:flex;align-items:center;gap:30px;}
+  .nav-links a{font-size:14px;color:#CDD6E0;letter-spacing:.02em;transition:color .2s;}
+  .nav-links a:hover{color:var(--gold-soft);}
+  .btn{
+    font-family:"IBM Plex Mono",monospace;font-size:13px;letter-spacing:.08em;
+    padding:11px 20px;border-radius:2px;display:inline-block;transition:.22s;cursor:pointer;border:none;
+  }
+  .btn-apply{background:var(--crimson);color:#fff;}
+  .btn-apply:hover{background:var(--crimson-bright);transform:translateY(-1px);}
+  .nav-toggle{display:none;}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    background:
+      radial-gradient(900px 520px at 78% -10%, rgba(193,154,72,.16), transparent 60%),
+      radial-gradient(700px 600px at 8% 110%, rgba(178,58,45,.14), transparent 55%),
+      linear-gradient(180deg,var(--ink) 0%, var(--ink-deep) 100%);
+    overflow:hidden;
+  }
+  .hero::after{ /* faint engraved rule grid */
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background-image:linear-gradient(rgba(193,154,72,.045) 1px,transparent 1px);
+    background-size:100% 38px;mask-image:linear-gradient(180deg,transparent,black 30%,black 70%,transparent);
+  }
+  .hero-inner{
+    position:relative;z-index:2;max-width:var(--maxw);margin:0 auto;padding:62px 28px 78px;
+    display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center;
+  }
+  .hero-copy .eyebrow{margin-bottom:26px;}
+  .hero h1{
+    font-family:"Fraunces","Noto Serif SC",serif;font-weight:600;
+    font-size:clamp(46px,6.4vw,82px);line-height:1.02;margin:0 0 22px;
+    letter-spacing:-.01em;color:#F8F1E2;
+  }
+  .hero h1 em{font-style:normal;color:var(--gold-soft);}
+  .hero .lede{font-size:19px;color:#D4DCE4;max-width:30em;margin:0 0 30px;}
+  .hero .lede b{color:#fff;font-weight:600;}
+  .hero-cta{display:flex;gap:16px;flex-wrap:wrap;align-items:center;}
+  .btn-ghost{border:1px solid rgba(217,188,126,.5);color:var(--gold-soft);background:transparent;}
+  .btn-ghost:hover{background:rgba(193,154,72,.12);}
+  .statstrip{
+    display:flex;flex-wrap:wrap;gap:0;margin-top:42px;border-top:1px solid rgba(193,154,72,.25);
+  }
+  .statstrip div{padding:18px 26px 4px 0;margin-right:26px;}
+  .statstrip .n{font-family:"Fraunces",serif;font-weight:600;font-size:30px;color:#F6EFE1;line-height:1;}
+  .statstrip .l{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;color:var(--paper-soft);text-transform:uppercase;margin-top:8px;}
+
+  .hero-seal{display:flex;justify-content:center;align-items:center;}
+  .hero-seal svg{width:min(420px,80%);height:auto;filter:drop-shadow(0 18px 50px rgba(0,0,0,.45));}
+
+  .tagband{
+    background:var(--ink-deep);border-top:1px solid rgba(193,154,72,.2);border-bottom:1px solid rgba(193,154,72,.2);
+    text-align:center;padding:30px 28px;
+  }
+  .tagband p{margin:0;font-family:"Noto Serif SC","Fraunces",serif;font-weight:500;font-size:clamp(20px,2.6vw,30px);color:#EBE2D0;letter-spacing:.02em;}
+  .tagband p span{color:var(--crimson-bright);}
+
+  /* ---------- SECTION SCAFFOLD ---------- */
+  section{padding:96px 0;}
+  .sec-head{max-width:760px;margin-bottom:54px;}
+  .sec-head h2{
+    font-family:"Fraunces","Noto Serif SC",serif;font-weight:600;
+    font-size:clamp(30px,4vw,48px);line-height:1.08;margin:18px 0 0;letter-spacing:-.005em;
+  }
+
+  /* paper sections */
+  .paper{background:var(--paper);color:#26201A;}
+  .paper .eyebrow{color:#9A7A33;}
+  .paper .eyebrow::before{background:var(--gold);}
+  .paper .sec-head h2{color:#1B1610;}
+  .muted{color:var(--ink-soft);}
+  .paper .muted{color:#6A6256;}
+
+  /* ---------- CASE (problems) ---------- */
+  .cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--paper-line);}
+  .case-item{padding:40px 34px 44px;border-right:1px solid var(--paper-line);position:relative;}
+  .case-item:last-child{border-right:none;}
+  .case-item .idx{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--crimson);letter-spacing:.1em;}
+  .case-item h3{font-family:"Noto Serif SC","Fraunces",serif;font-weight:600;font-size:22px;margin:20px 0 14px;color:#241D15;line-height:1.3;}
+  .case-item p{font-size:15.5px;color:#5C544A;margin:0;}
+
+  /* ---------- PILLARS (what OOPS is) ---------- */
+  .pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+  .pillar{
+    background:var(--ink-2);border:1px solid rgba(193,154,72,.22);border-radius:3px;
+    padding:34px 30px 36px;position:relative;overflow:hidden;transition:transform .3s,border-color .3s;
+  }
+  .pillar:hover{transform:translateY(-4px);border-color:rgba(217,188,126,.55);}
+  .pillar .tag{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.18em;color:var(--gold-soft);text-transform:uppercase;}
+  .pillar h3{font-family:"Noto Serif SC",serif;font-weight:600;font-size:23px;margin:16px 0 12px;color:#F6EFE1;line-height:1.35;}
+  .pillar p{font-size:15px;color:#C2CCD6;margin:0;}
+  .pillar .ord{position:absolute;right:18px;top:8px;font-family:"Fraunces",serif;font-size:64px;color:rgba(193,154,72,.13);font-weight:900;}
+
+  /* ---------- 术 / 道 ---------- */
+  .ddao{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--paper-line);border-radius:3px;overflow:hidden;}
+  .ddao-col{padding:44px 40px;}
+  .ddao-col.shu{background:var(--paper);}
+  .ddao-col.dao{background:var(--paper-2);border-left:1px solid var(--paper-line);}
+  .ddao-col .glyph{font-family:"Noto Serif SC",serif;font-weight:900;font-size:46px;color:var(--ink);line-height:1;}
+  .ddao-col .glyph small{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:500;letter-spacing:.2em;color:var(--crimson);margin-left:14px;vertical-align:middle;}
+  .ddao-col .cap{font-size:14px;color:#7A7263;margin:8px 0 26px;}
+  .ddao li{list-style:none;padding:16px 0;border-top:1px solid var(--paper-line);display:flex;gap:14px;}
+  .ddao li:first-of-type{border-top:1px dashed var(--paper-line);}
+  .ddao li b{font-family:"Noto Serif SC",serif;font-weight:600;color:#241D15;font-size:16.5px;display:block;margin-bottom:3px;}
+  .ddao li span{font-size:14.5px;color:#675F52;}
+  .ddao li .b{flex:0 0 auto;width:8px;height:8px;border-radius:50%;background:var(--gold);margin-top:8px;}
+  .ddao ul{margin:0;padding:0;}
+
+  /* ---------- QUEST LINE (4 years) ---------- */
+  .quest-wrap{position:relative;}
+  .quest-line{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative;}
+  .quest-rail{position:absolute;left:6%;right:6%;top:46px;height:2px;background:linear-gradient(90deg,var(--gold) 0%,var(--crimson) 100%);opacity:.5;}
+  .qnode{position:relative;padding:0 18px;}
+  .qnode .dot{
+    width:18px;height:18px;border-radius:50%;background:var(--ink);border:2px solid var(--gold);
+    margin:38px auto 26px;position:relative;z-index:2;box-shadow:0 0 0 6px var(--ink);
+  }
+  .qnode:last-child .dot{border-color:var(--crimson);background:var(--crimson);}
+  .qnode .yr{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--gold-soft);text-align:center;}
+  .qnode .skill{font-family:"Fraunces","Noto Serif SC",serif;font-weight:600;font-size:26px;color:#F6EFE1;text-align:center;margin:8px 0 6px;}
+  .qnode .main{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--crimson-bright);text-align:center;letter-spacing:.06em;text-transform:uppercase;}
+  .qnode p{font-size:14px;color:#B7C2CD;text-align:center;margin:14px 8px 0;}
+  .openloop{
+    margin-top:54px;border:1px dashed rgba(217,188,126,.45);border-radius:4px;padding:24px 30px;
+    display:flex;align-items:center;gap:22px;background:rgba(193,154,72,.06);
+  }
+  .openloop .ol-mark{flex:0 0 44px;}
+  .openloop b{font-family:"Noto Serif SC",serif;color:var(--gold-soft);font-weight:600;}
+  .openloop p{margin:4px 0 0;font-size:15px;color:#C7D0DA;}
+
+  /* ---------- OPC SYSTEM ---------- */
+  .opc-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:start;}
+  .opc-feature{border-top:1px solid var(--paper-line);padding:26px 0;display:grid;grid-template-columns:64px 1fr;gap:8px;align-items:baseline;}
+  .opc-feature .k{font-family:"Fraunces",serif;font-weight:600;font-size:30px;color:var(--crimson);line-height:1;}
+  .opc-feature h4{font-family:"Noto Serif SC",serif;font-weight:600;font-size:18px;margin:0 0 6px;color:#241D15;}
+  .opc-feature p{margin:0;font-size:15px;color:#675F52;}
+  .badges{background:var(--ink);border-radius:4px;padding:34px 32px;border:1px solid rgba(193,154,72,.25);}
+  .badges .bhd{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-soft);margin-bottom:22px;}
+  .badge-row{display:flex;justify-content:space-between;padding:15px 0;border-top:1px solid rgba(255,255,255,.08);}
+  .badge-row:first-of-type{border-top:none;}
+  .badge-row .bn{font-family:"Fraunces",serif;font-weight:600;font-size:24px;color:var(--gold-soft);}
+  .badge-row .bl{font-size:14px;color:#C2CCD6;align-self:center;}
+  .terms{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px;}
+  .terms span{font-family:"IBM Plex Mono",monospace;font-size:12px;padding:6px 12px;border:1px solid rgba(217,188,126,.32);border-radius:2px;color:#D4DCE4;}
+
+  /* ---------- CAMPUS ---------- */
+  .campus{background:linear-gradient(180deg,var(--ink-deep),var(--ink));}
+  .campus-grid{display:grid;grid-template-columns:1fr 1fr;gap:54px;align-items:center;}
+  .campus h2{color:#F6EFE1;}
+  .basecard{border:1px solid rgba(193,154,72,.3);border-radius:4px;padding:30px 32px;background:rgba(193,154,72,.05);margin-bottom:26px;}
+  .basecard .pin{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.18em;color:var(--crimson-bright);text-transform:uppercase;}
+  .basecard h3{font-family:"Fraunces","Noto Serif SC",serif;font-weight:600;font-size:30px;margin:8px 0 6px;color:#F6EFE1;}
+  .basecard p{margin:0;color:#B7C2CD;font-size:15px;}
+  .countries{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(193,154,72,.22);border:1px solid rgba(193,154,72,.22);border-radius:4px;overflow:hidden;}
+  .countries div{background:var(--ink-2);padding:22px 16px;text-align:center;}
+  .countries .cn{font-family:"Noto Serif SC",serif;font-weight:600;font-size:18px;color:#EDE7DA;}
+  .countries .en{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.12em;color:var(--paper-soft);text-transform:uppercase;margin-top:4px;}
+
+  /* ---------- FACTS ---------- */
+  .facts{display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:1px solid var(--paper-line);border-bottom:1px solid var(--paper-line);}
+  .fact{padding:34px 22px;border-right:1px solid var(--paper-line);}
+  .fact:last-child{border-right:none;}
+  .fact .fn{font-family:"Fraunces",serif;font-weight:600;font-size:clamp(24px,2.4vw,34px);color:#1B1610;line-height:1;}
+  .fact .fl{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;color:#8A8273;text-transform:uppercase;margin-top:12px;}
+
+  /* ---------- PARTNERS ---------- */
+  .partners{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(193,154,72,.18);border:1px solid rgba(193,154,72,.18);border-radius:4px;overflow:hidden;}
+  .partner{background:var(--ink);padding:28px 24px;min-height:118px;display:flex;flex-direction:column;justify-content:center;transition:background .25s;}
+  .partner:hover{background:var(--ink-2);}
+  .partner .pn{font-family:"Noto Serif SC",serif;font-weight:600;font-size:18px;color:#EDE7DA;}
+  .partner .pr{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.08em;color:var(--gold-soft);margin-top:8px;}
+
+  /* ---------- APPLY ---------- */
+  .apply{background:var(--paper);color:#1B1610;text-align:center;}
+  .apply .eyebrow{justify-content:center;}
+  .apply h2{font-family:"Fraunces","Noto Serif SC",serif;font-weight:600;font-size:clamp(34px,5vw,58px);margin:18px 0 18px;color:#1B1610;line-height:1.05;}
+  .apply p{max-width:36em;margin:0 auto 14px;color:#5C544A;font-size:17px;}
+  .apply-steps{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:30px 0 36px;}
+  .apply-steps span{font-family:"IBM Plex Mono",monospace;font-size:12.5px;padding:8px 14px;background:#fff;border:1px solid var(--paper-line);border-radius:2px;color:#3C362C;}
+  .btn-big{background:var(--crimson);color:#fff;font-size:15px;padding:16px 38px;letter-spacing:.06em;}
+  .btn-big:hover{background:var(--crimson-bright);transform:translateY(-2px);}
+
+  /* ---------- FOOTER ---------- */
+  footer{background:var(--ink-deep);border-top:1px solid rgba(193,154,72,.22);padding:54px 0 38px;}
+  .foot-grid{display:flex;justify-content:space-between;align-items:flex-start;gap:40px;flex-wrap:wrap;}
+  .foot-brand{display:flex;gap:18px;align-items:flex-start;max-width:380px;}
+  .foot-brand .mark{width:54px;flex:0 0 54px;}
+  .foot-brand b{font-family:"Fraunces",serif;font-weight:600;font-size:22px;letter-spacing:.05em;color:#F6EFE1;}
+  .foot-brand .sub{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;color:var(--paper-soft);text-transform:uppercase;margin:4px 0 12px;}
+  .foot-brand p{font-size:13.5px;color:#8FA0B2;margin:0;line-height:1.6;}
+  .foot-cols{display:flex;gap:64px;flex-wrap:wrap;}
+  .foot-col h5{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-soft);margin:0 0 14px;}
+  .foot-col a{display:block;font-size:14px;color:#AEBBC8;padding:5px 0;transition:color .2s;}
+  .foot-col a:hover{color:#fff;}
+  .foot-base{margin-top:44px;padding-top:22px;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.06em;color:#6F7F90;}
+
+  /* ---------- reveal ---------- */
+  .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease;}
+  .reveal.in{opacity:1;transform:none;}
+
+  /* ---------- responsive ---------- */
+  @media(max-width:980px){
+    .hero-inner{grid-template-columns:1fr;gap:30px;}
+    .hero-seal{order:-1;}
+    .hero-seal svg{width:230px;}
+    .pillars{grid-template-columns:1fr;}
+    .cards3{grid-template-columns:1fr;}
+    .case-item{border-right:none;border-bottom:1px solid var(--paper-line);}
+    .ddao{grid-template-columns:1fr;}
+    .ddao-col.dao{border-left:none;border-top:1px solid var(--paper-line);}
+    .quest-line{grid-template-columns:1fr 1fr;gap:30px 0;}
+    .quest-rail{display:none;}
+    .opc-grid,.campus-grid{grid-template-columns:1fr;gap:34px;}
+    .facts{grid-template-columns:repeat(2,1fr);}
+    .fact:nth-child(2n){border-right:none;}
+    .partners{grid-template-columns:repeat(2,1fr);}
+    .countries{grid-template-columns:repeat(2,1fr);}
+  }
+  @media(max-width:680px){
+    body{font-size:16px;}
+    section{padding:68px 0;}
+    .nav-links{display:none;}
+    .nav-toggle{display:inline-block;}
+    .quest-line{grid-template-columns:1fr;}
+    .facts{grid-template-columns:1fr;}
+    .fact{border-right:none;border-bottom:1px solid var(--paper-line);}
+    .partners{grid-template-columns:1fr;}
+    .statstrip div{margin-right:18px;}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *{scroll-behavior:auto!important;}
+    .reveal{opacity:1!important;transform:none!important;transition:none!important;}
+    .pillar:hover,.btn:hover{transform:none!important;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="#top">
+      <span class="mark">
+        <!-- minimal open-loop mark -->
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="50" cy="50" r="46" fill="none" stroke="#C19A48" stroke-width="2"/>
+          <path d="M50 22 A28 28 0 1 0 70 31" fill="none" stroke="#D9BC7E" stroke-width="5" stroke-linecap="round"/>
+          <path d="M50 16 l4.5 9 9 .8 -6.8 6 2 9-8.7-4.8-8.7 4.8 2-9-6.8-6 9-.8z" fill="#B23A2D"/>
+        </svg>
+      </span>
+      <span class="wordmark"><b>OOPS</b><span>Open One Person School</span></span>
+    </a>
+    <nav class="nav-links">
+      <a href="#case">现状</a>
+      <a href="#model">学习系统</a>
+      <a href="#quest">四年闯关</a>
+      <a href="#campus">校园</a>
+      <a href="#partners">伙伴</a>
+    </nav>
+    <a href="#apply" class="btn btn-apply">申请入学 →</a>
+    <a href="#apply" class="btn btn-apply nav-toggle" style="display:none">申请</a>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<a id="top"></a>
+<section class="hero" style="padding:0;">
+  <div class="hero-inner">
+    <div class="hero-copy reveal in">
+      <span class="eyebrow">Alternative College · 首届实验班 2026.09</span>
+      <h1>毕业即创业，<br>至少能<em>就业</em>。</h1>
+      <p class="lede">一所毕业生 <b>100% 就业率</b> 的实用型大学。开学就组建公司，用创业来学习——<b>拿到工作 Offer，才发毕业证。</b></p>
+      <div class="hero-cta">
+        <a href="#apply" class="btn btn-apply">申请首届实验班</a>
+        <a href="#model" class="btn btn-ghost">了解学习系统 ↓</a>
+      </div>
+      <div class="statstrip">
+        <div><div class="n">100%</div><div class="l">就业率</div></div>
+        <div><div class="n">¥1.2万</div><div class="l">入学即到手 · 启动资金</div></div>
+        <div><div class="n">18–25</div><div class="l">岁 · 招募 10–20 人</div></div>
+      </div>
+    </div>
+
+    <div class="hero-seal reveal in">
+      <!-- ===== OOPS SEAL ===== -->
+      <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="OOPS 校徽">
+        <defs>
+          <path id="arcTop" fill="none" d="M 36 110 A 74 74 0 0 1 184 110"/>
+          <path id="arcBot" fill="none" d="M 36 110 A 74 74 0 0 0 184 110"/>
+        </defs>
+        <!-- rings -->
+        <circle cx="110" cy="110" r="104" fill="none" stroke="#C19A48" stroke-width="1.5"/>
+        <circle cx="110" cy="110" r="94"  fill="none" stroke="#C19A48" stroke-width="3"/>
+        <circle cx="110" cy="110" r="62"  fill="none" stroke="#C19A48" stroke-width="1.2" opacity=".8"/>
+        <!-- circular text -->
+        <text font-family="'IBM Plex Mono',monospace" font-size="11" letter-spacing="4.5" fill="#D9BC7E">
+          <textPath href="#arcTop" startOffset="50%" text-anchor="middle">OPEN · ONE · PERSON · SCHOOL</textPath>
+        </text>
+        <text font-family="'IBM Plex Mono',monospace" font-size="10.5" letter-spacing="4" fill="#D9BC7E">
+          <textPath href="#arcBot" startOffset="50%" text-anchor="middle" side="right">好奇学习社区 · CURIONESTY</textPath>
+        </text>
+        <!-- side stars -->
+        <path d="M16 110 l3 5 5.5 .5-4 3.6 1.2 5.4-5.2-2.9-5.2 2.9 1.2-5.4-4-3.6 5.5-.5z" fill="#C19A48"/>
+        <path d="M204 110 l3 5 5.5 .5-4 3.6 1.2 5.4-5.2-2.9-5.2 2.9 1.2-5.4-4-3.6 5.5-.5z" fill="#C19A48"/>
+        <!-- center emblem: OPEN LOOP -->
+        <path d="M110 70 A40 40 0 1 0 138 82" fill="none" stroke="#D9BC7E" stroke-width="5" stroke-linecap="round"/>
+        <!-- ascending quest path -->
+        <polyline points="92,128 104,116 116,122 130,100" fill="none" stroke="#C19A48" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="92" cy="128" r="3" fill="#C19A48"/>
+        <circle cx="116" cy="122" r="3" fill="#C19A48"/>
+        <circle cx="130" cy="100" r="3.6" fill="#B23A2D"/>
+        <!-- spark at open gap -->
+        <path d="M110 60 l5 11 11 1-8.5 7.5 2.5 11.5-10-6-10 6 2.5-11.5-8.5-7.5 11-1z" fill="#B23A2D"/>
+        <!-- est -->
+        <text x="110" y="150" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="9" letter-spacing="3" fill="#9FAEBE">EST · 2026</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<div class="tagband reveal">
+  <p>不是学校，是<span>勇闯未知</span>的学习共同体。</p>
+</div>
+
+<!-- ============ CASE / 现状 ============ -->
+<section id="case" class="paper">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">现状 · The Case</span>
+      <h2>上大学，不再解决生存问题。</h2>
+    </div>
+    <div class="cards3 reveal">
+      <div class="case-item">
+        <div class="idx">01 / 出路</div>
+        <h3>大学毕业，<br>还是找不到工作。</h3>
+        <p>当机器能秒出所有标准答案，只会答题的人就贬值了。真正稀缺的是主动性、问题意识、判断力，是敢做事、能成事。孩子需要的不是学历，是实力。</p>
+      </div>
+      <div class="case-item">
+        <div class="idx">02 / 方向</div>
+        <h3>毕业了，还是<br>不知道自己要什么。</h3>
+        <p>“四无现象”——对学习无动力、对真实世界无兴趣、社交无能力、对生命价值无感受。从未探索过热爱与天赋，只能埋头读书，于是对未来一片迷茫。</p>
+      </div>
+      <div class="case-item">
+        <div class="idx">03 / 课堂</div>
+        <h3>上课除了睡觉，<br>就是刷短视频。</h3>
+        <p>大学教育与社会脱节。我们要的是实战型课程：直接学赚钱、主动探索；见世面、城市探索、跨国体验；见高手、拜师学艺、解决真问题。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MODEL / PILLARS ============ -->
+<section id="model">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">OOPS 是什么 · The Model</span>
+      <h2 style="color:#F6EFE1">把学费，<br>变成你的第一笔创业资本。</h2>
+    </div>
+    <div class="pillars">
+      <div class="pillar reveal">
+        <span class="ord">01</span>
+        <span class="tag">出路 / Outcome</span>
+        <h3>毕业标准是经济独立</h3>
+        <p>开学即创业，毕业即创业，至少能就业。部分企业订制委培，一线带教师徒制，用可雇佣性和灵活的组织适应性保障出路。拿到 Offer，才发毕业证。</p>
+      </div>
+      <div class="pillar reveal">
+        <span class="ord">02</span>
+        <span class="tag">方法 / Method</span>
+        <h3>用创业来学习</h3>
+        <p>开学就组建公司，一半以上时间“做中学”，充分结合 AI。遇到真实问题，就请真正打过仗的商业高手做师傅，举办生成式工作坊，培养主动解决问题的能力。</p>
+      </div>
+      <div class="pillar reveal">
+        <span class="ord">03</span>
+        <span class="tag">场域 / Campus</span>
+        <h3>亚洲东部即校园</h3>
+        <p>一半清迈强化语言，一半新马日韩商业考察，加深对亚洲与国际化生存的理解。充分保留线下的对话、游戏与运动——连接即成长。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 术 / 道 ============ -->
+<section class="paper">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">学习内容 · 术与道</span>
+      <h2>术，是本分的硬功夫。<br>道，是长远的价值观。</h2>
+    </div>
+    <div class="ddao reveal">
+      <div class="ddao-col shu">
+        <div class="glyph">术<small>THE CRAFT</small></div>
+        <div class="cap">可被检验、可被雇佣的真本事</div>
+        <ul>
+          <li><span class="b"></span><div><b>像科学家一样发现并解决问题</b><span>掌握研究的科学方法与学术写作。</span></div></li>
+          <li><span class="b"></span><div><b>像创造者一样用 AI 提升生产力</b><span>学习 vibe coding，沉浸 GitHub 社群。</span></div></li>
+          <li><span class="b"></span><div><b>像内容人一样公开创作、建立影响力</b><span>自媒体与内容创作实战，拥抱 build in public 的开源文化。</span></div></li>
+        </ul>
+      </div>
+      <div class="ddao-col dao">
+        <div class="glyph">道<small>THE WAY</small></div>
+        <div class="cap">穿越不确定的内在罗盘</div>
+        <ul>
+          <li><span class="b"></span><div><b>自洽 · 创造力</b><span>在创造新价值的过程中，找到自己。</span></div></li>
+          <li><span class="b"></span><div><b>常识 · 判断力</b><span>靠通识教育与批判性思维充分链接世界，做出优质决策。</span></div></li>
+          <li><span class="b"></span><div><b>爱 · 同理心</b><span>正视、兼听、直言，把良好的关系当成最重要的能力。生活即教育。</span></div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ QUEST LINE ============ -->
+<section id="quest">
+  <div class="wrap quest-wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">四年闯关 · The Quest Line</span>
+      <h2 style="color:#F6EFE1">一年一个完整循环，<br>四年练成四种能力。</h2>
+    </div>
+    <div class="quest-line reveal">
+      <div class="quest-rail"></div>
+      <div class="qnode">
+        <div class="dot"></div>
+        <div class="yr">YEAR 01</div>
+        <div class="skill">自主</div>
+        <div class="main">OPC · 一人公司</div>
+        <p>Idea → MVP → PMF。以一人公司实战，积累个人综合能力。</p>
+      </div>
+      <div class="qnode">
+        <div class="dot"></div>
+        <div class="yr">YEAR 02</div>
+        <div class="skill">合作</div>
+        <div class="main">Company</div>
+        <p>寻找合作伙伴，学习团队沟通与协作。副本：吵架擂台。</p>
+      </div>
+      <div class="qnode">
+        <div class="dot"></div>
+        <div class="yr">YEAR 03</div>
+        <div class="skill">管理</div>
+        <div class="main">Partner</div>
+        <p>正式组建合伙人团队，探索更现代的组织模式。副本：跨文化交流。</p>
+      </div>
+      <div class="qnode">
+        <div class="dot"></div>
+        <div class="yr">YEAR 04</div>
+        <div class="skill">实战</div>
+        <div class="main">Cash Flow</div>
+        <p>公司必须取得正现金流。毕业 = 个人成就 + 团队成就 + 工作 Offer。</p>
+      </div>
+    </div>
+    <div class="openloop reveal">
+      <span class="ol-mark">
+        <svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M30 12 A18 18 0 1 0 42 18" fill="none" stroke="#D9BC7E" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="42" cy="14" r="4" fill="#B23A2D"/>
+        </svg>
+      </span>
+      <div>
+        <b>Open Loop · 开环学制</b>
+        <p>七年之内完成四年学业即可毕业，欢迎中途 gap，或直接创业。环是开的——你可以离开，也可以回来。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ OPC SYSTEM ============ -->
+<section class="paper">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">OPC 学习系统 · 学生视角</span>
+      <h2>开学第一天，<br>你到手 ¥1.2 万。</h2>
+    </div>
+    <div class="opc-grid">
+      <div class="reveal">
+        <div class="opc-feature">
+          <div class="k">D1</div>
+          <div><h4>OPC 启动资金</h4><p>每人到手 1.2 万元，开启“一人公司挑战”，在实战中学会财、税、法常识。</p></div>
+        </div>
+        <div class="opc-feature">
+          <div class="k">52+</div>
+          <div><h4>超过 50 种体验</h4><p>常识周、课程周、游学周、创造周轮转，广泛探索、亲身感受，寻找自己的方向。</p></div>
+        </div>
+        <div class="opc-feature">
+          <div class="k">⚑</div>
+          <div><h4>期末考试是黑客松</h4><p>主线任务 + 支线副本，像闯关游戏一样推进。比起回归值，我们更在意异常值。</p></div>
+        </div>
+      </div>
+      <div class="badges reveal">
+        <div class="bhd">成就系统 · Achievements</div>
+        <div class="badge-row"><span class="bn">42</span><span class="bl">商业通识技能徽章（个人 · 必修）</span></div>
+        <div class="badge-row"><span class="bn">12</span><span class="bl">团队共识（团队 · 必修）</span></div>
+        <div class="badge-row"><span class="bn">∞</span><span class="bl">悬赏系统：Dan Koe 连线、百万大 V、100 本伟大的书…</span></div>
+        <div class="terms">
+          <span>高杠杆身份</span><span>热爱储蓄罐</span><span>天赋放大镜</span><span>职业百科</span><span>生成式工作坊</span><span>纪录系统</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CAMPUS ============ -->
+<section id="campus" class="campus">
+  <div class="wrap">
+    <div class="campus-grid">
+      <div class="reveal">
+        <span class="eyebrow">校园 · 亚洲东部</span>
+        <h2 class="sec-head" style="margin-bottom:24px;">把世界，<br>变成你的教室。</h2>
+        <p style="color:#B7C2CD;max-width:30em;margin-top:0;">我们每一年都去到不同的国家，在真实而复杂的语言环境里学习生存。不是把世界关在校门外，而是把整个亚洲东部当作校园。</p>
+        <div class="basecard" style="margin-top:30px;">
+          <div class="pin">探索基地 · Home Base</div>
+          <h3>泰国 · 清迈</h3>
+          <p>东南亚数字游民的“首都”，国际化氛围中强化语言，作为一切探索的起点。</p>
+        </div>
+      </div>
+      <div class="reveal">
+        <div class="countries">
+          <div><div class="cn">日本</div><div class="en">Japan</div></div>
+          <div><div class="cn">韩国</div><div class="en">Korea</div></div>
+          <div><div class="cn">新加坡</div><div class="en">Singapore</div></div>
+          <div><div class="cn">马来西亚</div><div class="en">Malaysia</div></div>
+          <div><div class="cn">尼泊尔</div><div class="en">Nepal</div></div>
+          <div><div class="cn">越南</div><div class="en">Vietnam</div></div>
+          <div><div class="cn">老挝</div><div class="en">Laos</div></div>
+          <div><div class="cn">印度</div><div class="en">India</div></div>
+          <div><div class="cn">孟加拉</div><div class="en">Bangladesh</div></div>
+        </div>
+        <p style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--paper-soft);letter-spacing:.08em;margin-top:16px;text-align:center;">一半清迈强化语言 · 一半新马日韩商业考察</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FACTS ============ -->
+<section class="paper" style="padding-top:80px;padding-bottom:80px;">
+  <div class="wrap">
+    <div class="facts reveal">
+      <div class="fact"><div class="fn">2026.09</div><div class="fl">首届实验班启动</div></div>
+      <div class="fact"><div class="fn">10–20</div><div class="fl">人 · 首届招募</div></div>
+      <div class="fact"><div class="fn">18–25</div><div class="fl">岁 · 招生对象</div></div>
+      <div class="fact"><div class="fn">¥12万</div><div class="fl">/ 年（含 1.2 万启动金）</div></div>
+      <div class="fact"><div class="fn">50–100</div><div class="fl">人 · 未来每届规模</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PARTNERS ============ -->
+<section id="partners">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">合作伙伴 · Partners</span>
+      <h2 style="color:#F6EFE1">一群真正打过仗的人，<br>陪你一起办这所学校。</h2>
+    </div>
+    <div class="partners reveal">
+      <div class="partner"><div class="pn">好奇学习社区</div><div class="pr">策划 · 招生 · 线下执行</div></div>
+      <div class="partner"><div class="pn">标榜</div><div class="pr">国际职业教育 · 多国校园</div></div>
+      <div class="partner"><div class="pn">清迈西北大学</div><div class="pr">资质 · 线下场地</div></div>
+      <div class="partner"><div class="pn">蓝驰创投</div><div class="pr">投资 · 出海 · 创投导师库</div></div>
+      <div class="partner"><div class="pn">得到</div><div class="pr">招生渠道 · 委培奖学金</div></div>
+      <div class="partner"><div class="pn">一席</div><div class="pr">实习基地 · 通识导师库</div></div>
+      <div class="partner"><div class="pn">银杏基金会</div><div class="pr">实习基地 · 社会创新</div></div>
+      <div class="partner"><div class="pn">21 世纪教育研究院</div><div class="pr">不看文凭企业联盟</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ APPLY ============ -->
+<section id="apply" class="apply">
+  <div class="wrap">
+    <span class="eyebrow reveal">申请 · Admissions 2026</span>
+    <h2 class="reveal">不靠文凭保障出路，<br>靠实力走通新世界。</h2>
+    <p class="reveal">首届实验班 2026 年 9 月启动，面向 18–25 岁。我们不只看分数——入学评估由五部分组成：</p>
+    <div class="apply-steps reveal">
+      <span>报名表（自洽测试）</span>
+      <span>身心状态</span>
+      <span>关系描述</span>
+      <span>作品集</span>
+      <span>成绩单</span>
+      <span>常识测试</span>
+      <span>行动记录</span>
+    </div>
+    <a href="#top" class="btn btn-big reveal">申请首届实验班 →</a>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <span class="mark">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="50" cy="50" r="46" fill="none" stroke="#C19A48" stroke-width="1.6"/>
+            <circle cx="50" cy="50" r="40" fill="none" stroke="#C19A48" stroke-width="1"/>
+            <path d="M50 28 A22 22 0 1 0 65 35" fill="none" stroke="#D9BC7E" stroke-width="4.5" stroke-linecap="round"/>
+            <path d="M50 20 l4 9 9.5 .7-7 6.2 2.2 9.4-8.7-5-8.7 5 2.2-9.4-7-6.2 9.5-.7z" fill="#B23A2D"/>
+          </svg>
+        </span>
+        <div>
+          <b>OOPS</b>
+          <div class="sub">Open One Person School</div>
+          <p>好奇学习社区 · CURIONESTY COLLEGE<br>成都 Chengdu · 清迈 Chiang Mai<br>一所适应 AI 时代的一人学校。</p>
+        </div>
+      </div>
+      <div class="foot-cols">
+        <div class="foot-col">
+          <h5>了解</h5>
+          <a href="#case">现状</a>
+          <a href="#model">学习系统</a>
+          <a href="#quest">四年闯关</a>
+          <a href="#campus">校园</a>
+        </div>
+        <div class="foot-col">
+          <h5>加入</h5>
+          <a href="#apply">申请入学</a>
+          <a href="#partners">合作伙伴</a>
+          <a href="#apply">招生公告</a>
+          <a href="#apply">需求调研</a>
+        </div>
+      </div>
+    </div>
+    <div class="foot-base">
+      <span>© 2026 OOPS · CURIONESTY COLLEGE</span>
+      <span>OOPS = 小意外，大转机 · 好想法的起点</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // scroll reveal
+  (function(){
+    var els = document.querySelectorAll('.reveal');
+    if(!('IntersectionObserver' in window)){els.forEach(function(e){e.classList.add('in');});return;}
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target);}
+      });
+    },{threshold:.12, rootMargin:'0px 0px -8% 0px'});
+    els.forEach(function(e){ if(!e.classList.contains('in')) io.observe(e); });
+  })();
+</script>
+</body>
+</html>
