@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>边疆勘测局 · 扩大舒适圈七局</title>
+<style>
+:root{
+  --ink:#0C1A24;          /* 深潮汐蓝，图纸底色 */
+  --ink-2:#132836;
+  --grid:#1E3B4E;         /* 坐标网格 */
+  --paper:#E9E4D6;        /* 测绘纸白 */
+  --paper-dim:#9FB0BB;
+  --moss:#5FA189;         /* 已测绘 · 舒适圈 */
+  --sand:#E3A24E;         /* 正在测绘 · 学习圈 */
+  --flare:#D2523A;        /* 未测绘 · 恐慌圈 */
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  --serif:"Songti SC","Noto Serif SC","Source Han Serif SC",STZhongsong,"SimSun",serif;
+  --sans:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--ink);
+  color:var(--paper);
+  font-family:var(--sans);
+  overflow:hidden;
+  background-image:
+    linear-gradient(var(--grid) 1px,transparent 1px),
+    linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:44px 44px,44px 44px;
+  background-position:-1px -1px;
+}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at 30% 40%,transparent 30%,rgba(6,14,20,.85) 100%)}
+#app{position:relative;z-index:2;height:100%;display:flex;flex-direction:column}
+
+/* ── 顶栏 / 底栏 ───────────────────────────── */
+.bar{display:flex;align-items:center;justify-content:space-between;
+  padding:.7rem 1.6rem;font-family:var(--mono);font-size:.72rem;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--paper-dim)}
+.bar.top{border-bottom:1px solid var(--grid)}
+.bar.bottom{border-top:1px solid var(--grid);gap:1.4rem;flex-wrap:wrap}
+.bar .mark{color:var(--paper);letter-spacing:.3em}
+.bar kbd{font-family:var(--mono);border:1px solid var(--grid);border-radius:3px;
+  padding:.1em .45em;color:var(--paper);margin-right:.3em}
+
+/* ── 主区 ─────────────────────────────────── */
+main{flex:1;display:grid;grid-template-columns:minmax(280px,32%) 1fr;min-height:0}
+.map-panel{border-right:1px solid var(--grid);padding:1.4rem 1.6rem;
+  display:flex;flex-direction:column;gap:1rem;min-height:0}
+#map{width:100%;max-height:46vh;display:block}
+.ring-label{font-family:var(--mono);font-size:8px;letter-spacing:.18em;fill:var(--paper-dim)}
+
+.legend{list-style:none;font-family:var(--mono);font-size:.66rem;
+  letter-spacing:.14em;display:flex;flex-direction:column;gap:.4rem;color:var(--paper-dim)}
+.legend li{display:flex;align-items:center;gap:.6rem}
+.swatch{width:22px;height:0;border-top:2px solid currentColor;flex:none}
+.legend .l-moss{color:var(--moss)} .legend .l-sand{color:var(--sand)}
+.legend .l-flare{color:var(--flare)}
+.legend .l-flare .swatch{border-top-style:dashed}
+
+.sector-list{list-style:none;font-family:var(--mono);font-size:.7rem;
+  letter-spacing:.1em;overflow:auto;border-top:1px solid var(--grid);padding-top:.9rem}
+.sector-list li{display:flex;gap:.7rem;padding:.28rem 0;color:#5F7484;cursor:pointer}
+.sector-list li:hover{color:var(--paper-dim)}
+.sector-list li.done{color:var(--moss)}
+.sector-list li.now{color:var(--paper)}
+.sector-list li.now .num{background:var(--sand);color:var(--ink)}
+.sector-list .num{flex:none;width:1.6em;text-align:center;border-radius:2px}
+
+/* ── 舞台 ─────────────────────────────────── */
+.stage{position:relative;min-height:0;overflow:auto;padding:2.2rem clamp(1.5rem,4vw,4rem) 1.5rem}
+.panel{display:none;max-width:60ch;animation:rise .45s ease both}
+.panel.on{display:block}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+.eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.3em;
+  color:var(--sand);text-transform:uppercase;margin-bottom:.9rem;
+  display:flex;align-items:baseline;gap:.9rem}
+.eyebrow::after{content:"";flex:1;height:1px;background:var(--grid)}
+h1{font-family:var(--serif);font-weight:700;line-height:1.15;
+  font-size:clamp(2rem,4.2vw,3.4rem);letter-spacing:.02em;margin-bottom:1.1rem}
+h1 em{font-style:normal;color:var(--sand)}
+.lede{font-size:clamp(1rem,1.5vw,1.3rem);line-height:1.75;color:#CBD6DD;margin-bottom:1.5rem}
+.lede strong{color:var(--paper);font-weight:600}
+
+.steps{list-style:none;display:flex;flex-direction:column;gap:.75rem;margin-bottom:1.6rem}
+.steps li{display:flex;gap:1rem;line-height:1.7;font-size:clamp(.95rem,1.25vw,1.12rem)}
+.steps .k{font-family:var(--mono);font-size:.78rem;color:var(--sand);
+  border:1px solid var(--grid);border-radius:3px;padding:.15em .55em;
+  height:fit-content;flex:none;margin-top:.25em}
+
+.say{border-left:3px solid var(--flare);padding:.7rem 0 .7rem 1.1rem;
+  font-family:var(--serif);font-size:clamp(1.1rem,1.9vw,1.6rem);line-height:1.6;margin:1.4rem 0}
+.note{font-size:.92rem;color:var(--paper-dim);line-height:1.7;margin-top:1rem}
+
+/* ── 控件 ─────────────────────────────────── */
+button{font-family:var(--mono);font-size:.78rem;letter-spacing:.14em;
+  background:transparent;color:var(--paper);border:1px solid var(--grid);
+  border-radius:3px;padding:.6em 1.1em;cursor:pointer;transition:.15s}
+button:hover{border-color:var(--sand);color:var(--sand)}
+button:focus-visible{outline:2px solid var(--sand);outline-offset:2px}
+.btn-row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-top:1.2rem}
+input[type=text]{font-family:var(--sans);font-size:1rem;background:var(--ink-2);
+  border:1px solid var(--grid);border-radius:3px;color:var(--paper);padding:.62em .8em}
+input[type=text]:focus{outline:none;border-color:var(--sand)}
+input::placeholder{color:#5F7484}
+
+/* 计时器 */
+#timer{position:absolute;right:clamp(1.5rem,4vw,4rem);top:2.2rem;text-align:right}
+#tval{font-family:var(--mono);font-size:clamp(2rem,4vw,3.2rem);letter-spacing:.04em;
+  color:var(--paper-dim);line-height:1}
+#tval.run{color:var(--sand)} #tval.up{color:var(--flare)}
+@keyframes blink{50%{opacity:.25}}
+#tval.up{animation:blink 1s steps(1,end) infinite}
+.tset{display:flex;gap:.4rem;justify-content:flex-end;margin-top:.6rem}
+.tset button{padding:.35em .7em;font-size:.68rem}
+
+/* 三圈投票 */
+.poll-q{font-family:var(--serif);font-size:clamp(1.4rem,3vw,2.4rem);line-height:1.4;
+  min-height:2.6em;display:flex;align-items:center;border-bottom:1px dashed var(--grid);
+  padding-bottom:.6rem;margin-bottom:1.4rem}
+.bars{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;align-items:end;height:34vh;max-height:280px}
+.bar-col{display:flex;flex-direction:column;justify-content:flex-end;height:100%;gap:.5rem;text-align:center}
+.bar-fill{border-radius:3px 3px 0 0;min-height:4px;transition:height .35s cubic-bezier(.2,.8,.2,1)}
+.b1 .bar-fill{background:var(--moss)} .b2 .bar-fill{background:var(--sand)} .b3 .bar-fill{background:var(--flare)}
+.bar-col .cnt{font-family:var(--mono);font-size:1.6rem}
+.bar-col .lab{font-family:var(--mono);font-size:.7rem;letter-spacing:.16em;color:var(--paper-dim)}
+.b1 .cnt{color:var(--moss)} .b2 .cnt{color:var(--sand)} .b3 .cnt{color:var(--flare)}
+#split{font-family:var(--mono);font-size:.78rem;letter-spacing:.14em;color:var(--paper-dim);margin-top:1rem}
+
+/* 装备卡 */
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.3rem}
+.card{border:1px solid var(--grid);border-radius:4px;padding:1.1rem;background:var(--ink-2);
+  min-height:200px;display:flex;flex-direction:column;gap:.6rem;cursor:pointer;transition:.2s}
+.card:hover{border-color:var(--sand);transform:translateY(-3px)}
+.card.picked{border-color:var(--moss);box-shadow:inset 0 0 0 1px var(--moss)}
+.card .no{font-family:var(--mono);font-size:.68rem;letter-spacing:.18em;color:var(--paper-dim)}
+.card h3{font-family:var(--serif);font-size:1.24rem;font-weight:700;line-height:1.3}
+.card .src{font-size:.78rem;color:var(--paper-dim)}
+.card .use{font-size:.94rem;line-height:1.6;color:#CBD6DD;margin-top:auto}
+.card .use::before{content:"用法 ";font-family:var(--mono);font-size:.66rem;
+  letter-spacing:.18em;color:var(--sand);display:block;margin-bottom:.3rem}
+.card.empty{border-style:dashed;justify-content:center;align-items:center;color:#4E6272;
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.2em;cursor:default;transform:none}
+
+/* 插旗 */
+.flag-form{display:flex;gap:.6rem;flex-wrap:wrap;margin:1.3rem 0}
+.flag-form input.who{width:9em} .flag-form input.what{flex:1;min-width:16em}
+#flagList{list-style:none;display:flex;flex-direction:column;gap:.5rem;
+  max-height:26vh;overflow:auto;font-size:.95rem;line-height:1.5}
+#flagList li{display:flex;gap:.8rem;border-bottom:1px dotted var(--grid);padding-bottom:.45rem}
+#flagList .who{font-family:var(--mono);color:var(--sand);flex:none;min-width:5em}
+#count{font-family:var(--mono);font-size:.72rem;letter-spacing:.16em;color:var(--paper-dim)}
+
+@media (max-width:820px){
+  main{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+  .map-panel{border-right:0;border-bottom:1px solid var(--grid);flex-direction:row;align-items:center}
+  #map{max-height:26vh;width:auto;height:26vh}
+  .sector-list{display:none}
+  #timer{position:static;text-align:left;margin-bottom:1.4rem}
+  .tset{justify-content:flex-start}
+  .cards{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header class="bar top">
+    <div class="mark">边疆勘测局 · 扩大舒适圈</div>
+    <div id="coord">SECTOR 00 / 07</div>
+  </header>
+
+  <main>
+    <aside class="map-panel">
+      <div style="flex:1;min-width:0">
+        <svg id="map" viewBox="0 0 300 300" aria-label="舒适圈勘测图"></svg>
+      </div>
+      <div>
+        <ul class="legend">
+          <li class="l-moss"><span class="swatch"></span>已测绘 · 舒适圈</li>
+          <li class="l-sand"><span class="swatch"></span>正在测绘 · 学习圈</li>
+          <li class="l-flare"><span class="swatch"></span>未测绘 · 恐慌圈</li>
+        </ul>
+        <ol class="sector-list" id="sectorList"></ol>
+      </div>
+    </aside>
+
+    <section class="stage">
+      <div id="timer">
+        <div id="tval">03:00</div>
+        <div class="tset">
+          <button data-t="60">1分</button>
+          <button data-t="180">3分</button>
+          <button data-t="300">5分</button>
+          <button id="tgo">开始</button>
+        </div>
+      </div>
+
+      <!-- 00 ─────────────────────────────────── -->
+      <article class="panel on" data-s="0">
+        <div class="eyebrow">SECTOR 00 · 校准</div>
+        <h1>不是突破舒适圈，<br>是<em>扩大</em>舒适圈。</h1>
+        <p class="lede">诺尔·迪奇的三个同心圆：最里面是<strong>舒适圈</strong>，完全掌控，安全但不长；中间是<strong>学习圈</strong>，跳一跳够得着；最外面是<strong>恐慌圈</strong>，远超能力，一想就怂。</p>
+        <p class="lede">「突破舒适圈」这句话大错特错。它违背人性，也违背损失厌恶原则——老想着自虐式地离开，可不就内耗了。人天然想待着不动。好的教育顺应人性，借力打力。</p>
+        <div class="say">我们要在舒适圈和学习圈的边缘，持续开疆拓土。</div>
+        <ul class="steps">
+          <li><span class="k">带什么</span>每人一张白纸横放，一支笔。全程不交换、不评分、不互相评判。</li>
+          <li><span class="k">规则</span>七局游戏没有标准答案。它们只帮你看见本来就在你心底的东西。</li>
+          <li><span class="k">终点</span>第七局结束时，你会带走一个小到不像话、但今晚就能做的动作。</li>
+        </ul>
+        <p class="note">主持人：按 <kbd>空格</kbd> 或 <kbd>→</kbd> 进入下一局。</p>
+      </article>
+
+      <!-- 01 ─────────────────────────────────── -->
+      <article class="panel" data-s="1">
+        <div class="eyebrow">SECTOR 01 · 我的五样</div>
+        <h1>写下五件<em>想做、但一直没敢做</em>的事。</h1>
+        <ul class="steps">
+          <li><span class="k">写</span>五件事，一件一行。要具体到能想象出画面，不写「变勇敢」，写「在食堂跟不认识的人拼桌」。</li>
+          <li><span class="k">划 1</span>划掉一件——其实你没那么想做的。</li>
+          <li><span class="k">划 2</span>划掉一件——别人希望你做，你自己无所谓的。</li>
+          <li><span class="k">划 3</span>再划掉两件——这辈子不做也不遗憾的。</li>
+          <li><span class="k">圈</span>剩下的那一件，用笔圈起来，旁边写四个字：<strong>我的边疆</strong>。</li>
+        </ul>
+        <div class="say">划的时候心里一紧，就是它重要的证据。</div>
+        <p class="note">接下来六局，全部围绕你圈出的这一件事。留着这张纸。</p>
+      </article>
+
+      <!-- 02 ─────────────────────────────────── -->
+      <article class="panel" data-s="2">
+        <div class="eyebrow">SECTOR 02 · 三圈定位 · 手势同步</div>
+        <p class="lede" style="margin-bottom:1rem">屏幕出题，倒数三下，所有人<strong>同时</strong>出手指：<span style="color:var(--moss)">1＝舒适</span>　<span style="color:var(--sand)">2＝学习</span>　<span style="color:var(--flare)">3＝恐慌</span></p>
+        <div class="poll-q" id="pollQ">点「下一题」开始</div>
+        <div class="bars">
+          <div class="bar-col b1"><div class="cnt" id="c1">0</div><div class="bar-fill" id="f1" style="height:4px"></div><div class="lab">1 · 舒适</div></div>
+          <div class="bar-col b2"><div class="cnt" id="c2">0</div><div class="bar-fill" id="f2" style="height:4px"></div><div class="lab">2 · 学习</div></div>
+          <div class="bar-col b3"><div class="cnt" id="c3">0</div><div class="bar-fill" id="f3" style="height:4px"></div><div class="lab">3 · 恐慌</div></div>
+        </div>
+        <div id="split">分歧度 —</div>
+        <div class="btn-row">
+          <button data-vote="1">＋1 舒适</button>
+          <button data-vote="2">＋2 学习</button>
+          <button data-vote="3">＋3 恐慌</button>
+          <button id="pollNext">下一题</button>
+          <button id="pollClear">清零</button>
+        </div>
+        <p class="note">分歧最大的那题，请两边各找一个人说说：同一件事，为什么在你那儿是舒适圈，在他那儿是恐慌圈？——舒适圈是私人地图，没有人能替你画。</p>
+      </article>
+
+      <!-- 03 ─────────────────────────────────── -->
+      <article class="panel" data-s="3">
+        <div class="eyebrow">SECTOR 03 · 支援站</div>
+        <h1>谁能陪你走出<em>这一步</em>？</h1>
+        <ul class="steps">
+          <li><span class="k">写</span>在纸的右下角写三个支援站，能帮你完成第一局圈出的那件事。</li>
+          <li><span class="k">限制</span>最多只能写一个成年人；至少一个是同龄人；至少一个不是人——一本书、一个工具、一个社群、一段音乐都算。</li>
+          <li><span class="k">再写</span>挑其中一个，写一句话：我打算怎么开口请他帮忙。一句话就好，就当是台词。</li>
+        </ul>
+        <div class="say">先爱自己，再爱别人。飞机上也是先给自己戴氧气面罩。</div>
+        <p class="note">扩大舒适圈从来不是一个人硬扛。写不出三个的人，这本身就是今天最有用的发现。</p>
+      </article>
+
+      <!-- 04 ─────────────────────────────────── -->
+      <article class="panel" data-s="4">
+        <div class="eyebrow">SECTOR 04 · 边疆前辈</div>
+        <h1>想一个你<em>亲眼见过</em>的人。</h1>
+        <p class="lede">他做成过一件你觉得挺难的事。不用是名人，同桌、表姐、教练、你妈都行。</p>
+        <ul class="steps">
+          <li><span class="k">禁止</span>不许写「他很勇敢」「他心态好」。这些不能抄。</li>
+          <li><span class="k">要写</span>他<strong>做了什么动作</strong>：他先做了什么、找了谁、失败之后第二天干了什么。</li>
+          <li><span class="k">两人</span>找一个人，各讲 60 秒。听的人只问一句：然后呢？</li>
+          <li><span class="k">标注</span>在那个动作旁边写「可抄」或「抄不了」。</li>
+        </ul>
+        <div class="say">厉害的人有个超能力：对不舒适感到舒适。</div>
+        <p class="note">刘梦霏老师说，遇到特别大的挑战时，她会启动游戏模式，告诉自己：事情变得有意思起来了，我要打起精神打 BOSS 了。</p>
+      </article>
+
+      <!-- 05 ─────────────────────────────────── -->
+      <article class="panel" data-s="5">
+        <div class="eyebrow">SECTOR 05 · 装备补给</div>
+        <p class="lede" style="margin-bottom:.4rem">补给站有 15 件装备。每人抽三件，<strong>只能带走一件</strong>——点一下你要带走的那张。</p>
+        <div class="cards" id="cards">
+          <div class="card empty">按「发牌」抽三件</div>
+          <div class="card empty">按「发牌」抽三件</div>
+          <div class="card empty">按「发牌」抽三件</div>
+        </div>
+        <div class="btn-row">
+          <button id="deal">发牌</button>
+          <span class="note" style="margin:0">带走之后，用它给你圈出的那件事设计一个动作，写在纸上。下一位。</span>
+        </div>
+      </article>
+
+      <!-- 06 ─────────────────────────────────── -->
+      <article class="panel" data-s="6">
+        <div class="eyebrow">SECTOR 06 · 一年后的地图</div>
+        <h1>把纸翻面。<br>写<em>明年今天</em>的自己。</h1>
+        <ul class="steps">
+          <li><span class="k">格式</span>用完成时写，三行：「到明年今天，我已经______。」</li>
+          <li><span class="k">内容</span>三件今天还在你恐慌圈里、明年已经进了舒适圈的事。第一局那件必须在里面。</li>
+          <li><span class="k">往上</span>敢写大一点。乔布斯说，做超出上限的事，下限也会跟着抬高。</li>
+        </ul>
+        <div class="say">取乎其上，得乎其中。</div>
+        <p class="note">写完抬头看看地图——你刚才写的，就是绿色圈线明年该在的位置。</p>
+      </article>
+
+      <!-- 07 ─────────────────────────────────── -->
+      <article class="panel" data-s="7">
+        <div class="eyebrow">SECTOR 07 · 插旗</div>
+        <h1>把它切到<em>不能再小</em>。</h1>
+        <p class="lede">小到你今晚或这周就能做完，小到你自己都觉得「这也太小了吧」。那就对了——边缘上的一小步，才是开疆拓土；一步跨进恐慌圈，只会退回原地。</p>
+        <p class="lede">格式：<strong>我会在（时间）（地点）做（一个动作），一次就够。</strong></p>
+        <div class="flag-form">
+          <input type="text" class="who" id="who" placeholder="名字" maxlength="12">
+          <input type="text" class="what" id="what" placeholder="我会在……做……" maxlength="80">
+          <button id="plant">插旗</button>
+        </div>
+        <div id="count">已插 0 面旗</div>
+        <ul id="flagList"></ul>
+        <div class="btn-row">
+          <button id="copy">复制全班承诺</button>
+          <button id="save">下载为 TXT</button>
+          <button id="finale">全体朗读</button>
+        </div>
+      </article>
+
+      <!-- 08 ─────────────────────────────────── -->
+      <article class="panel" data-s="8">
+        <div class="eyebrow">收队</div>
+        <div class="say" style="border-color:var(--moss);font-size:clamp(1.2rem,2.4vw,2rem)">
+          愿上帝赐予我从容，去接受我不能改变的，不内耗；<br>
+          赐予我勇气，去改变我可以改变的，扩大舒适圈；<br>
+          并赐予我智慧，去分辨这两者间的区别。
+        </div>
+        <p class="lede">我们最深的恐惧，不是我们力不能及，而是我们的力量无可限量。</p>
+        <h1 style="margin-top:1.4rem">勇敢是<em>第一美德</em>。</h1>
+        <p class="note">两千多年前古希腊人这么说。愿它推动你迈出扩大舒适圈的第一小步。</p>
+      </article>
+    </section>
+  </main>
+
+  <footer class="bar bottom">
+    <div><kbd>空格</kbd>下一局 <kbd>←</kbd>上一局 <kbd>T</kbd>计时 <kbd>F</kbd>全屏</div>
+    <div id="hint">好奇学习社区 · 钥匙玩校</div>
+  </footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ── 关卡 ─────────────────────────────────── */
+var SECTORS = ["校准","我的五样","三圈定位","支援站","边疆前辈","装备补给","一年后的地图","插旗","收队"];
+var cur = 0, LAST = SECTORS.length - 1;
+
+var list = document.getElementById("sectorList");
+SECTORS.forEach(function(n,i){
+  var li = document.createElement("li");
+  li.innerHTML = '<span class="num">'+String(i).padStart(2,"0")+'</span><span>'+n+'</span>';
+  li.addEventListener("click", function(){ go(i); });
+  list.appendChild(li);
+});
+
+function go(n){
+  cur = Math.max(0, Math.min(LAST, n));
+  document.querySelectorAll(".panel").forEach(function(p){
+    p.classList.toggle("on", +p.dataset.s === cur);
+  });
+  Array.prototype.forEach.call(list.children, function(li,i){
+    li.className = i < cur ? "done" : (i === cur ? "now" : "");
+  });
+  document.getElementById("coord").textContent =
+    "SECTOR " + String(Math.min(cur,7)).padStart(2,"0") + " / 07";
+  drawMap();
+}
+
+document.addEventListener("keydown", function(e){
+  if (/^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
+  if (e.key === " " || e.key === "ArrowRight"){ e.preventDefault(); go(cur+1); }
+  else if (e.key === "ArrowLeft"){ e.preventDefault(); go(cur-1); }
+  else if (e.key === "t" || e.key === "T"){ toggleTimer(); }
+  else if (e.key === "f" || e.key === "F"){
+    if (document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen();
+  }
+});
+
+/* ── 勘测图 ───────────────────────────────── */
+var map = document.getElementById("map"), NS = "http://www.w3.org/2000/svg";
+var RINGS = 8, CX = 150, CY = 150, R0 = 26, RSTEP = 15;
+var flags = [];
+
+function wobble(seed, k){                       // 稳定的伪随机，让等高线不那么圆
+  var x = Math.sin(seed * 12.9898 + k * 78.233) * 43758.5453;
+  return x - Math.floor(x);
+}
+function contour(r, seed){
+  var pts = [], n = 24, i, a, rr;
+  for (i = 0; i < n; i++){
+    a = i / n * Math.PI * 2;
+    rr = r * (1 + (wobble(seed, i) - 0.5) * 0.13);
+    pts.push([CX + Math.cos(a) * rr, CY + Math.sin(a) * rr * 0.92]);
+  }
+  var d = "M" + pts[0][0].toFixed(1) + " " + pts[0][1].toFixed(1);
+  for (i = 0; i < n; i++){
+    var p = pts[(i+1) % n], q = pts[(i+2) % n];
+    d += " Q" + p[0].toFixed(1) + " " + p[1].toFixed(1) + " " +
+         ((p[0]+q[0])/2).toFixed(1) + " " + ((p[1]+q[1])/2).toFixed(1);
+  }
+  return d + "Z";
+}
+
+function drawMap(){
+  while (map.firstChild) map.removeChild(map.firstChild);
+  var edge = Math.min(cur + 1, RINGS - 1);       // 已测绘到第几圈
+  for (var i = 0; i < RINGS; i++){
+    var r = R0 + i * RSTEP;
+    var path = document.createElementNS(NS, "path");
+    path.setAttribute("d", contour(r, i + 1));
+    path.setAttribute("fill", i === 0 ? "rgba(95,161,137,.10)" : "none");
+    if (i < edge){ path.setAttribute("stroke", "var(--moss)"); path.setAttribute("stroke-width", "1.4"); }
+    else if (i === edge){
+      path.setAttribute("stroke", "var(--sand)"); path.setAttribute("stroke-width", "2.2");
+    } else {
+      path.setAttribute("stroke", "var(--flare)");
+      path.setAttribute("stroke-width", "1");
+      path.setAttribute("stroke-dasharray", "3 5");
+      path.setAttribute("opacity", "0.45");
+    }
+    map.appendChild(path);
+  }
+  var t = document.createElementNS(NS, "text");
+  t.setAttribute("class", "ring-label");
+  t.setAttribute("x", CX); t.setAttribute("y", CY + 3);
+  t.setAttribute("text-anchor", "middle");
+  t.textContent = "YOU";
+  map.appendChild(t);
+
+  // 插在最外一圈已测绘线上的旗
+  var fr = R0 + Math.max(edge, 1) * RSTEP;
+  flags.forEach(function(f, i){
+    var a = (i / Math.max(flags.length, 8)) * Math.PI * 2 - Math.PI / 2;
+    var x = CX + Math.cos(a) * fr, y = CY + Math.sin(a) * fr * 0.92;
+    var g = document.createElementNS(NS, "g");
+    var pole = document.createElementNS(NS, "line");
+    pole.setAttribute("x1", x); pole.setAttribute("y1", y);
+    pole.setAttribute("x2", x); pole.setAttribute("y2", y - 11);
+    pole.setAttribute("stroke", "var(--paper)"); pole.setAttribute("stroke-width", ".9");
+    var fl = document.createElementNS(NS, "path");
+    fl.setAttribute("d", "M"+x+" "+(y-11)+" L"+(x+8)+" "+(y-8.5)+" L"+x+" "+(y-6)+"Z");
+    fl.setAttribute("fill", "var(--sand)");
+    var nm = document.createElementNS(NS, "text");
+    nm.setAttribute("class", "ring-label");
+    nm.setAttribute("x", x + (Math.cos(a) < 0 ? -3 : 3));
+    nm.setAttribute("y", y + 8);
+    nm.setAttribute("text-anchor", Math.cos(a) < 0 ? "end" : "start");
+    nm.setAttribute("fill", "var(--paper)");
+    nm.textContent = f.who;
+    g.appendChild(pole); g.appendChild(fl); g.appendChild(nm);
+    map.appendChild(g);
+  });
+}
+
+/* ── 计时器 ───────────────────────────────── */
+var total = 180, left = 180, tick = null;
+var tval = document.getElementById("tval"), tgo = document.getElementById("tgo");
+function paint(){
+  var m = Math.floor(Math.abs(left) / 60), s = Math.abs(left) % 60;
+  tval.textContent = (left < 0 ? "-" : "") + String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+  tval.className = tick ? (left <= 0 ? "up" : "run") : (left <= 0 ? "up" : "");
+}
+function toggleTimer(){
+  if (tick){ clearInterval(tick); tick = null; tgo.textContent = "继续"; }
+  else {
+    tick = setInterval(function(){ left--; paint(); }, 1000);
+    tgo.textContent = "暂停";
+  }
+  paint();
+}
+tgo.addEventListener("click", toggleTimer);
+document.querySelectorAll(".tset button[data-t]").forEach(function(b){
+  b.addEventListener("click", function(){
+    if (tick){ clearInterval(tick); tick = null; tgo.textContent = "开始"; }
+    total = left = +b.dataset.t; paint();
+  });
+});
+paint();
+
+/* ── 02 三圈定位题库 ──────────────────────── */
+var QUESTIONS = [
+  "当着全班唱完一整首歌",
+  "举手说：这里我没听懂",
+  "一个人坐地铁去没去过的地方",
+  "吃一道从来没吃过、看起来很怪的菜",
+  "主动跟一个不认识的同龄人说第一句话",
+  "把自己做的东西发到群里给大家看",
+  "用英语向陌生人问路",
+  "对朋友说：我不想这样",
+  "当着大家承认：这件事是我做错了",
+  "在长辈面前说出不同意见",
+  "报名一个自己完全是新手的比赛",
+  "一整天不碰手机",
+  "教别人一样你昨天才学会的东西",
+  "先跟人道歉，哪怕对方也有错",
+  "跟老师说：我觉得您刚才讲的不对",
+  "一个人吃一顿饭，不看手机"
+];
+var qbag = [], votes = [0,0,0];
+var pollQ = document.getElementById("pollQ");
+
+function nextQ(){
+  if (!qbag.length) qbag = QUESTIONS.slice();
+  var i = Math.floor(Math.random() * qbag.length);
+  pollQ.textContent = qbag.splice(i,1)[0];
+  votes = [0,0,0]; paintVotes();
+}
+function paintVotes(){
+  var max = Math.max(1, votes[0], votes[1], votes[2]);
+  var box = document.querySelector(".bars");
+  var h = box ? box.clientHeight - 70 : 180;
+  for (var i = 0; i < 3; i++){
+    document.getElementById("c" + (i+1)).textContent = votes[i];
+    document.getElementById("f" + (i+1)).style.height =
+      Math.max(4, votes[i] / max * Math.max(h, 60)) + "px";
+  }
+  var tot = votes[0] + votes[1] + votes[2];
+  var el = document.getElementById("split");
+  if (!tot){ el.textContent = "分歧度 —"; return; }
+  var d = 1 - max / tot;                          // 0 = 全班一致
+  el.textContent = "分歧度 " + Math.round(d * 150) + "%　" +
+    (d < .12 ? "· 全班几乎同频" : d < .35 ? "· 有分歧，值得聊两句" : "· 大分歧，请两边各找一个人说说");
+}
+document.querySelectorAll("[data-vote]").forEach(function(b){
+  b.addEventListener("click", function(){ votes[+b.dataset.vote - 1]++; paintVotes(); });
+});
+document.getElementById("pollNext").addEventListener("click", nextQ);
+document.getElementById("pollClear").addEventListener("click", function(){ votes = [0,0,0]; paintVotes(); });
+
+/* ── 05 装备卡（讲稿里的 15 件） ──────────── */
+var GEAR = [
+  ["浪漫—精确—综合","怀特海","先只管去感受，别急着搞懂。允许自己在第一阶段什么都不精确。"],
+  ["贝叶斯修正","条件概率","别等想清楚再动。先给一个粗糙判断，做一次，拿结果改一次。"],
+  ["测试—反馈—迭代","精益创业","把那件事做成一个最小版本，今天就发出去，收一条真反馈。"],
+  ["敞开你的胃","冉云飞","从吃开始练。这周点一道你从没点过的菜，先让身体学会接受新东西。"],
+  ["先爱自己，再爱别人","氧气面罩","检查一下：你的这一步是牺牲式的吗？是就重新设计，不许自虐。"],
+  ["成长模式","《认知觉醒》","别用意志力硬扛。闭眼想象完成那一刻的画面，把大脑从默认模式叫醒。"],
+  ["即时反馈","加布·纽维尔","给自己设计一个五秒就能看到结果的动作。反馈越快，越上瘾。"],
+  ["我们最深的恐惧","朗读诗","把「我怕」改口说成「事情变得有意思起来了，该打 BOSS 了」。"],
+  ["蒂尔的问题","彼得·蒂尔","写下：在什么重要的事情上，我跟大多数人看法不同？然后大声说出来一次。"],
+  ["修炼松弛感","佐佐木常夫","挑一件生活小事，这周每天做一次，只为把自己调松，不为结果。"],
+  ["取乎其上","乔布斯","把目标往上抬一格。做超出上限的事，下限会跟着抬高。"],
+  ["全视角学习","丹麦学习理论","给自己打分：内容、动机、互动，哪一项最低？就从最低那项动手。"],
+  ["动议 + 妥协","罗伯特议事规则","跟人合作卡住时，别争对错。提一个具体动议，再留一个可让的条件。"],
+  ["尼布尔祷文","改写版","把那件事分两栏：我改不了的（放下），我能改的（今天动手）。"],
+  ["勇敢是第一美德","古希腊","不做设计了。就现在，做那件事的第一个动作，30 秒之内。"]
+];
+var cardsBox = document.getElementById("cards");
+document.getElementById("deal").addEventListener("click", function(){
+  var bag = GEAR.slice(), pick = [];
+  while (pick.length < 3) pick.push(bag.splice(Math.floor(Math.random() * bag.length), 1)[0]);
+  cardsBox.innerHTML = "";
+  pick.forEach(function(g){
+    var i = GEAR.indexOf(g) + 1;
+    var d = document.createElement("div");
+    d.className = "card";
+    d.innerHTML = '<div class="no">装备 ' + String(i).padStart(2,"0") + '</div>' +
+      '<h3>' + g[0] + '</h3><div class="src">' + g[1] + '</div>' +
+      '<div class="use">' + g[2] + '</div>';
+    d.addEventListener("click", function(){
+      cardsBox.querySelectorAll(".card").forEach(function(c){ c.classList.remove("picked"); });
+      d.classList.add("picked");
+    });
+    cardsBox.appendChild(d);
+  });
+});
+
+/* ── 07 插旗 ─────────────────────────────── */
+var who = document.getElementById("who"), what = document.getElementById("what");
+var flagList = document.getElementById("flagList"), count = document.getElementById("count");
+function plant(){
+  var w = who.value.trim(), t = what.value.trim();
+  if (!w || !t){ (w ? what : who).focus(); return; }
+  flags.push({who: w, what: t});
+  var li = document.createElement("li");
+  li.innerHTML = '<span class="who"></span><span class="txt"></span>';
+  li.querySelector(".who").textContent = w;
+  li.querySelector(".txt").textContent = t;
+  flagList.appendChild(li);
+  flagList.scrollTop = flagList.scrollHeight;
+  count.textContent = "已插 " + flags.length + " 面旗";
+  who.value = ""; what.value = ""; who.focus();
+  drawMap();
+}
+document.getElementById("plant").addEventListener("click", plant);
+[who, what].forEach(function(el){
+  el.addEventListener("keydown", function(e){ if (e.key === "Enter") plant(); });
+});
+function asText(){
+  return "扩大舒适圈 · 全班第一小步\n" + new Date().toLocaleDateString("zh-CN") + "\n\n" +
+    flags.map(function(f,i){ return (i+1) + ". " + f.who + "：" + f.what; }).join("\n");
+}
+document.getElementById("copy").addEventListener("click", function(){
+  var b = this;
+  navigator.clipboard.writeText(asText()).then(function(){
+    b.textContent = "已复制";
+    setTimeout(function(){ b.textContent = "复制全班承诺"; }, 1600);
+  }, function(){ b.textContent = "复制失败，请用下载"; });
+});
+document.getElementById("save").addEventListener("click", function(){
+  var url = URL.createObjectURL(new Blob([asText()], {type: "text/plain;charset=utf-8"}));
+  var a = document.createElement("a");
+  a.href = url; a.download = "扩大舒适圈-全班第一小步.txt"; a.click();
+  URL.revokeObjectURL(url);
+});
+document.getElementById("finale").addEventListener("click", function(){ go(8); });
+
+window.addEventListener("resize", function(){ paintVotes(); });
+go(0);
+})();
+</script>
+</body>
+</html>
