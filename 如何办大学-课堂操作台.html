@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>如何办大学 · 课堂操作台</title>
+<style>
+  :root{
+    --ink:#14231C;        /* 深板面墨绿 */
+    --ink-2:#1D3128;      /* 卡片面 */
+    --ink-3:#263E32;      /* 高亮面 */
+    --chalk:#F2EFE6;      /* 粉笔白 */
+    --chalk-dim:#B9C2B6;  /* 次级文字 */
+    --brass:#C9A24B;      /* 学院黄铜 */
+    --seal:#C8503C;       /* 印章红 */
+    --line:rgba(242,239,230,.14);
+    --serif:"Songti SC","STSong","SimSun","Noto Serif CJK SC","Noto Serif SC",serif;
+    --sans:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{font-size:19px}
+  body{
+    background:var(--ink);
+    color:var(--chalk);
+    font-family:var(--serif);
+    min-height:100vh;
+    display:flex;flex-direction:column;
+    background-image:radial-gradient(ellipse at 50% -10%, rgba(201,162,75,.07), transparent 55%);
+  }
+  button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:inherit}
+  button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+  input,textarea{
+    font-family:var(--serif);font-size:1rem;color:var(--chalk);
+    background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:6px;
+    padding:.55em .8em;width:100%;
+  }
+  input::placeholder,textarea::placeholder{color:rgba(185,194,182,.5)}
+
+  /* ── 顶栏 ── */
+  header{
+    display:flex;align-items:center;gap:1.2rem;
+    padding:.8rem 1.6rem;border-bottom:1px solid var(--line);
+    font-family:var(--sans);font-size:.78rem;letter-spacing:.12em;color:var(--chalk-dim);
+  }
+  header .brand{font-family:var(--serif);font-size:1rem;color:var(--chalk);letter-spacing:.35em}
+  header .brand em{font-style:normal;color:var(--brass)}
+  .stage-dots{display:flex;gap:.55rem;margin-left:auto;align-items:center}
+  .stage-dots button{
+    width:2rem;height:2rem;border-radius:50%;border:1px solid var(--line);
+    font-size:.72rem;color:var(--chalk-dim);letter-spacing:0;
+  }
+  .stage-dots button.on{background:var(--brass);color:var(--ink);border-color:var(--brass);font-weight:700}
+  .export-btn{
+    border:1px solid var(--line);border-radius:999px;padding:.45em 1.1em;
+    font-size:.75rem;letter-spacing:.15em;color:var(--chalk-dim);
+  }
+  .export-btn:hover{border-color:var(--brass);color:var(--brass)}
+
+  /* ── 主区 ── */
+  main{flex:1;padding:1.6rem 2.2rem 6.5rem;max-width:1500px;width:100%;margin:0 auto}
+  .stage{display:none}
+  .stage.on{display:block;animation:rise .35s ease}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.stage.on{animation:none}}
+
+  .eyebrow{font-family:var(--sans);font-size:.72rem;letter-spacing:.4em;color:var(--brass);margin-bottom:.6rem}
+  h1.stage-title{font-size:clamp(1.8rem,3.4vw,2.9rem);font-weight:700;letter-spacing:.06em;line-height:1.2}
+  .stage-sub{color:var(--chalk-dim);margin-top:.5rem;font-size:1.02rem;max-width:60ch}
+  .stage-head{margin-bottom:1.6rem}
+
+  /* ── 开场 ── */
+  #s0{min-height:70vh;display:flex;flex-direction:column;justify-content:center;text-align:center}
+  #s0 .mega{font-size:clamp(3.2rem,9vw,7.5rem);letter-spacing:.18em;font-weight:700;line-height:1.15}
+  #s0 .mega .q{color:var(--seal)}
+  #s0 .seal{
+    width:6.4rem;height:6.4rem;border:2px solid var(--seal);border-radius:50%;
+    margin:2.2rem auto 0;display:flex;align-items:center;justify-content:center;
+    color:var(--seal);font-size:.95rem;letter-spacing:.3em;line-height:1.5;
+    transform:rotate(-8deg);padding:.5rem;
+  }
+  #s0 .hint{margin-top:2.4rem;color:var(--chalk-dim);font-family:var(--sans);font-size:.85rem;letter-spacing:.1em}
+
+  /* ── 通用条目 ── */
+  .item{
+    display:flex;align-items:flex-start;gap:.7rem;
+    background:var(--ink-2);border:1px solid var(--line);border-radius:8px;
+    padding:.65rem .9rem;margin-bottom:.55rem;font-size:1.08rem;line-height:1.5;
+  }
+  .item .txt{flex:1}
+  .vote{
+    font-family:var(--sans);font-size:.85rem;font-weight:700;
+    border:1px solid var(--line);border-radius:999px;padding:.25em .8em;
+    color:var(--chalk-dim);white-space:nowrap;transition:transform .08s ease;
+  }
+  .vote:active{transform:scale(1.15)}
+  .vote.has{border-color:var(--brass);color:var(--brass)}
+  .del{color:rgba(185,194,182,.35);font-size:1rem;padding:.1em .3em}
+  .del:hover{color:var(--seal)}
+  .addrow{display:flex;gap:.6rem;margin-bottom:1rem}
+  .addrow .go{
+    font-size:.85rem;font-weight:700;letter-spacing:.1em;white-space:nowrap;
+    background:var(--brass);color:var(--ink);border-radius:6px;padding:0 1.2em;
+  }
+  .empty{color:rgba(185,194,182,.4);font-size:.92rem;padding:.6rem 0;font-style:italic}
+
+  /* ── 阶段一:好与坏 ── */
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.6rem}
+  .colhead{font-size:1.25rem;font-weight:700;letter-spacing:.15em;margin-bottom:.9rem;padding-bottom:.5rem;border-bottom:1px solid var(--line)}
+  .colhead .tag{font-family:var(--sans);font-size:.68rem;letter-spacing:.3em;display:block;margin-bottom:.3rem}
+  .col-good .colhead{color:var(--brass)}
+  .col-good .colhead .tag{color:rgba(201,162,75,.6)}
+  .col-bad .colhead{color:var(--seal)}
+  .col-bad .colhead .tag{color:rgba(200,80,60,.6)}
+
+  /* ── 阶段二:毕业标准 ── */
+  .threecol{display:grid;grid-template-columns:repeat(3,1fr);gap:1.3rem}
+  .std-card{background:var(--ink-2);border:1px solid var(--line);border-radius:12px;padding:1.1rem 1.1rem 1rem}
+  .std-card h3{
+    font-size:1.5rem;letter-spacing:.2em;text-align:center;padding-bottom:.7rem;margin-bottom:.9rem;
+    border-bottom:1px dashed var(--line);position:relative;
+  }
+  .std-card h3::after{content:"必须在大学吗?";position:absolute;left:50%;transform:translateX(-50%);bottom:-.62em;background:var(--ink-2);padding:0 .6em;font-size:.62rem;font-family:var(--sans);letter-spacing:.25em;color:var(--chalk-dim)}
+  .std-card .item{background:rgba(0,0,0,.2);font-size:.98rem}
+  .std-card .item.top{border-color:var(--brass);box-shadow:0 0 0 1px var(--brass) inset}
+
+  /* ── 阶段三:证据链 ── */
+  .chain-wrap{overflow-x:auto;padding:1.4rem 0 1.8rem}
+  .chain{display:flex;align-items:stretch;gap:0;min-width:min-content}
+  .node{
+    position:relative;min-width:11.5rem;max-width:14rem;
+    background:var(--ink-2);border:1px solid var(--line);border-radius:10px;
+    padding:.9rem .9rem .8rem;display:flex;flex-direction:column;gap:.55rem;
+  }
+  .node.fixed{border-style:double;border-width:3px;border-color:rgba(201,162,75,.5)}
+  .node .ntxt{font-size:1.08rem;line-height:1.4;flex:1}
+  .node .plan{font-family:var(--sans);font-size:.78rem;color:var(--brass);border-top:1px dashed var(--line);padding-top:.45rem;line-height:1.5}
+  .node .plan b{color:var(--chalk-dim);font-weight:400;letter-spacing:.15em}
+  .node.weakest{border-color:var(--seal);background:linear-gradient(160deg,rgba(200,80,60,.16),var(--ink-2));transform:rotate(-1.3deg)}
+  .node.weakest::before{
+    content:"最脆弱";position:absolute;top:-.8rem;left:50%;transform:translateX(-50%) rotate(-4deg);
+    background:var(--seal);color:var(--chalk);font-family:var(--sans);font-size:.66rem;
+    letter-spacing:.25em;padding:.2em .7em;border-radius:3px;
+  }
+  @media (prefers-reduced-motion:reduce){.node.weakest{transform:none}}
+  .link{display:flex;align-items:center;color:rgba(201,162,75,.55);font-size:1.3rem;padding:0 .35rem;user-select:none}
+  .link.broken{color:var(--seal);letter-spacing:.15em}
+  .stance{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin-top:2rem}
+  .stance-card{
+    border:1px solid var(--line);border-radius:14px;padding:1.4rem;text-align:center;
+    background:var(--ink-2);
+  }
+  .stance-card h4{font-size:1.35rem;letter-spacing:.1em;margin-bottom:.35rem}
+  .stance-card p{color:var(--chalk-dim);font-size:.95rem;margin-bottom:1rem}
+  .stance-card .bigvote{
+    font-family:var(--sans);font-size:2.6rem;font-weight:800;
+    border:2px solid var(--line);border-radius:12px;padding:.15em .8em;min-width:5em;
+    transition:transform .08s ease;
+  }
+  .stance-card .bigvote:active{transform:scale(1.06)}
+  .stance-card.lead{border-color:var(--brass)}
+  .stance-card.lead .bigvote{border-color:var(--brass);color:var(--brass)}
+  .stance-bar{grid-column:1/-1;height:.55rem;border-radius:999px;background:rgba(0,0,0,.35);overflow:hidden;display:flex}
+  .stance-bar .a{background:var(--brass);transition:width .3s ease}
+  .stance-bar .b{background:var(--seal);flex:1;transition:width .3s ease}
+
+  /* ── 阶段四:校长 ── */
+  .banwords{display:flex;flex-wrap:wrap;gap:.9rem;margin:.4rem 0 1.6rem}
+  .banword{
+    font-size:clamp(1.5rem,3vw,2.4rem);font-weight:700;letter-spacing:.15em;
+    padding:.25em .7em;border:1px solid var(--seal);border-radius:8px;color:var(--chalk-dim);
+    position:relative;
+  }
+  .banword::after{content:"";position:absolute;left:8%;right:8%;top:50%;height:3px;background:var(--seal);transform:rotate(-4deg)}
+  .banword .del{position:absolute;top:-.5rem;right:-.5rem;background:var(--ink);border:1px solid var(--line);border-radius:50%;width:1.4rem;height:1.4rem;font-size:.8rem;display:flex;align-items:center;justify-content:center}
+  .schools{display:grid;grid-template-columns:repeat(auto-fill,minmax(21rem,1fr));gap:1.2rem;margin-top:1rem}
+  .school{
+    background:var(--ink-2);border:1px solid var(--line);border-radius:12px;padding:1.1rem;
+    display:flex;flex-direction:column;gap:.6rem;position:relative;
+  }
+  .school .sn{font-family:var(--sans);font-size:.7rem;letter-spacing:.35em;color:var(--chalk-dim)}
+  .school .lines{font-size:1.05rem;line-height:1.75;flex:1}
+  .school .foot{display:flex;align-items:center;gap:.6rem}
+  .school.admit{border-color:var(--brass);box-shadow:0 0 26px rgba(201,162,75,.18)}
+  .school.admit::before{
+    content:"录 取";position:absolute;top:.7rem;right:.8rem;
+    border:2px solid var(--seal);color:var(--seal);border-radius:50%;
+    width:3.4rem;height:3.4rem;display:flex;align-items:center;justify-content:center;
+    font-size:.8rem;letter-spacing:.2em;transform:rotate(12deg);
+  }
+  .reveal-btn{
+    font-size:.9rem;font-weight:700;letter-spacing:.25em;
+    border:1px solid var(--brass);color:var(--brass);border-radius:999px;padding:.6em 1.6em;
+  }
+  .reveal-btn:hover{background:var(--brass);color:var(--ink)}
+  .sec-label{font-family:var(--sans);font-size:.72rem;letter-spacing:.4em;color:var(--chalk-dim);margin:1.8rem 0 .8rem}
+
+  /* ── 阶段五:OOPS ── */
+  #s5 .oops-title{font-size:clamp(2.4rem,6vw,4.6rem);letter-spacing:.12em;font-weight:700;text-align:center;margin-top:1.5rem}
+  #s5 .oops-title em{font-style:normal;color:var(--brass)}
+  #s5 .oops-sub{text-align:center;color:var(--chalk-dim);margin-top:.7rem;letter-spacing:.3em;font-family:var(--sans);font-size:.8rem}
+  .tenets{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;margin:2.6rem 0 2.2rem}
+  .tenet{border-top:2px solid var(--brass);padding-top:.8rem}
+  .tenet .k{font-family:var(--sans);font-size:.7rem;letter-spacing:.3em;color:var(--chalk-dim);margin-bottom:.4rem}
+  .tenet .v{font-size:1.2rem;line-height:1.5}
+  .openqs{max-width:52rem;margin:0 auto}
+  .openqs .item{font-size:1.12rem;background:transparent;border:none;border-left:2px solid var(--seal);border-radius:0;padding:.3rem 0 .3rem 1rem}
+
+  /* ── 底栏 ── */
+  footer{
+    position:fixed;left:0;right:0;bottom:0;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:.8rem 1.6rem;background:linear-gradient(transparent,var(--ink) 35%);
+    font-family:var(--sans);
+  }
+  footer .navbtn{
+    border:1px solid var(--line);border-radius:999px;padding:.55em 1.5em;
+    font-size:.85rem;letter-spacing:.2em;color:var(--chalk);
+  }
+  footer .navbtn:hover{border-color:var(--brass);color:var(--brass)}
+  footer .navbtn:disabled{opacity:.25;cursor:default}
+  footer .where{font-size:.75rem;letter-spacing:.2em;color:var(--chalk-dim)}
+
+  @media (max-width:900px){
+    .twocol,.threecol,.stance,.tenets{grid-template-columns:1fr}
+    main{padding:1.2rem 1rem 7rem}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">如何办<em>大学</em></div>
+  <div class="stage-dots" id="dots"></div>
+  <button class="export-btn" onclick="exportAll()">导出记录</button>
+</header>
+
+<main>
+
+  <!-- 阶段 0:开场 -->
+  <section class="stage" id="s0">
+    <div>
+      <div class="eyebrow">CHECK · IN</div>
+      <div class="mega">如何办大学<span class="q">?</span></div>
+      <div class="seal">未经<br>认证</div>
+      <div class="hint">本页数据只存在于内存 · 请勿刷新 · 结束前记得点右上角「导出记录」</div>
+    </div>
+  </section>
+
+  <!-- 阶段 1:好与坏 -->
+  <section class="stage" id="s1">
+    <div class="stage-head">
+      <div class="eyebrow">第一环 · 盘点</div>
+      <h1 class="stage-title">大学的好与坏</h1>
+      <p class="stage-sub">学员口头说,主持人录入。点「共鸣」为引起举手最多的条目记票。</p>
+    </div>
+    <div class="twocol">
+      <div class="col-good">
+        <div class="colhead"><span class="tag">THE GOOD</span>大学给了什么</div>
+        <div class="addrow">
+          <input id="goodIn" placeholder="录入一条「好」…" onkeydown="if(event.key==='Enter')addGood()">
+          <button class="go" onclick="addGood()">录入</button>
+        </div>
+        <div id="goodList"></div>
+      </div>
+      <div class="col-bad">
+        <div class="colhead"><span class="tag">THE BAD</span>大学夺走了什么</div>
+        <div class="addrow">
+          <input id="badIn" placeholder="录入一条「坏」…" onkeydown="if(event.key==='Enter')addBad()">
+          <button class="go" onclick="addBad()">录入</button>
+        </div>
+        <div id="badList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 阶段 2:毕业标准 -->
+  <section class="stage" id="s2">
+    <div class="stage-head">
+      <div class="eyebrow">第二环 · 拆解</div>
+      <h1 class="stage-title">毕业标准,非大学不可吗?</h1>
+      <p class="stage-sub">在每个标准下录入学员提出的替代方案,举手表决后点票。得票最高的方案会自动镶上金边。</p>
+    </div>
+    <div class="threecol" id="stdCards"></div>
+  </section>
+
+  <!-- 阶段 3:证据链 -->
+  <section class="stage" id="s3">
+    <div class="stage-head">
+      <div class="eyebrow">第三环 · 攻击</div>
+      <h1 class="stage-title">大学如何保证工作?拼出证据链</h1>
+      <p class="stage-sub">和学员一起把「上大学 → 获得工作」中间的环节补全,再投票攻击最脆弱的一环,并为它录入新方案。</p>
+    </div>
+    <div class="addrow" style="max-width:36rem">
+      <input id="nodeIn" placeholder="添加一个中间环节,如:文凭作为筛选信号…" onkeydown="if(event.key==='Enter')addNode()">
+      <button class="go" onclick="addNode()">加入链条</button>
+    </div>
+    <div class="chain-wrap"><div class="chain" id="chain"></div></div>
+
+    <div class="sec-label">终极表决 —— 新形态的大学,向左还是向右?</div>
+    <div class="stance" id="stance"></div>
+  </section>
+
+  <!-- 阶段 4:校长 -->
+  <section class="stage" id="s4">
+    <div class="stage-head">
+      <div class="eyebrow">第四环 · 重建</div>
+      <h1 class="stage-title">如果你是校长</h1>
+      <p class="stage-sub">先让大家喊出五个词,全部禁用。然后每人在纸上写三句话描述自己的学校,交上来匿名录入,最后举手投票入学。</p>
+    </div>
+
+    <div class="sec-label">禁 用 词(五个)</div>
+    <div class="addrow" style="max-width:30rem">
+      <input id="banIn" placeholder="录入一个禁用词…" onkeydown="if(event.key==='Enter')addBan()">
+      <button class="go" onclick="addBan()">封禁</button>
+    </div>
+    <div class="banwords" id="banList"></div>
+
+    <div class="sec-label">匿 名 招 生 墙</div>
+    <div class="addrow" style="max-width:44rem;align-items:stretch">
+      <textarea id="schoolIn" rows="3" placeholder="录入一份三句话(可分行)…"></textarea>
+      <button class="go" onclick="addSchool()">上墙</button>
+    </div>
+    <div class="schools" id="schoolList"></div>
+    <div style="text-align:center;margin-top:1.8rem">
+      <button class="reveal-btn" onclick="revealAdmit()">揭晓录取</button>
+    </div>
+  </section>
+
+  <!-- 阶段 5:OOPS -->
+  <section class="stage" id="s5">
+    <div class="eyebrow" style="text-align:center">第五环 · 另一种答案</div>
+    <div class="oops-title">好奇的<em>亚洲大学</em>计划</div>
+    <div class="oops-sub">OOPS · OPEN ONE PERSON SCHOOL</div>
+    <div class="tenets">
+      <div class="tenet"><div class="k">对象</div><div class="v">18–25岁的<br>年轻人</div></div>
+      <div class="tenet"><div class="k">路径</div><div class="v">以创业为<br>主线的学习</div></div>
+      <div class="tenet"><div class="k">课程</div><div class="v">游戏化的<br>四年设计</div></div>
+      <div class="tenet"><div class="k">毕业标准</div><div class="v">经济独立<br>而非学分</div></div>
+    </div>
+    <div class="openqs">
+      <div class="sec-label" style="text-align:center">回 到 今 天 的 三 个 问 题</div>
+      <div class="item"><span class="txt">刚才投票选出的「最脆弱一环」,这个计划如何回应?</span></div>
+      <div class="item"><span class="txt">刚才票数最高的替代方案,能不能直接搬进来?</span></div>
+      <div class="item"><span class="txt">终极表决的结果,和这个计划的选择一致吗?</span></div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <button class="navbtn" id="prevBtn" onclick="go(-1)">← 上一环</button>
+  <div class="where" id="whereLabel"></div>
+  <button class="navbtn" id="nextBtn" onclick="go(1)">下一环 →</button>
+</footer>
+
+<script>
+/* ───────── 状态(仅存内存) ───────── */
+const S = {
+  stage: 0,
+  good: [],            // {t,v}
+  bad: [],             // {t,v}
+  stds: [
+    {name:"论文", alts:[]},        // alts: {t,v}
+    {name:"学分＋成绩", alts:[]},
+    {name:"年限", alts:[]}
+  ],
+  nodes: [],           // 中间环节 {t,v,plan}
+  stance: {a:0, b:0},  // a=放弃保障 b=重做保障
+  bans: [],
+  schools: [],         // {t,v}
+  revealed: false
+};
+const STAGE_NAMES = ["开场","好与坏","毕业标准","证据链","当校长","OOPS"];
+
+/* ───────── 导航 ───────── */
+function go(d){ setStage(Math.min(5, Math.max(0, S.stage + d))); }
+function setStage(i){
+  S.stage = i;
+  document.querySelectorAll(".stage").forEach((el,idx)=>el.classList.toggle("on", idx===i));
+  document.getElementById("prevBtn").disabled = (i===0);
+  document.getElementById("nextBtn").disabled = (i===5);
+  document.getElementById("whereLabel").textContent = "第 " + i + " / 5 环 · " + STAGE_NAMES[i];
+  renderDots();
+}
+function renderDots(){
+  const d = document.getElementById("dots");
+  d.innerHTML = "";
+  STAGE_NAMES.forEach((n,i)=>{
+    const b = document.createElement("button");
+    b.textContent = i;
+    b.title = n;
+    b.className = (i===S.stage) ? "on" : "";
+    b.onclick = ()=>setStage(i);
+    d.appendChild(b);
+  });
+}
+document.addEventListener("keydown", e=>{
+  if(e.target.tagName==="INPUT" || e.target.tagName==="TEXTAREA") return;
+  if(e.key==="ArrowRight") go(1);
+  if(e.key==="ArrowLeft") go(-1);
+});
+
+/* ───────── 通用条目渲染 ───────── */
+function itemRow(obj, onVote, onDel, voteLabel){
+  const row = document.createElement("div");
+  row.className = "item";
+  const txt = document.createElement("span");
+  txt.className = "txt"; txt.textContent = obj.t;
+  const v = document.createElement("button");
+  v.className = "vote" + (obj.v>0 ? " has" : "");
+  v.textContent = (voteLabel||"共鸣") + " " + obj.v;
+  v.onclick = onVote;
+  const x = document.createElement("button");
+  x.className = "del"; x.textContent = "×"; x.onclick = onDel;
+  row.append(txt, v, x);
+  return row;
+}
+
+/* ───────── 阶段一 ───────── */
+function addGood(){ pushItem("goodIn", S.good, renderS1); }
+function addBad(){ pushItem("badIn", S.bad, renderS1); }
+function pushItem(inputId, arr, rerender){
+  const el = document.getElementById(inputId);
+  const t = el.value.trim();
+  if(!t) return;
+  arr.push({t, v:0});
+  el.value = ""; el.focus();
+  rerender();
+}
+function renderS1(){
+  const g = document.getElementById("goodList"), b = document.getElementById("badList");
+  g.innerHTML = ""; b.innerHTML = "";
+  if(!S.good.length) g.innerHTML = '<div class="empty">等待第一条「好」……</div>';
+  if(!S.bad.length) b.innerHTML = '<div class="empty">等待第一条「坏」……</div>';
+  S.good.forEach((o,i)=> g.appendChild(itemRow(o,
+    ()=>{o.v++;renderS1();}, ()=>{S.good.splice(i,1);renderS1();})));
+  S.bad.forEach((o,i)=> b.appendChild(itemRow(o,
+    ()=>{o.v++;renderS1();}, ()=>{S.bad.splice(i,1);renderS1();})));
+}
+
+/* ───────── 阶段二 ───────── */
+function renderS2(){
+  const wrap = document.getElementById("stdCards");
+  wrap.innerHTML = "";
+  S.stds.forEach((std, si)=>{
+    const card = document.createElement("div");
+    card.className = "std-card";
+    const h = document.createElement("h3"); h.textContent = std.name;
+    card.appendChild(h);
+    const row = document.createElement("div"); row.className = "addrow";
+    const inp = document.createElement("input");
+    inp.placeholder = "替代方案…";
+    inp.onkeydown = e=>{ if(e.key==="Enter") add(); };
+    const btn = document.createElement("button");
+    btn.className = "go"; btn.textContent = "录入"; btn.onclick = add;
+    function add(){
+      const t = inp.value.trim(); if(!t) return;
+      std.alts.push({t, v:0}); inp.value=""; inp.focus(); renderS2();
+    }
+    row.append(inp, btn); card.appendChild(row);
+    const max = Math.max(0, ...std.alts.map(a=>a.v));
+    if(!std.alts.length){
+      const e = document.createElement("div"); e.className="empty"; e.textContent="等待方案……";
+      card.appendChild(e);
+    }
+    std.alts.forEach((a, ai)=>{
+      const r = itemRow(a, ()=>{a.v++;renderS2();}, ()=>{std.alts.splice(ai,1);renderS2();}, "可行");
+      if(a.v>0 && a.v===max) r.classList.add("top");
+      card.appendChild(r);
+    });
+    wrap.appendChild(card);
+  });
+}
+
+/* ───────── 阶段三 ───────── */
+function addNode(){
+  const el = document.getElementById("nodeIn");
+  const t = el.value.trim(); if(!t) return;
+  S.nodes.push({t, v:0, plan:""});
+  el.value=""; el.focus(); renderS3();
+}
+function renderS3(){
+  const c = document.getElementById("chain");
+  c.innerHTML = "";
+  const maxV = Math.max(0, ...S.nodes.map(n=>n.v));
+  const all = [{fixed:true, t:"上大学"}, ...S.nodes, {fixed:true, t:"获得工作"}];
+  all.forEach((n, i)=>{
+    if(i>0){
+      const lk = document.createElement("div");
+      const prevWeak = !all[i-1].fixed && all[i-1].v>0 && all[i-1].v===maxV;
+      const thisWeak = !n.fixed && n.v>0 && n.v===maxV;
+      lk.className = "link" + ((prevWeak||thisWeak) ? " broken" : "");
+      lk.textContent = (prevWeak||thisWeak) ? "─ ✕ ─" : "──";
+      c.appendChild(lk);
+    }
+    const nd = document.createElement("div");
+    nd.className = "node" + (n.fixed ? " fixed" : "");
+    const tx = document.createElement("div"); tx.className="ntxt"; tx.textContent = n.t;
+    nd.appendChild(tx);
+    if(!n.fixed){
+      const isWeak = n.v>0 && n.v===maxV;
+      if(isWeak) nd.classList.add("weakest");
+      const foot = document.createElement("div");
+      foot.style.display="flex"; foot.style.gap=".5rem"; foot.style.alignItems="center";
+      const v = document.createElement("button");
+      v.className = "vote" + (n.v>0?" has":"");
+      v.textContent = "脆弱 " + n.v;
+      v.onclick = ()=>{n.v++;renderS3();};
+      const p = document.createElement("button");
+      p.className = "vote"; p.textContent = n.plan ? "改方案" : "新方案";
+      p.onclick = ()=>{
+        const ans = prompt("这一环的新方案:", n.plan||"");
+        if(ans!==null){ n.plan = ans.trim(); renderS3(); }
+      };
+      const x = document.createElement("button");
+      x.className="del"; x.textContent="×";
+      x.onclick = ()=>{ S.nodes.splice(S.nodes.indexOf(n),1); renderS3(); };
+      foot.append(v,p,x); nd.appendChild(foot);
+      if(n.plan){
+        const pl = document.createElement("div");
+        pl.className="plan"; pl.innerHTML = "<b>新方案</b><br>";
+        pl.append(document.createTextNode(n.plan));
+        nd.appendChild(pl);
+      }
+    }
+    c.appendChild(nd);
+  });
+  renderStance();
+}
+function renderStance(){
+  const w = document.getElementById("stance");
+  w.innerHTML = "";
+  const defs = [
+    {key:"a", h:"彻底放弃工作保障", p:"那么,大学的价值到底是什么?"},
+    {key:"b", h:"继续保障工作", p:"那么,大学必须变成什么样?"}
+  ];
+  const total = S.stance.a + S.stance.b;
+  defs.forEach(d=>{
+    const card = document.createElement("div");
+    card.className = "stance-card";
+    if(total>0 && S.stance[d.key]===Math.max(S.stance.a,S.stance.b) && S.stance.a!==S.stance.b)
+      card.classList.add("lead");
+    const h = document.createElement("h4"); h.textContent = d.h;
+    const p = document.createElement("p"); p.textContent = d.p;
+    const b = document.createElement("button");
+    b.className = "bigvote"; b.textContent = S.stance[d.key];
+    b.title = "点击记一票";
+    b.onclick = ()=>{ S.stance[d.key]++; renderStance(); };
+    card.append(h,p,b);
+    w.appendChild(card);
+  });
+  const bar = document.createElement("div");
+  bar.className = "stance-bar";
+  const a = document.createElement("div"); a.className="a";
+  a.style.width = total ? (S.stance.a/total*100)+"%" : "50%";
+  const b2 = document.createElement("div"); b2.className="b";
+  bar.append(a,b2);
+  w.appendChild(bar);
+}
+
+/* ───────── 阶段四 ───────── */
+function addBan(){
+  const el = document.getElementById("banIn");
+  const t = el.value.trim(); if(!t) return;
+  if(S.bans.length>=5){ alert("已有五个禁用词。先删掉一个再加。"); return; }
+  S.bans.push(t); el.value=""; el.focus(); renderS4();
+}
+function addSchool(){
+  const el = document.getElementById("schoolIn");
+  const t = el.value.trim(); if(!t) return;
+  S.schools.push({t, v:0});
+  el.value=""; el.focus(); renderS4();
+}
+function revealAdmit(){ S.revealed = true; renderS4(); }
+function renderS4(){
+  const bl = document.getElementById("banList");
+  bl.innerHTML = "";
+  if(!S.bans.length) bl.innerHTML = '<div class="empty">让大家喊出五个词……</div>';
+  S.bans.forEach((w,i)=>{
+    const c = document.createElement("div");
+    c.className = "banword";
+    c.append(document.createTextNode(w));
+    const x = document.createElement("button");
+    x.className="del"; x.textContent="×";
+    x.onclick = ()=>{ S.bans.splice(i,1); renderS4(); };
+    c.appendChild(x);
+    bl.appendChild(c);
+  });
+
+  const sl = document.getElementById("schoolList");
+  sl.innerHTML = "";
+  let list = S.schools.map((s,i)=>({s, i}));
+  if(S.revealed) list.sort((x,y)=> y.s.v - x.s.v);
+  const maxV = Math.max(0, ...S.schools.map(s=>s.v));
+  if(!list.length) sl.innerHTML = '<div class="empty">等待第一份三句话上墙……</div>';
+  list.forEach(({s,i}, rank)=>{
+    const card = document.createElement("div");
+    card.className = "school";
+    if(S.revealed && s.v>0 && s.v===maxV) card.classList.add("admit");
+    const sn = document.createElement("div");
+    sn.className="sn";
+    sn.textContent = S.revealed ? ("第 " + (rank+1) + " 名 · " + s.v + " 票") : ("第 " + (i+1) + " 号学校");
+    const ln = document.createElement("div");
+    ln.className="lines";
+    s.t.split(/\n+/).forEach(line=>{
+      const d = document.createElement("div"); d.textContent = line; ln.appendChild(d);
+    });
+    const foot = document.createElement("div");
+    foot.className = "foot";
+    const v = document.createElement("button");
+    v.className = "vote" + (s.v>0?" has":"");
+    v.textContent = "入学 " + s.v;
+    v.onclick = ()=>{ s.v++; renderS4(); };
+    const x = document.createElement("button");
+    x.className="del"; x.textContent="×";
+    x.onclick = ()=>{ S.schools.splice(i,1); renderS4(); };
+    foot.append(v,x);
+    card.append(sn, ln, foot);
+    sl.appendChild(card);
+  });
+}
+
+/* ───────── 导出 ───────── */
+function exportAll(){
+  const L = [];
+  L.push("《如何办大学》课堂记录");
+  L.push("时间:" + new Date().toLocaleString("zh-CN"));
+  L.push("");
+  L.push("── 一、大学的好与坏 ──");
+  L.push("【好】");
+  S.good.forEach(o=>L.push("· " + o.t + "(共鸣 " + o.v + ")"));
+  L.push("【坏】");
+  S.bad.forEach(o=>L.push("· " + o.t + "(共鸣 " + o.v + ")"));
+  L.push("");
+  L.push("── 二、毕业标准的替代方案 ──");
+  S.stds.forEach(std=>{
+    L.push("【" + std.name + "】");
+    std.alts.forEach(a=>L.push("· " + a.t + "(可行 " + a.v + " 票)"));
+  });
+  L.push("");
+  L.push("── 三、证据链 ──");
+  L.push("上大学 → " + S.nodes.map(n=>n.t).join(" → ") + " → 获得工作");
+  S.nodes.forEach(n=>{
+    L.push("· " + n.t + "(脆弱 " + n.v + " 票)" + (n.plan ? " 新方案:" + n.plan : ""));
+  });
+  L.push("终极表决:放弃保障 " + S.stance.a + " 票 / 重做保障 " + S.stance.b + " 票");
+  L.push("");
+  L.push("── 四、当校长 ──");
+  L.push("禁用词:" + S.bans.join("、"));
+  S.schools.forEach((s,i)=>{
+    L.push("第" + (i+1) + "号学校(入学 " + s.v + " 票):");
+    s.t.split(/\n+/).forEach(line=>L.push("  " + line));
+  });
+  L.push("");
+  L.push("── 五、好奇的亚洲大学计划 ──");
+  L.push("(现场讨论,见录音/笔记)");
+  const blob = new Blob([L.join("\n")], {type:"text/plain;charset=utf-8"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "如何办大学-课堂记录.txt";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+/* ───────── 防误刷新 ───────── */
+window.addEventListener("beforeunload", e=>{
+  const dirty = S.good.length||S.bad.length||S.nodes.length||S.schools.length||S.bans.length;
+  if(dirty){ e.preventDefault(); e.returnValue = ""; }
+});
+
+/* ───────── 初始化 ───────── */
+renderS1(); renderS2(); renderS3(); renderS4();
+setStage(0);
+</script>
+</body>
+</html>
