@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>一人公司大冒险 · 高杠杆身份养成 · ONE PERSON QUEST</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=ZCOOL+QingKe+HuangYou&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0c0e1d;
+  --panel:#151834;
+  --panel2:#1c2044;
+  --line:#31376b;
+  --gold:#ffcf4d;
+  --red:#ff5d6c;
+  --green:#57f2a2;
+  --cyan:#5fd4ff;
+  --ink:#e8eaff;
+  --dim:#9aa0d0;
+  --display:'ZCOOL QingKe HuangYou','PingFang SC','Microsoft YaHei',sans-serif;
+  --body:-apple-system,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--body);
+  line-height:1.75;
+  min-height:100vh;
+  background-image:
+    radial-gradient(circle at 15% 10%, rgba(95,212,255,.06), transparent 40%),
+    radial-gradient(circle at 85% 90%, rgba(255,207,77,.05), transparent 40%);
+}
+/* subtle scanlines */
+body::after{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:999;
+  background:repeating-linear-gradient(0deg, rgba(255,255,255,.015) 0 1px, transparent 1px 3px);
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+.wrap{max-width:720px;margin:0 auto;padding:20px 18px 80px}
+
+/* ===== pixel frame ===== */
+.pix{
+  background:var(--panel);
+  border:3px solid var(--line);
+  box-shadow:0 0 0 3px var(--bg), 0 0 0 6px #23274e, 6px 8px 0 rgba(0,0,0,.45);
+  padding:22px 20px;
+  margin-bottom:26px;
+}
+.pix.gold{border-color:var(--gold)}
+.pix.red{border-color:var(--red)}
+.pix.green{border-color:var(--green)}
+
+h1,h2,h3,.btn,.hud-label{font-family:var(--display);font-weight:400;letter-spacing:.04em}
+h1{font-size:2rem;line-height:1.25;color:var(--gold)}
+h2{font-size:1.4rem;color:var(--gold);margin-bottom:12px}
+h3{font-size:1.1rem;color:var(--cyan);margin:18px 0 6px}
+.small{font-size:.85rem;color:var(--dim)}
+.eyebrow{font-family:var(--display);font-size:.85rem;color:var(--cyan);letter-spacing:.25em;margin-bottom:6px}
+
+/* ===== HUD ===== */
+#hud{position:sticky;top:0;z-index:50;background:rgba(12,14,29,.92);backdrop-filter:blur(6px);border-bottom:2px solid var(--line);padding:10px 18px;display:none}
+#hud .row{max-width:720px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.hud-label{font-size:.8rem;color:var(--gold);white-space:nowrap}
+.hpbar{flex:1;height:16px;background:#0a0b18;border:2px solid var(--line);position:relative}
+.hpfill{height:100%;background:linear-gradient(90deg,var(--red),var(--gold),var(--green));width:100%;transition:width .6s steps(12)}
+#hpnum{font-family:var(--display);font-size:.85rem;color:var(--green);min-width:52px;text-align:right}
+
+/* ===== buttons ===== */
+.btn{
+  display:inline-block;cursor:pointer;border:3px solid var(--gold);background:var(--gold);color:#1a1500;
+  font-size:1.05rem;padding:10px 26px;box-shadow:4px 4px 0 rgba(0,0,0,.5);
+  transition:transform .08s;user-select:none;text-align:center
+}
+.btn:hover{transform:translate(-1px,-1px)}
+.btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 rgba(0,0,0,.5)}
+.btn:focus-visible{outline:3px dashed var(--cyan);outline-offset:3px}
+.btn.ghost{background:transparent;color:var(--gold)}
+.btn.cyan{background:var(--cyan);border-color:var(--cyan);color:#00222f}
+.btn.danger{background:var(--red);border-color:var(--red);color:#2b0006}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btnrow{display:flex;gap:14px;flex-wrap:wrap;margin-top:18px}
+
+/* ===== form ===== */
+label.q{display:block;font-weight:600;margin:16px 0 4px;color:var(--ink)}
+label.q .hint{display:block;font-weight:400;font-size:.82rem;color:var(--dim)}
+input[type=text],textarea,select{
+  width:100%;background:#0a0b18;border:2px solid var(--line);color:var(--ink);
+  padding:10px 12px;font-size:1rem;font-family:var(--body);border-radius:0
+}
+textarea{min-height:74px;resize:vertical}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--cyan)}
+
+/* choice cards */
+.choice{display:block;border:2px solid var(--line);background:var(--panel2);padding:12px 14px;margin:10px 0;cursor:pointer;transition:border-color .15s}
+.choice:hover{border-color:var(--cyan)}
+.choice input{margin-right:10px;accent-color:var(--gold)}
+.choice.sel{border-color:var(--gold);background:#242a58}
+.choice .t{font-weight:700}
+.choice .d{font-size:.85rem;color:var(--dim)}
+
+/* ===== screens ===== */
+.screen{display:none}
+.screen.on{display:block;animation:pop .35s steps(6)}
+@keyframes pop{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* level tag */
+.lvl{display:inline-block;font-family:var(--display);background:var(--panel2);border:2px solid var(--cyan);color:var(--cyan);padding:2px 12px;font-size:.85rem;margin-bottom:10px}
+
+/* coins */
+.coin{display:inline-block;width:14px;height:14px;background:var(--gold);border-radius:50%;box-shadow:inset -3px -3px 0 rgba(0,0,0,.35);margin-right:2px;vertical-align:-2px}
+
+/* verdict */
+#verdictTitle{font-size:2.2rem;text-align:center;margin:8px 0 4px}
+#verdictTitle.dead{color:var(--red);text-shadow:0 0 18px rgba(255,93,108,.5)}
+#verdictTitle.alive{color:var(--green);text-shadow:0 0 18px rgba(87,242,162,.5)}
+.gameover-sub{text-align:center;font-family:var(--display);color:var(--dim);letter-spacing:.3em;margin-bottom:18px}
+#verdictBody{white-space:pre-wrap}
+.charcard{border:3px solid var(--gold);background:linear-gradient(160deg,#1c2044,#151834);padding:18px;margin-top:18px}
+.charcard h3{margin-top:0;color:var(--gold)}
+.charcard .kv{margin:8px 0}
+.charcard .k{font-family:var(--display);color:var(--cyan);font-size:.9rem;display:block}
+
+/* stage feedback interstitial */
+.npc-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.npc-avatar{width:52px;height:52px;background:var(--panel2);border:3px solid var(--cyan);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex:none}
+.npc-name{font-family:var(--display);color:var(--cyan)}
+.npc-name .small{display:block;letter-spacing:.2em}
+#fb-praise{min-height:60px}
+.roast{margin-top:16px;border:2px dashed var(--red);background:rgba(255,93,108,.07);padding:10px 14px;position:relative}
+.roast .stamp{font-family:var(--display);color:var(--red);font-size:.8rem;letter-spacing:.2em;display:block;margin-bottom:2px}
+.fb-loading{color:var(--dim)}
+.fb-loading .dots{margin-top:8px}
+
+/* loading */
+.loader{text-align:center;padding:40px 0}
+.dots span{display:inline-block;width:12px;height:12px;background:var(--gold);margin:0 5px;animation:blink 1s infinite steps(2)}
+.dots span:nth-child(2){animation-delay:.2s}.dots span:nth-child(3){animation-delay:.4s}
+@keyframes blink{50%{opacity:.15}}
+
+/* ===== course section ===== */
+.flywheel{display:flex;flex-direction:column;align-items:center;margin:14px 0}
+.fly-step{background:var(--panel2);border:2px solid var(--line);padding:8px 20px;font-family:var(--display);font-size:1rem;color:var(--ink);min-width:230px;text-align:center}
+.fly-step em{font-style:normal;color:var(--gold);font-size:.8rem;display:block}
+.fly-arrow{color:var(--gold);font-family:var(--display);padding:2px 0}
+.fly-loop{color:var(--green);font-family:var(--display);font-size:.9rem;margin-top:6px}
+.tagline{border-left:4px solid var(--gold);padding:6px 14px;margin:14px 0;background:rgba(255,207,77,.06);font-size:1.02rem}
+.ladder{list-style:none;margin:12px 0}
+.ladder li{border:2px solid var(--line);background:var(--panel2);margin:8px 0;padding:10px 14px}
+.ladder li b{color:var(--gold)}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.vs>div{border:2px solid var(--line);padding:12px 14px;background:var(--panel2);font-size:.92rem}
+.vs .bad{border-color:var(--red)}
+.vs .good{border-color:var(--green)}
+.vs h4{font-family:var(--display);margin-bottom:6px}
+.vs .bad h4{color:var(--red)}.vs .good h4{color:var(--green)}
+@media(max-width:560px){.vs{grid-template-columns:1fr}}
+.footer-note{text-align:center;color:var(--dim);font-size:.85rem;margin-top:40px}
+.err{color:var(--red);font-size:.9rem;margin-top:10px;display:none}
+.toplink{position:fixed;right:14px;bottom:14px;z-index:60;display:none}
+</style>
+</head>
+<body>
+
+<div id="hud" aria-hidden="true">
+  <div class="row">
+    <span class="hud-label" id="hudStage">LV.0 角色创建</span>
+    <div class="hpbar"><div class="hpfill" id="hpfill"></div></div>
+    <span id="hpnum">100%</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ============ START ============ -->
+<section class="screen on" id="s-start">
+  <div class="pix gold" style="text-align:center">
+    <div class="eyebrow">好奇学习社区 · OOPS 特别课</div>
+    <h1>一人公司大冒险</h1>
+    <p style="font-family:var(--display);color:var(--cyan);font-size:1.05rem;margin-top:2px">—— 高杠杆身份养成计划 ——</p>
+    <p class="small" style="letter-spacing:.3em;font-family:var(--display)">ONE PERSON QUEST</p>
+    <p style="margin:18px 0">这是一场创业模拟。你将带着<b>真实的自己</b>——真实的时间、真实的责任、真实的兴趣——闯过一人公司的五道关卡。</p>
+    <p>最后,命运裁判会宣布:你活下来了,还是——<span style="color:var(--red)">死在了哪一关</span>。</p>
+    <p class="small" style="margin-top:10px">全球已有超过 4000 万一人公司创业者。Anthropic CEO 曾预测:第一家十亿美元的一人公司将在 2026 年出现。<br>问题只有一个:那个人为什么不能是你?</p>
+    <div class="btnrow" style="justify-content:center">
+      <button class="btn" onclick="go('s-create')">▶ 插入硬币,开始游戏</button>
+      <button class="btn ghost" onclick="go('s-course')">先看攻略(课程内容)</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LV.0 角色创建 ============ -->
+<section class="screen" id="s-create">
+  <div class="pix">
+    <span class="lvl">LV.0 角色创建</span>
+    <h2>你是谁?</h2>
+    <p class="small">每个伟大的一人公司,资产负债表上只有一项资产:你自己。先诚实盘点。</p>
+
+    <label class="q">姓名 / 代号</label>
+    <input type="text" id="f-name" placeholder="例:阿柴">
+
+    <label class="q">用三个词给自己贴标签<span class="hint">例:社恐 / 猫奴 / 什么都懂一点</span></label>
+    <input type="text" id="f-tags" placeholder="三个词,逗号隔开">
+
+    <label class="q">最近最困扰你的问题是什么?</label>
+    <textarea id="f-trouble" placeholder="说真话,裁判看得出敷衍"></textarea>
+
+    <label class="q">一天真实的可支配时间有多少?<span class="hint">刨掉睡觉、上课/上班、通勤、刷手机停不下来的部分</span></label>
+    <select id="f-time">
+      <option value="">请选择</option>
+      <option>不到 1 小时</option>
+      <option>1–2 小时</option>
+      <option>2–4 小时</option>
+      <option>4 小时以上</option>
+      <option>我时间大把,但都不知道去哪了</option>
+    </select>
+
+    <label class="q">目前无法回避的责任是什么?<span class="hint">例:学业、还房贷、照顾家人、给猫铲屎</span></label>
+    <textarea id="f-duty"></textarea>
+
+    <div class="btnrow"><button class="btn" onclick="validateCreate()">确认建档 →</button></div>
+    <p class="err" id="e-create">⚠ 至少填写姓名、可支配时间和困扰的问题,裁判需要证据。</p>
+  </div>
+</section>
+
+<!-- ============ LV.1 兴趣勘探 ============ -->
+<section class="screen" id="s-lv1">
+  <div class="pix">
+    <span class="lvl">LV.1 兴趣勘探</span>
+    <h2>寻找你的矿脉</h2>
+    <p class="small">一人公司不是从「市场缺什么」开始,而是从「你身上有什么」开始。Dan Koe:解决你自己的真实问题,把方法打包,就是最不容易失败的生意。</p>
+
+    <label class="q">你愿意自发花时间的事情是什么?做什么容易忘记时间?</label>
+    <textarea id="f-flow" placeholder="打游戏也算,但要说清楚你在里面到底享受什么"></textarea>
+
+    <label class="q">你自愿为什么事情花钱、花精力、倒贴也乐意?</label>
+    <textarea id="f-pay"></textarea>
+
+    <label class="q">独特经历<span class="hint">别人很少有、而你有的经历。例:休学一年 / 摆过摊 / 在寺庙住过一个月</span></label>
+    <textarea id="f-exp"></textarea>
+
+    <label class="q">痛苦经验<span class="hint">你踩过的坑、熬过的难。你的伤疤,往往就是别人愿意付费绕开的坑</span></label>
+    <textarea id="f-pain"></textarea>
+
+    <label class="q">兴趣组合 · ⚗️ 合成实验台<span class="hint">小众组合就是护城河。填两个兴趣,让 AI 帮你合成一个结合两者的行动</span></label>
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center">
+      <input type="text" id="f-int1" placeholder="兴趣 A,例:做饭">
+      <span style="font-family:var(--display);color:var(--gold)">×</span>
+      <input type="text" id="f-int2" placeholder="兴趣 B,例:哲学">
+    </div>
+    <div class="btnrow" style="margin-top:10px">
+      <button class="btn cyan" type="button" id="combo-btn" onclick="fuseInterests()">⚗️ 开始合成</button>
+    </div>
+    <div class="tagline" id="combo-result" style="display:none;border-color:var(--cyan);background:rgba(95,212,255,.06)"></div>
+
+    <label class="q">最喜欢的书或最喜欢的博主(任写一个)<span class="hint">你反复消费的内容,暴露了你真正的兴趣</span></label>
+    <input type="text" id="f-idol">
+
+    <div class="btnrow"><button class="btn" onclick="validateLv1()">带上矿镐,继续 →</button></div>
+    <p class="err" id="e-lv1">⚠ 「愿意自发花时间的事」是本关钥匙,必须填写。</p>
+  </div>
+</section>
+
+<!-- ============ LV.2 身份选择 ============ -->
+<section class="screen" id="s-lv2">
+  <div class="pix">
+    <span class="lvl">LV.2 身份选择</span>
+    <h2>岔路口:选择你的职业(游戏意义上的)</h2>
+    <p class="small">Naval:劳动和资本是旧杠杆,<b>代码和内容</b>是不需要任何人许可的新杠杆。可以被时间、网络、内容放大的身份,才是高杠杆身份。</p>
+
+    <div id="identityChoices">
+      <label class="choice"><input type="radio" name="idn" value="执行者"><span class="t">💼 稳定打工人</span><div class="d">出售时间换钱,干一小时赚一小时。安全,但天花板锁死。</div></label>
+      <label class="choice"><input type="radio" name="idn" value="创作者"><span class="t">✍️ 创作者(作家 / UP主 / 播客)</span><div class="d">内容杠杆:写一次,被读一万次。睡觉时也在工作。</div></label>
+      <label class="choice"><input type="radio" name="idn" value="开发者"><span class="t">⌨️ 独立开发者 / 研究者</span><div class="d">代码与知识杠杆:产品和论文自己复制自己。</div></label>
+      <label class="choice"><input type="radio" name="idn" value="长期主义者"><span class="t">🌱 长期主义者(健身 / 复利 / 手艺)</span><div class="d">时间杠杆:每天微小积累,五年后判若两人。</div></label>
+    </div>
+
+    <label class="q">用一句话描述你的「高杠杆身份」<span class="hint">例:一个教社恐者做展示的漫画作者 / 记录 gap year 的乡村建造者</span></label>
+    <input type="text" id="f-identity" placeholder="我是一个____的____">
+
+    <div class="btnrow"><button class="btn" onclick="validateLv2()">锁定身份 →</button></div>
+    <p class="err" id="e-lv2">⚠ 请选择一个职业,并写下你的高杠杆身份。</p>
+  </div>
+</section>
+
+<!-- ============ LV.3 内容试炼 ============ -->
+<section class="screen" id="s-lv3">
+  <div class="pix">
+    <span class="lvl">LV.3 内容试炼</span>
+    <h2>断更之谷</h2>
+    <p class="small">一人公司的第一资产不是产品,而是<b>注意力</b>。你承诺每天 1 小时公开输出。但是——</p>
+    <p style="margin:10px 0">🎬 <b>剧情事件:</b>第 14 天。你连更了两周,总共收获 37 个播放、2 个赞,其中 1 个赞来自你妈。评论区有人说「就这?」。今晚你很累。你会:</p>
+
+    <div id="contentChoices">
+      <label class="choice"><input type="radio" name="cnt" value="放弃"><span class="t">🛏️ 今天先歇一天,明天再说</span><div class="d">(旁白:根据历史存档,「明天」通常不会来)</div></label>
+      <label class="choice"><input type="radio" name="cnt" value="换赛道"><span class="t">🔄 数据这么差,肯定是赛道不对,连夜换方向</span><div class="d">30 天换 4 个赛道,每个都是新号</div></label>
+      <label class="choice"><input type="radio" name="cnt" value="继续+复盘"><span class="t">📊 照常发布,但花 15 分钟研究同类账号在解决什么问题</span><div class="d">对齐真实需求,小步迭代</div></label>
+      <label class="choice"><input type="radio" name="cnt" value="偷偷发"><span class="t">🥷 转为「偷偷发」模式,只在互助小组里发,求真实反馈</span><div class="d">降低心理成本,保住每日节奏</div></label>
+    </div>
+
+    <label class="q">如果非要坚持 90 天,你打算靠什么撑住?(一句话)</label>
+    <input type="text" id="f-persist" placeholder="你的续航策略">
+
+    <div class="btnrow"><button class="btn" onclick="validateLv3()">穿过山谷 →</button></div>
+    <p class="err" id="e-lv3">⚠ 请做出选择——断更之谷不接受沉默。</p>
+  </div>
+</section>
+
+<!-- ============ LV.4 产品化 ============ -->
+<section class="screen" id="s-lv4">
+  <div class="pix">
+    <span class="lvl">LV.4 产品化</span>
+    <h2>铸币工坊:你的第一个 MVO</h2>
+    <p class="small">Productize Yourself:不要卖时间,把「你的经历 + 知识 + 方法论」打包成系统。不要等完美产品,先做<b>最小可行产品(Minimum Viable Offer)</b>,靠销售来迭代。</p>
+
+    <label class="q">你能提供的「微小价值」是什么?<span class="hint">参考你喜欢的同类账号:他们在帮人解决什么问题?你能解决哪个更小、更具体的?</span></label>
+    <textarea id="f-value" placeholder="例:帮不敢开口的初中生录出第一条口语视频"></textarea>
+
+    <label class="q">你的第一个产品长什么样?<span class="hint">一句话说清:卖什么(模板/教程/社群/陪跑/小工具)、卖给谁、定价多少</span></label>
+    <textarea id="f-offer" placeholder="例:99 元的「7 天读书笔记模板+陪跑群」,卖给想读书但坚持不下来的大学生"></textarea>
+
+    <label class="q">如果只有 1000 个铁杆粉丝愿意为你付费,他们是谁?</label>
+    <input type="text" id="f-fans" placeholder="描述这 1000 个人">
+
+    <div class="btnrow"><button class="btn" onclick="validateLv4()">铸造金币 →</button></div>
+    <p class="err" id="e-lv4">⚠ 「微小价值」和「第一个产品」必须填写,空手不能铸币。</p>
+  </div>
+</section>
+
+<!-- ============ LV.5 系统化 ============ -->
+<section class="screen" id="s-lv5">
+  <div class="pix">
+    <span class="lvl">LV.5 系统化</span>
+    <h2>最终试炼:规模的诱惑</h2>
+    <p class="small">🎬 <b>剧情事件:</b>一年后,你的小生意每月稳定收入 2 万元,但你每天工作 12 小时,快撑不住了。一个投资人请你喝咖啡:「招 10 个人,我给你钱,把它做大!」你会:</p>
+
+    <div id="scaleChoices">
+      <label class="choice"><input type="radio" name="scl" value="融资扩张"><span class="t">🚀 拿钱、招人、扩张!</span><div class="d">收入↑ → 招人 → 管理 → 复杂度↑ → 你变成自己最讨厌的中层</div></label>
+      <label class="choice"><input type="radio" name="scl" value="自动化"><span class="t">⚙️ 拒绝。用系统和 AI 工具自动化交付,优化利润</span><div class="d">收入↑ → 优化系统 → 自动化 → 利润↑,人还是一个</div></label>
+      <label class="choice"><input type="radio" name="scl" value="涨价聚焦"><span class="t">💎 砍掉一半客户,涨价三倍,只服务铁杆</span><div class="d">Paul Jarvis:增长不是默认选项,「够了」是一种能力</div></label>
+      <label class="choice"><input type="radio" name="scl" value="躺平"><span class="t">🏖️ 维持现状,反正月入两万也不错</span><div class="d">但你每天仍然工作 12 小时……</div></label>
+    </div>
+
+    <label class="q">最后一题:五年后,你希望这家「一人公司」把你变成一个什么样的人?</label>
+    <textarea id="f-vision"></textarea>
+
+    <div class="btnrow"><button class="btn danger" onclick="finishGame()">⚔ 接受最终审判</button></div>
+    <p class="err" id="e-lv5">⚠ 请做出选择,命运不接受弃权票。</p>
+  </div>
+</section>
+
+<!-- ============ STAGE FEEDBACK ============ -->
+<section class="screen" id="s-feedback">
+  <div class="pix" style="border-color:var(--cyan)">
+    <div class="npc-head">
+      <div class="npc-avatar">⚖️</div>
+      <div class="npc-name">巡关裁判<span class="small">STAGE REFEREE</span></div>
+    </div>
+    <div id="fb-praise" class="fb-loading">裁判正在阅读你的答卷……<div class="dots"><span></span><span></span><span></span></div></div>
+    <div class="roast" id="fb-roast-box" style="display:none">
+      <span class="stamp">✎ 裁判锐评</span>
+      <span id="fb-roast"></span>
+    </div>
+    <div class="btnrow">
+      <button class="btn" id="fb-next" onclick="fbContinue()" disabled>收下点评,前往下一关 →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ JUDGING ============ -->
+<section class="screen" id="s-judging">
+  <div class="pix gold loader">
+    <h2 style="text-align:center">命运裁判正在翻阅你的存档……</h2>
+    <div class="dots"><span></span><span></span><span></span></div>
+    <p class="small" id="judgeFlavor" style="margin-top:16px">正在计算你的可支配时间与野心的比值……</p>
+  </div>
+</section>
+
+<!-- ============ VERDICT ============ -->
+<section class="screen" id="s-verdict">
+  <div class="pix" id="verdictBox">
+    <p class="gameover-sub">FINAL JUDGMENT · 终审判决</p>
+    <h2 id="verdictTitle">……</h2>
+    <p style="text-align:center;margin-bottom:14px"><span id="verdictStage" class="lvl" style="border-color:var(--gold);color:var(--gold)"></span></p>
+    <div id="verdictBody"></div>
+    <div id="adviceBox"></div>
+    <div class="charcard" id="charCard" style="display:none">
+      <h3>🎴 你的一人公司角色卡</h3>
+      <div class="kv"><span class="k">高杠杆身份</span><span id="c-identity"></span></div>
+      <div class="kv"><span class="k">微小价值</span><span id="c-value"></span></div>
+      <div class="kv"><span class="k">第一个产品(MVO)</span><span id="c-offer"></span></div>
+      <div class="kv"><span class="k">每日行动</span><span id="c-action"></span></div>
+    </div>
+    <div class="btnrow" style="justify-content:center">
+      <button class="btn cyan" onclick="go('s-course')">📖 解锁课程:攻略本</button>
+      <button class="btn ghost" onclick="restart()">↻ 再来一局</button>
+      <button class="btn ghost" onclick="copyResult()">⧉ 复制我的判决书</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COURSE ============ -->
+<section class="screen" id="s-course">
+  <div class="pix gold" style="text-align:center">
+    <div class="eyebrow">攻略本 · STRATEGY GUIDE</div>
+    <h1 style="font-size:1.6rem">一人公司 × 高杠杆身份方法论</h1>
+    <p class="small">刚才游戏里的每一关,都对应一条被反复验证过的方法论。</p>
+  </div>
+
+  <div class="pix">
+    <h2>① 商业飞轮 <span class="small">Dan Koe</span></h2>
+    <p>一人公司可以简化成一个不断自转的飞轮:</p>
+    <div class="flywheel">
+      <div class="fly-step">个人兴趣 / 经验<em>你的矿脉(LV.1)</em></div><div class="fly-arrow">▼</div>
+      <div class="fly-step">公开表达(内容)<em>免费价值输出</em></div><div class="fly-arrow">▼</div>
+      <div class="fly-step">建立受众 Audience<em>注意力是第一资产</em></div><div class="fly-arrow">▼</div>
+      <div class="fly-step">邮件列表 / 私域<em>你「拥有」的受众</em></div><div class="fly-arrow">▼</div>
+      <div class="fly-step">产品化知识<em>课程 · 模板 · 社群 · 工具</em></div><div class="fly-arrow">▼</div>
+      <div class="fly-step">自动销售系统<em>睡觉时也在成交</em></div><div class="fly-arrow">▼</div>
+      <div class="fly-step" style="border-color:var(--green)">收入循环<em>反哺内容与产品</em></div>
+      <div class="fly-loop">↺ 回到起点,飞轮加速</div>
+    </div>
+    <p class="small">内容不是广告,而是公开展示:你的思考方式、你解决问题的能力、你的世界观。</p>
+  </div>
+
+  <div class="pix">
+    <h2>② 四种杠杆 <span class="small">Naval Ravikant</span></h2>
+    <p>财富 = 你的判断力 × 杠杆。杠杆有四种:</p>
+    <ul class="ladder">
+      <li><b>劳动杠杆</b> —— 让别人为你工作。最古老,需要管理,麻烦。</li>
+      <li><b>资本杠杆</b> —— 用钱生钱。需要先有钱,还需要有人给你钱。</li>
+      <li><b>代码杠杆</b> —— 软件写一次,跑一万次。<span style="color:var(--green)">无需许可</span>。</li>
+      <li><b>内容杠杆</b> —— 文章、视频、播客,创作一次,被消费一万次。<span style="color:var(--green)">无需许可</span>。</li>
+    </ul>
+    <div class="tagline">「互联网让 80 亿个垄断成为可能。」—— Naval。高杠杆身份 = 可以被时间(复利)、网络(流量)、内容(代表作)放大的身份。选择只做执行者和消费者,等于亲手锁死人生天花板。</div>
+  </div>
+
+  <div class="pix">
+    <h2>③ 产品化自己 <span class="small">Productize Yourself</span></h2>
+    <div class="vs">
+      <div class="bad"><h4>✗ 卖时间</h4>「我一小时咨询 500 元。」干一小时,赚一小时。生病 = 停业。天花板 = 24 小时。</div>
+      <div class="good"><h4>✓ 卖系统</h4>你的经历 + 知识 + 方法论 → 打包成课程、模板、社群、咨询方案。做一次,卖无数次。</div>
+    </div>
+    <p>而且不用等「完美产品」。先做 <b>Minimum Viable Offer(最小可行产品)</b>,通过真实销售不断迭代——第一版丑一点没关系,没人买才是真正的问题。</p>
+  </div>
+
+  <div class="pix">
+    <h2>④ 1000 个铁杆粉丝 + 产品阶梯</h2>
+    <p><b>Kevin Kelly 的经典论断:</b>创作者不需要一百万粉丝。1000 个愿意每年为你花 100 美元的铁杆粉丝,就足以支撑体面的生活。你不需要讨好所有人,只需要对一小群人无可替代。</p>
+    <p style="margin-top:10px"><b>然后为他们搭一座阶梯(Offer Stack):</b></p>
+    <ul class="ladder">
+      <li>🆓 <b>免费内容</b> —— 建立信任,筛选同频者</li>
+      <li>🪙 <b>低价产品</b> —— 9.9~99 元:模板、电子书、小课。降低第一次付费门槛</li>
+      <li>💰 <b>核心课程 / 社群</b> —— 几百到几千元,主力收入</li>
+      <li>💎 <b>高价服务</b> —— 一对一咨询、陪跑、定制。数量少,利润高</li>
+    </ul>
+  </div>
+
+  <div class="pix">
+    <h2>⑤ 系统化,而不是扩大团队 <span class="small">Paul Jarvis《一人公司》</span></h2>
+    <div class="vs">
+      <div class="bad"><h4>传统创业剧本</h4>收入增加 → 招人 → 管理更多人 → 复杂度增加 → 你成为全公司最忙、时薪最低的人</div>
+      <div class="good"><h4>一人公司剧本</h4>收入增加 → 优化系统 → 自动化 → 提高利润 → 人还是一个,自由越来越多</div>
+    </div>
+    <p>Paul Jarvis 的核心追问:<b>增长真的是默认正确的吗?</b>「更大」不等于「更好」,「足够」是一种被低估的能力。工具箱:个人网站、邮件系统、数字支付、AI 工具、自动化交付。今天一个人 + AI,可以完成过去一个十人团队的工作。</p>
+  </div>
+
+  <div class="pix">
+    <h2>⑥ 真实的时间表 <span class="small">别被爽文骗了</span></h2>
+    <p>公开数据里,这条路的真实速度是:</p>
+    <ul class="ladder">
+      <li><b>Justin Welsh</b> —— 用了 29 个月才做到累计 100 万美元收入,起点是把销售岗位的经验变成内容</li>
+      <li><b>Dan Koe</b> —— 从年入 1 万到 80 万美元,走了大约 4 年;每天核心动作只有 2 小时写作</li>
+      <li><b>Pieter Levels</b> —— 在做出成功产品之前,先公开做废了约 70 个项目</li>
+    </ul>
+    <p>他们共同的顺序不是「想法 → 融资 → 团队」,而是:<b>技能 → 分发(内容)→ 产品 → 自动化</b>。所以本课只要求一个行动:</p>
+    <div class="tagline">🎯 <b>行动:每天一小时内容分享。</b>可以偷偷发。在小组里寻求反馈。做不到也没关系,有困难可以找我。今天就能达成的三件事:输出、学习、身体。</div>
+  </div>
+
+  <div class="pix green">
+    <h2>Build in Public:我们的互助玩法</h2>
+    <p>接下来,请把你游戏里的答案变成现实:</p>
+    <ul class="ladder">
+      <li>1️⃣ 找到你的<b>微小价值</b>——参考同类账号,他们解决了什么问题?</li>
+      <li>2️⃣ 把它变成一门课程 / 一个作品,<b>给它起个名字</b></li>
+      <li>3️⃣ 每天一小时,公开(或偷偷)分享进度,在群里 checkin</li>
+    </ul>
+    <div class="tagline" style="border-color:var(--green);background:rgba(87,242,162,.06)">「当你明白,你身边这个所谓的世界,是由并不比你聪明的人建造的,你就能改变它、影响它、造出你自己的东西。」—— 史蒂夫 · 乔布斯</div>
+    <h3>Checkout</h3>
+    <p class="small">写下你此刻的真实感受、收获和疑问,截图或复制发到群里:</p>
+    <textarea id="f-checkout" placeholder="真实感受 / 收获 / 疑问"></textarea>
+    <div class="btnrow">
+      <button class="btn" onclick="copyCheckout()">⧉ 复制我的 Checkout</button>
+      <button class="btn ghost" onclick="go('s-start')">回到标题画面</button>
+    </div>
+  </div>
+
+  <p class="footer-note">一人公司大冒险 · 好奇学习社区 × OOPS · 世界是由并不比你聪明的人创造的</p>
+</section>
+
+</div>
+
+<button class="btn ghost toplink" id="topBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+const S = { hp: 100 };
+const D = {}; // answers
+
+const stages = ["LV.0 角色创建","LV.1 兴趣勘探","LV.2 身份选择","LV.3 内容试炼","LV.4 产品化","LV.5 系统化"];
+const stageOfScreen = { "s-create":0, "s-lv1":1, "s-lv2":2, "s-lv3":3, "s-lv4":4, "s-lv5":5 };
+
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  window.scrollTo({top:0});
+  const hud = document.getElementById('hud');
+  if(id in stageOfScreen){
+    hud.style.display='block';
+    document.getElementById('hudStage').textContent = stages[stageOfScreen[id]];
+  } else if(id==='s-judging' || id==='s-verdict' || id==='s-feedback'){
+    hud.style.display='block';
+    if(id!=='s-feedback') document.getElementById('hudStage').textContent = id==='s-judging' ? '⚖ 审判中' : '📜 判决';
+  } else {
+    hud.style.display='none';
+  }
+  document.getElementById('topBtn').style.display = (id==='s-course') ? 'block':'none';
+}
+
+function setHP(v){
+  S.hp = Math.max(0, Math.min(100, v));
+  document.getElementById('hpfill').style.width = S.hp + '%';
+  document.getElementById('hpnum').textContent = S.hp + '%';
+}
+
+// highlight selected radio cards
+document.addEventListener('change', e=>{
+  if(e.target.matches('input[type=radio]')){
+    const group = document.getElementsByName(e.target.name);
+    group.forEach(r=>r.closest('.choice').classList.toggle('sel', r.checked));
+  }
+});
+
+const val = id => document.getElementById(id).value.trim();
+const radio = name => { const r=document.querySelector(`input[name=${name}]:checked`); return r?r.value:''; };
+function showErr(id, bad){ document.getElementById(id).style.display = bad?'block':'none'; return !bad; }
+
+function validateCreate(){
+  D.name=val('f-name'); D.tags=val('f-tags'); D.trouble=val('f-trouble'); D.time=val('f-time'); D.duty=val('f-duty');
+  if(!showErr('e-create', !(D.name&&D.time&&D.trouble))) return;
+  setHP(100);
+  stageFeedback(0, {姓名:D.name,三个标签:D.tags,最近的困扰:D.trouble,可支配时间:D.time,无法回避的责任:D.duty}, 's-lv1');
+}
+function validateLv1(){
+  D.flow=val('f-flow'); D.pay=val('f-pay'); D.exp=val('f-exp'); D.pain=val('f-pain');
+  D.int1=val('f-int1'); D.int2=val('f-int2'); D.idol=val('f-idol');
+  if(!showErr('e-lv1', !D.flow)) return;
+  setHP(S.hp - 5);
+  stageFeedback(1, {愿意自发花时间的事:D.flow,自愿倒贴钱的事:D.pay,独特经历:D.exp,痛苦经验:D.pain,兴趣组合:[D.int1,D.int2].filter(Boolean).join(' × '),AI合成的兴趣组合行动:D.combo||'',最喜欢的书或博主:D.idol}, 's-lv2');
+}
+function validateLv2(){
+  D.identityType=radio('idn'); D.identity=val('f-identity');
+  if(!showErr('e-lv2', !(D.identityType&&D.identity))) return;
+  setHP(S.hp - (D.identityType==='执行者'?25:5));
+  stageFeedback(2, {选择的职业:D.identityType,高杠杆身份宣言:D.identity}, 's-lv3');
+}
+function validateLv3(){
+  D.contentChoice=radio('cnt'); D.persist=val('f-persist');
+  if(!showErr('e-lv3', !D.contentChoice)) return;
+  const cost={'放弃':30,'换赛道':20,'继续+复盘':5,'偷偷发':8}[D.contentChoice]||10;
+  setHP(S.hp - cost);
+  stageFeedback(3, {断更之谷的选择:D.contentChoice,坚持90天的续航策略:D.persist}, 's-lv4');
+}
+function validateLv4(){
+  D.value=val('f-value'); D.offer=val('f-offer'); D.fans=val('f-fans');
+  if(!showErr('e-lv4', !(D.value&&D.offer))) return;
+  setHP(S.hp - 5);
+  stageFeedback(4, {微小价值:D.value,第一个产品MVO:D.offer,一千个铁杆粉丝画像:D.fans}, 's-lv5');
+}
+
+/* ===== interest fusion lab ===== */
+/* 离线合成引擎:六套模板随机出锅 */
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+let lastFuseIdx=-1;
+async function fuseInterests(){
+  const a=val('f-int1'), b=val('f-int2');
+  const box=document.getElementById('combo-result');
+  if(!a||!b){ box.style.display='block'; box.textContent='⚗️ 合成失败:实验台需要两种原料。请填写两个兴趣。'; return; }
+  const btn=document.getElementById('combo-btn');
+  btn.disabled=true; btn.textContent='⚗️ 合成中…';
+  box.style.display='block'; box.textContent='正在把「'+a+'」和「'+b+'」倒进同一个烧杯……';
+  await sleep(900);
+  const recipes=[
+    ['【'+a+'味'+b+'研究所】','每周用「'+a+'」的思路拆解一个「'+b+'」的问题,把两拨互不认识的人骗进同一个评论区。'],
+    ['【'+b+'人的'+a+'急救包】','专治想搞「'+b+'」又放不下「'+a+'」的人:每期用「'+a+'」演示一个「'+b+'」的概念,五分钟一集。'],
+    ['【当'+a+'撞上'+b+'】','连载 30 天:每天记录你用「'+a+'」的方法练「'+b+'」的翻车与开窍现场——真实比完美更圈粉。'],
+    ['【'+a+'×'+b+'混血手册】','把「'+a+'」圈的黑话翻译给「'+b+'」圈的人听,当全网唯一的双语导游。'],
+    ['【一边'+a+'一边'+b+'】','开一个过程直播账号:左手'+a+',右手'+b+'——观众来看的,就是这种不务正业的认真。'],
+    ['【'+a+'系'+b+'指南】','用「'+a+'」的方式做「'+b+'」的内容,小众组合就是天然护城河。']
+  ];
+  let i;
+  do{ i=Math.floor(Math.random()*recipes.length); }while(i===lastFuseIdx && recipes.length>1);
+  lastFuseIdx=i;
+  const combo='⚡ 合成成功:'+recipes[i][0]+' '+recipes[i][1];
+  box.textContent=combo+' (可以多合成几次,直到你心动为止)';
+  D.combo=combo;
+  btn.disabled=false; btn.textContent='⚗️ 再合成一次';
+}
+
+/* ===== per-stage AI feedback ===== */
+const stageBrief = [
+  '第0关·角色创建:玩家盘点了自己是谁、真实可支配时间、无法回避的责任、最近的困扰。评价重点:诚实盘点本身就值得夸;锐评可以指向时间与责任的现实约束,或标签里暴露的自我认知。',
+  '第1关·兴趣勘探:玩家挖掘了愿意自发投入的事、倒贴钱也乐意的事、独特经历、痛苦经验,并用两个兴趣做了AI合成实验。评价重点:夸他矿脉的真实与独特之处(独特经历和痛苦经验是护城河,兴趣组合若有趣可以顺势调侃);锐评指出哪里还太空泛、或兴趣与消费的区别(爱看≠爱做)。',
+  '第2关·身份选择:玩家选择了职业类型并写下高杠杆身份宣言。评价重点:夸身份中的杠杆潜力;锐评检验这个身份到底能不能被时间、网络或内容放大,还是只是好听。',
+  '第3关·内容试炼:玩家面对连更14天数据惨淡的剧情做出了选择,并写了90天续航策略。评价重点:「继续+复盘」和「偷偷发」是好策略值得夸,「放弃」「换赛道」要温柔但直接地点破;锐评针对续航策略是否靠意志力硬扛(靠意志力的都会输)。',
+  '第4关·产品化:玩家写下了微小价值、第一个MVO(卖什么/卖给谁/定价)、1000铁杆粉丝画像。评价重点:夸具体之处;锐评检验是否还在卖时间、价值是否够小够具体、粉丝画像是不是"所有人"。'
+];
+let fbNextScreen=null, fbStage=0;
+
+function stageFeedback(stage, payload, nextScreen){
+  fbNextScreen=nextScreen; fbStage=stage;
+  go('s-feedback');
+  document.getElementById('hudStage').textContent = stages[stage] + ' · 裁判点评';
+  const praise=document.getElementById('fb-praise');
+  praise.className='fb-loading';
+  praise.innerHTML='裁判正在阅读你的答卷……<div class="dots"><span></span><span></span><span></span></div>';
+  document.getElementById('fb-roast-box').style.display='none';
+  const btn=document.getElementById('fb-next');
+  btn.disabled=true;
+  btn.textContent = stage===4 ? '收下点评,前往最终试炼 →' : '收下点评,前往下一关 →';
+  aiStageComment(stage, payload).then(r=>{
+    praise.className='';
+    praise.textContent=r.praise;
+    document.getElementById('fb-roast').textContent=r.roast;
+    document.getElementById('fb-roast-box').style.display='block';
+    btn.disabled=false;
+  });
+}
+
+function fbContinue(){ go(fbNextScreen); }
+
+async function aiStageComment(stage, payload){
+  await sleep(1100); /* 保留裁判"阅读答卷"的仪式感 */
+  return localStageComment(stage);
+}
+
+function localStageComment(stage){
+  const name=D.name||'冒险者';
+  const pick=arr=>arr[Math.floor(Math.random()*arr.length)];
+  const cut=(s,n)=>{s=(s||'').trim();return s.length>n?s.slice(0,n)+'……':s;};
+  const table=[
+    /* LV.0 角色创建 */
+    [
+     {praise:`${name},敢把真实的时间和责任摊在桌面上,这份诚实已经赢过很多把履历当小说写的人。角色建档完成,属性面板没有一格是编的。`,
+      roast:'诚实是起点,但可支配时间不会自己变多。'},
+     {praise:`「${cut(D.tags,15)}」——${name},这三个标签像一手还没打出去的牌,看似普通,组合起来说不定就是王炸。困扰你的那件事(${cut(D.trouble,15)}),恰好是这场游戏要拆的锁。`,
+      roast:'困扰写得越具体的人,通关越快——这是历史存档规律。'},
+     {praise:`${name},「${cut(D.time,12)}」的可支配时间配上「${cut(D.duty,12)}」的责任,这是真实人生的开局配置,不是新手保护区。带着枷锁起舞的人,舞步反而最扎实。`,
+      roast:'先别嫌时间少,大多数人的问题是把仅有的时间也刷掉了。'}
+    ],
+    /* LV.1 兴趣勘探 */
+    [
+     {praise:`${name},你的矿脉里有真东西——「${cut(D.flow,18)}」是你愿意自发投入的事,这种骗不了人的信号,很多人挖了三十年都没挖到。`,
+      roast:'记住:爱看别人做,不等于你爱做。'},
+     {praise:`愿意为「${cut(D.pay,15)}」倒贴,还带着「${cut(D.pain,15)}」的伤疤——${name},这两样合在一起就是护城河的图纸:你踩过的坑,正是别人愿意付费绕开的坑。`,
+      roast:'伤疤要变现,前提是你敢公开撕开给人看。'},
+     {praise:`${name},这一关你交出了独特经历、痛苦经验和一个兴趣合成配方,矿区勘探报告齐了。别小看这些零件,一人公司的差异化从来不是造出来的,是拼出来的。`,
+      roast:'空泛的兴趣是矿渣,能写出细节的才是矿石。'}
+    ],
+    /* LV.2 身份选择 */
+    [
+     {praise:`「${cut(D.identity,25)}」——这个身份宣言有模有样,至少你没有选择把人生天花板焊死。杠杆已装配,等待启动。`,
+      roast:'身份不是宣言出来的,是发出第一条内容那刻才成立的。'},
+     {praise:`${name},你选了「${D.identityType||''}」这条路线,配上「${cut(D.identity,20)}」的自我定义——恭喜,这是能被时间、网络或内容放大的身份,不是干一小时赚一小时的死工资曲线。`,
+      roast:'杠杆放大的是行动,零乘以多大的杠杆都是零。'}
+    ],
+    /* LV.3 内容试炼 */
+    [
+     {praise:`面对你妈的孤独一赞,你选择了「${D.contentChoice||''}」。能想到续航策略而不是硬扛,说明你把坚持当系统问题而不是道德问题——这很职业。`,
+      roast:'所有靠意志力的计划,平均寿命 21 天。'},
+     {praise:`${name},第 14 天没有删号跑路,已经超过了断更之谷里 60% 的阵亡者。你的续航方案「${cut(D.persist,18)}」——有策略的坚持和硬撑,是两种完全不同的东西。`,
+      roast:'数据惨淡不可怕,可怕的是从此只在深夜怀疑,不在白天迭代。'}
+    ],
+    /* LV.4 产品化 */
+    [
+     {praise:`你的第一个产品已经有轮廓了:${cut(D.offer,30)}——敢定价、敢描述买家,MVO 的精髓你摸到了:先丑陋地存在,再优雅地迭代。`,
+      roast:'检查一下:你卖的是系统,还是换了包装的时间?'},
+     {praise:`「${cut(D.value,25)}」——${name},这个微小价值找得有手感:够小,才够具体;够具体,才有人认领。铸币机已预热,就差第一枚金币出炉。`,
+      roast:'粉丝画像如果是「所有人」,那就等于「没有人」。'}
+    ]
+  ];
+  return pick(table[stage]||table[0]);
+}
+
+const flavors = [
+  "正在计算你的可支配时间与野心的比值……",
+  "正在检查「微小价值」是否真的微小且有价值……",
+  "正在模拟你连续断更 14 天后的心理状态……",
+  "正在向 1000 个虚拟铁杆粉丝征求意见……",
+  "正在翻看你妈给你点的那个赞……"
+];
+let flavorTimer=null;
+
+function finishGame(){
+  D.scaleChoice=radio('scl'); D.vision=val('f-vision');
+  if(!showErr('e-lv5', !D.scaleChoice)) return;
+  const cost={'融资扩张':20,'自动化':0,'涨价聚焦':0,'躺平':10}[D.scaleChoice]||5;
+  setHP(S.hp - cost);
+  go('s-judging');
+  let i=0;
+  flavorTimer=setInterval(()=>{ i=(i+1)%flavors.length; document.getElementById('judgeFlavor').textContent=flavors[i]; },2500);
+  judge();
+}
+
+async function judge(){
+  await sleep(3000); /* 审判仪式感 */
+  clearInterval(flavorTimer);
+  showVerdict(localJudge());
+}
+
+/* 离线终审引擎 */
+function localJudge(){
+  const name=D.name||'冒险者';
+  const cut=(s,n)=>{s=(s||'').trim();return s.length>n?s.slice(0,n)+'……':s;};
+  let died=0, why='', title='';
+  if(D.contentChoice==='放弃'){
+    died=3; title='卒于明天再说';
+    why=`第 14 天那个「今天先歇一天」,就是绝大多数一人公司的死亡现场。根据历史存档,「明天」的到货率不足 20%。你不是输给了数据,是输给了那张床。`;
+  } else if(D.contentChoice==='换赛道'){
+    died=3; title='卒于赛道漂移';
+    why=`30 天换 4 个赛道,每个账号都是新号——飞轮还没转起来,就被你亲手拆了当零件卖。方向可以修,但节奏一断,信任清零。`;
+  } else if(D.scaleChoice==='融资扩张'){
+    died=5; title='卒于规模诱惑';
+    why=`你拿了钱、招了 10 个人,三个月后你在开周会、写 OKR、调解同事矛盾——恭喜,你把一人公司成功经营成了你当初最想逃离的那种公司。投资人的咖啡,是这个游戏里最贵的一杯。`;
+  } else if(D.scaleChoice==='躺平'){
+    died=5; title='卒于慢性过劳';
+    why=`月入两万,但每天工作 12 小时——这不是一人公司,这是一人血汗工厂,而且老板和员工吵架永远没有赢家。你没有输给市场,你输给了没有系统。`;
+  } else if(D.identityType==='执行者'){
+    died=2; title='卒于天花板';
+    why=`你选择了纯执行者身份。安全、体面、按时发薪,但没有任何东西替你复利——十年后你的时薪涨了,天花板没动。这局你死得很舒适,这是最危险的死法。`;
+  } else if(((D.value||'')+(D.offer||'')).length<16){
+    died=4; title='卒于产品虚焦';
+    why=`走到铸币工坊你才露馅:微小价值和 MVO 加起来还没有一条朋友圈长。产品不怕丑陋,怕的是模糊——说不清卖什么、卖给谁、多少钱的金币,铸出来也是空气币。`;
+  }
+  const survived = died===0;
+  const rate = survived ? Math.max(62, S.hp) : Math.min(45, Math.max(12, S.hp-20));
+  const surTitles=['飞轮已启动','杠杆持有者','断更谷幸存者'];
+  return {
+    survived, died_at:died,
+    died_at_name: survived?'全关通过':stages[died].split(' ')[1],
+    survival_rate: rate,
+    verdict_title: survived ? surTitles[Math.floor(Math.random()*surTitles.length)] : title,
+    verdict: survived
+      ? `${name},你避开了三大经典死因:断更、乱换赛道、盲目扩张。你的身份「${cut(D.identity,20)}」具备可放大的杠杆,微小价值「${cut(D.value,20)}」也落到了具体的人身上,面对规模诱惑你选择了「${D.scaleChoice||''}」——这是 Paul Jarvis 式的清醒。飞轮已经开始转第一圈。记住真实速度:Justin Welsh 走到 100 万美元用了 29 个月,慢就是快。五年后你想成为的那个人(${cut(D.vision,20)}),从明天的一小时开始施工。`
+      : `${name},${why} 好消息是:这个游戏里死亡不扣钱,只涨经验。你的兴趣矿脉(${cut(D.flow,20)})是真实的,${D.combo?'合成实验台上那个配方还热着,':''}角色卡也已经替你打磨好了。重新读档,换个决策,再来。`,
+    advice: survived
+      ? ['明早发出通关后第 1 条内容','把角色卡上的 MVO 发给 3 个潜在买家','设一个 90 天连续发布的进度条']
+      : ['明天发出第 1 条内容,可以偷偷发','找 3 个同类账号,写下他们解决的问题','把 MVO 补成一句话:卖什么/卖给谁/多少钱'],
+    card:{
+      identity:D.identity||'待打磨:一个能被内容放大的身份',
+      value:D.value||'待提炼:帮一小群具体的人解决一个具体的小问题',
+      first_offer:D.offer||'待设计:一页纸模板或小课,定价 9.9–99 元',
+      daily_action:'每天 1 小时:30 分钟输出 + 15 分钟研究同类账号 + 15 分钟群内互助'
+    }
+  };
+}
+
+let lastResult=null;
+function showVerdict(r){
+  lastResult=r;
+  go('s-verdict');
+  setHP(r.survival_rate);
+  const t=document.getElementById('verdictTitle');
+  t.textContent = r.survived ? ('🏆 '+r.verdict_title) : ('💀 '+r.verdict_title);
+  t.className = r.survived?'alive':'dead';
+  document.getElementById('verdictBox').className = 'pix ' + (r.survived?'green':'red');
+  document.getElementById('verdictStage').textContent = r.survived ? ('存活率 '+r.survival_rate+'% · 全关通过') : ('☠ 死于 '+r.died_at_name+' · 存活率 '+r.survival_rate+'%');
+  document.getElementById('verdictBody').textContent = r.verdict;
+  document.getElementById('adviceBox').innerHTML =
+    '<h3>⚡ 复活指引(明天就能做)</h3><ul class="ladder">' +
+    (r.advice||[]).map(a=>'<li>▸ '+esc(a)+'</li>').join('') + '</ul>';
+  const c=r.card||{};
+  document.getElementById('c-identity').textContent=c.identity||'';
+  document.getElementById('c-value').textContent=c.value||'';
+  document.getElementById('c-offer').textContent=c.first_offer||'';
+  document.getElementById('c-action').textContent=c.daily_action||'';
+  document.getElementById('charCard').style.display='block';
+}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+function restart(){
+  document.querySelectorAll('input[type=text],textarea').forEach(i=>{ if(i.id!=='f-checkout') i.value=''; });
+  document.querySelectorAll('input[type=radio]').forEach(r=>{r.checked=false;r.closest('.choice').classList.remove('sel');});
+  document.getElementById('f-time').value='';
+  document.getElementById('combo-result').style.display='none';
+  document.getElementById('combo-btn').textContent='⚗️ 开始合成';
+  delete D.combo;
+  setHP(100);
+  go('s-start');
+}
+
+function copyResult(){
+  if(!lastResult) return;
+  const r=lastResult,c=r.card||{};
+  const txt=`【一人公司大冒险 · 判决书】\n玩家:${D.name||''}\n结局:${r.survived?'全关通过 🏆':'死于'+r.died_at_name+' 💀'} ${r.verdict_title}(存活率 ${r.survival_rate}%)\n\n${r.verdict}\n\n角色卡:\n· 高杠杆身份:${c.identity||''}\n· 微小价值:${c.value||''}\n· 第一个产品:${c.first_offer||''}\n· 每日行动:${c.daily_action||''}`;
+  navigator.clipboard.writeText(txt).then(()=>alert('判决书已复制,快发到群里!'));
+}
+function copyCheckout(){
+  const t=val('f-checkout');
+  if(!t){alert('先写点真实感受吧');return;}
+  navigator.clipboard.writeText(`【Checkout · ${D.name||'匿名冒险者'}】\n${t}`).then(()=>alert('已复制,发到群里吧!'));
+}
+</script>
+</body>
+</html>
