@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第一桶金 · 九道关 | 钥匙玩校 KIID SCHOOL</title>
+<style>
+:root{
+  --ink:#101B18; --ink2:#172823; --rule:#2A463D;
+  --paper:#EDE4CF; --paper2:#DCCFB2;
+  --seal:#C43A2C; --coin:#E3AE3C; --jade:#41A98B; --dim:#8FA79E;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--ink);color:var(--paper);
+  font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+  overflow:hidden;-webkit-font-smoothing:antialiased}
+.num{font-family:"DIN Alternate","Bahnschrift","Menlo","Consolas",monospace;font-variant-numeric:tabular-nums}
+.serif{font-family:"Songti SC","SimSun","Noto Serif CJK SC","Source Han Serif SC",serif}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:repeating-linear-gradient(0deg,transparent 0 46px,rgba(65,169,139,.045) 46px 47px),
+             repeating-linear-gradient(90deg,transparent 0 46px,rgba(65,169,139,.03) 46px 47px)}
+#app{position:relative;z-index:1;height:100%;display:flex;flex-direction:column}
+
+/* HUD */
+#hud{flex:0 0 auto;display:flex;border-bottom:2px solid var(--rule);background:var(--ink2)}
+.hud-cell{padding:9px 22px;border-right:1px solid var(--rule);display:flex;flex-direction:column;justify-content:center;min-width:0}
+.hud-cell:last-child{border-right:none}
+.hud-label{font-size:11px;letter-spacing:.26em;color:var(--dim)}
+.hud-val{font-size:28px;font-weight:700;line-height:1.15;white-space:nowrap}
+.c-cash{color:var(--coin)} .c-val{color:var(--jade)} .c-debt{color:var(--seal)}
+.hud-cell.grow{flex:1;border-right:none}
+#chapter-strip{display:flex;gap:5px;align-items:center;justify-content:flex-end;padding-right:20px}
+.pip{width:24px;height:5px;background:var(--rule)} .pip.done{background:var(--coin)} .pip.now{background:var(--paper)}
+
+main{flex:1;overflow:hidden;position:relative}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;padding:20px 42px 14px;overflow:auto}
+.screen.on{display:flex}
+.eyebrow{font-size:13px;letter-spacing:.4em;color:var(--coin);margin-bottom:8px}
+h1.title{font-size:46px;line-height:1.12;font-weight:800}
+.scene{margin-top:10px;font-size:20px;line-height:1.6;color:#CFDDD6;max-width:1150px}
+.scene b,.ask b,.cx b,.tx b{color:var(--coin);font-weight:700}
+
+/* 课堂提问带 */
+.askbox{margin-top:14px;border-left:5px solid var(--jade);background:rgba(65,169,139,.09);padding:11px 18px}
+.askbox .lbl{font-size:11px;letter-spacing:.32em;color:var(--jade)}
+.ask{font-size:21px;line-height:1.5;font-weight:700;margin-top:5px;color:#E7F2EE}
+.ask+.ask{margin-top:6px}
+.askbox.after{border-left-color:var(--coin);background:rgba(227,174,60,.09)}
+.askbox.after .lbl{color:var(--coin)}
+
+/* 选项单据 */
+#options{margin-top:auto;display:grid;gap:14px;padding-top:16px}
+.opt{position:relative;background:var(--paper);color:#22201A;border:2px solid #000;padding:14px 16px 12px;
+  cursor:pointer;text-align:left;box-shadow:6px 6px 0 rgba(0,0,0,.45);transition:transform .09s,box-shadow .09s;
+  display:flex;flex-direction:column;font-family:inherit}
+.opt:hover,.opt:focus-visible{transform:translate(-2px,-2px);box-shadow:8px 8px 0 rgba(0,0,0,.5);outline:none}
+.opt:focus-visible{border-color:var(--seal)}
+.opt-no{font-size:11px;letter-spacing:.3em;color:#8A8272}
+.opt-label{font-size:24px;font-weight:800;line-height:1.25;margin-top:3px}
+.opt-sub{font-size:14.5px;line-height:1.5;color:#5A5346;margin-top:5px}
+.tally{margin-top:auto;padding-top:9px;display:flex;align-items:baseline;gap:8px;border-top:1px dashed #B3A98F}
+.tally-n{font-size:32px;font-weight:800}
+.tally-t{font-size:12px;letter-spacing:.2em;color:#8A8272}
+.opt.picked{background:var(--paper2)}
+.stamp{position:absolute;right:10px;top:10px;color:var(--seal);border:3px solid var(--seal);padding:2px 9px;
+  font-size:19px;font-weight:800;letter-spacing:.15em;transform:rotate(-13deg) scale(2.4);opacity:0}
+.opt.picked .stamp{animation:slam .32s cubic-bezier(.2,.9,.3,1.4) forwards}
+@keyframes slam{to{transform:rotate(-13deg) scale(1);opacity:.92}}
+
+/* 揭晓 */
+#reveal{position:absolute;inset:0;background:rgba(8,15,13,.975);display:none;flex-direction:column;padding:18px 42px 12px;z-index:5}
+#reveal.on{display:flex}
+#reveal-head{display:flex;align-items:baseline;gap:20px;flex-wrap:wrap;border-bottom:2px solid var(--rule);padding-bottom:10px}
+#reveal-head h2{font-size:30px;font-weight:800}
+#delta{font-size:23px;font-weight:800;display:flex;gap:18px;flex-wrap:wrap}
+#rbrand{margin-left:auto;font-size:12px;letter-spacing:.3em;color:var(--dim)}
+#cards{flex:1;overflow:auto;display:grid;gap:11px;margin-top:11px;align-content:start}
+.rc{border:1px solid var(--rule);border-left:5px solid var(--rule);padding:11px 16px;background:var(--ink2)}
+.rc.chosen{border-left-color:var(--coin);background:#1B2E28}
+.rc-h{display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+.rc-h .k{font-weight:800;font-size:19px}
+.tag{font-size:11px;letter-spacing:.2em;padding:2px 8px;border:1px solid currentColor}
+.tag.good{color:var(--jade)}.tag.mid{color:var(--coin)}.tag.bad{color:var(--seal)}
+.tag.you{background:var(--coin);border-color:var(--coin);color:#1a1a1a;font-weight:800}
+.row{margin-top:6px;font-size:16px;line-height:1.6;display:flex;gap:10px}
+.row .lb{flex:0 0 86px;font-size:11.5px;letter-spacing:.14em;color:var(--dim);padding-top:4px}
+.row.hero .tx{color:#DDE9E4}
+.row.why .tx{color:#F0D89A;border-left:2px solid var(--coin);padding-left:10px}
+.row.method .tx{color:var(--jade)}
+.row.death .tx{color:#E9938A}
+#concept{margin-top:10px;border:2px dashed var(--coin);padding:10px 16px;background:rgba(227,174,60,.07)}
+#concept .ct{font-size:12.5px;letter-spacing:.3em;color:var(--coin)}
+#concept .cx{font-size:19px;line-height:1.5;margin-top:4px;font-weight:600}
+#debrief{margin-top:9px}
+
+/* 结算 */
+#finalWrap{align-items:center;justify-content:center;text-align:center}
+#finalWrap>*{flex:0 0 auto}
+#finalRank{font-size:15px;letter-spacing:.5em;color:var(--coin)}
+#finalNum{font-size:100px;font-weight:800;line-height:1;margin:6px 0 4px}
+#finalNote{font-size:20px;color:#CFDDD6;max-width:900px;line-height:1.6}
+#ladder{margin-top:20px;width:min(980px,100%);border:1px solid var(--rule)}
+.lrow{display:flex;justify-content:space-between;padding:7px 16px;border-bottom:1px solid var(--rule);font-size:15.5px}
+.lrow:last-child{border-bottom:none}
+.lrow.hit{background:var(--coin);color:#151515;font-weight:800}
+.lrow .r{color:var(--dim)} .lrow.hit .r{color:#151515}
+.dead #finalNum{color:var(--seal)}
+
+/* 封面 */
+#cover{justify-content:center}
+#cover .big{font-size:88px;font-weight:800;letter-spacing:.04em;line-height:1}
+#cover .sub{font-size:22px;color:#CFDDD6;margin-top:16px;line-height:1.7;max-width:920px}
+#cover .rules{margin-top:22px;display:flex;gap:12px;flex-wrap:wrap}
+.chip{border:1px solid var(--rule);padding:7px 13px;font-size:14.5px;color:#BCCFC8}
+.chip b{color:var(--coin)}
+
+/* 天花板与地板 */
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px;align-items:start}
+#range .title,#real .title{font-size:32px;line-height:1.1}
+@media (max-width:1100px){.twocol{grid-template-columns:1fr}}
+.path{border:1px solid var(--rule);border-top:5px solid var(--jade);background:var(--ink2);padding:12px 16px}
+.path.worst{border-top-color:var(--seal)}
+.ph{font-size:20px;font-weight:800;color:var(--jade)}
+.path.worst .ph{color:var(--seal)}
+.ph .num{font-size:30px}
+.path ol{margin:10px 0 0 20px}
+.path li{font-size:14.5px;line-height:1.4;margin-bottom:5px;color:#DDE9E4}
+.path li em{margin-top:0}
+.pf{font-size:15px}
+#range .eyebrow{margin-bottom:4px}
+.path li em{font-style:normal;color:var(--dim);display:block;font-size:13.5px;margin-top:1px}
+.pf{margin-top:10px;padding-top:9px;border-top:1px dashed var(--rule);font-size:16px;line-height:1.5;color:#F0D89A}
+#ladder{margin-top:12px;width:100%;border:1px solid var(--rule)}
+.lrow{padding:6px 16px}
+.screen::-webkit-scrollbar{width:10px}
+.screen::-webkit-scrollbar-thumb{background:var(--rule)}
+.screen::-webkit-scrollbar-track{background:#0A1210}
+
+/* Naval 五征兆 */
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:12px}
+.sg{border:1px solid var(--rule);border-left:5px solid var(--coin);background:var(--ink2);padding:12px 16px;display:flex;gap:14px}
+.sg:last-child{grid-column:1/-1;border-left-color:var(--jade)}
+.sg .no{font-size:34px;font-weight:800;color:var(--coin);line-height:1;flex:0 0 auto;font-family:"DIN Alternate","Bahnschrift",monospace}
+.sg:last-child .no{color:var(--jade)}
+.sg .b{min-width:0}
+.sg .b .t{font-size:18px;font-weight:800;line-height:1.25}
+.sg .b .x{font-size:13.5px;line-height:1.5;color:#CFDDD6;margin-top:4px}
+.sg .b .x b{color:var(--coin)}
+.acts{margin-top:8px;border-top:1px dashed var(--rule);padding-top:7px}
+.acts .ah{font-size:11px;letter-spacing:.28em;color:var(--jade);margin-bottom:4px}
+.acts .ai{font-size:13.5px;line-height:1.4;color:#DDE9E4;padding-left:16px;position:relative;margin-bottom:3px}
+.acts .ai::before{content:"→";position:absolute;left:0;color:var(--jade)}
+.sg:last-child .acts .ai::before{color:var(--jade)}
+#signs .lead{font-size:16px}
+@media (max-width:1000px){.sgrid{grid-template-columns:1fr}.sg:last-child{grid-column:auto}}
+
+/* 现实案例 */
+.rtab{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:10px;margin-top:14px}
+.rc2{border:1px solid var(--rule);border-left:4px solid var(--coin);background:var(--ink2);padding:9px 13px}
+.rc2 .n{font-size:17px;font-weight:800}
+.rc2 .h{font-size:14.5px;line-height:1.5;color:#DDE9E4;margin-top:3px}
+.rc2 .m{font-size:13.5px;color:var(--jade);margin-top:4px}
+
+/* 书单 */
+#books h1{font-size:38px;font-weight:800}
+#books .lead{font-size:17px;color:#CFDDD6;margin-top:6px}
+.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:11px;margin-top:14px}
+.bsec{grid-column:1/-1;font-size:12px;letter-spacing:.34em;color:var(--coin);border-bottom:1px solid var(--rule);padding-bottom:5px;margin-top:8px}
+.bk{border:1px solid var(--rule);border-left:4px solid var(--jade);padding:9px 13px;background:var(--ink2)}
+.bk .t{font-size:17px;font-weight:700;line-height:1.35}
+.bk .a{font-size:12.5px;color:var(--dim);margin-top:2px}
+.bk .w{font-size:14px;color:#F0D89A;margin-top:5px;line-height:1.45}
+.bk.film{border-left-color:var(--coin)} .bk.free{border-left-color:var(--seal)}
+
+/* 底部 */
+#bar{flex:0 0 auto;display:flex;align-items:center;gap:14px;padding:8px 42px;border-top:2px solid var(--rule);
+  background:var(--ink2);font-size:13.5px;color:var(--dim)}
+#bar .keys{display:flex;gap:13px;flex-wrap:wrap}
+#bar kbd{background:var(--rule);color:var(--paper);padding:2px 7px;font-family:inherit;font-size:12.5px}
+#next{margin-left:auto;background:var(--coin);color:#171717;border:none;padding:10px 28px;font-size:17px;
+  font-weight:800;cursor:pointer;letter-spacing:.08em;font-family:inherit;box-shadow:4px 4px 0 rgba(0,0,0,.5)}
+#next:hover{filter:brightness(1.08)} #next:disabled{opacity:.3;cursor:not-allowed;box-shadow:none}
+
+/* 页脚 —— 每一页都在 */
+#foot{flex:0 0 auto;display:flex;align-items:center;gap:14px;padding:7px 42px;background:#0A1210;
+  border-top:1px solid var(--rule);font-size:12.5px;color:var(--dim);letter-spacing:.1em}
+#foot .brand{color:var(--paper);font-weight:800;letter-spacing:.06em}
+#foot .brand em{font-style:normal;color:var(--coin);letter-spacing:.28em;font-size:11.5px;margin-left:7px}
+#foot .sp{flex:1}
+#foot .pg{color:var(--dim);letter-spacing:.22em}
+
+/* 教师侧栏 */
+#coach{position:absolute;right:0;top:0;bottom:0;width:400px;background:#0A1210;border-left:2px solid var(--coin);
+  padding:20px 22px;overflow:auto;z-index:20;transform:translateX(102%);transition:transform .2s}
+#coach.on{transform:none}
+#coach h3{font-size:18px;color:var(--coin);letter-spacing:.1em}
+#coach .t{font-size:12.5px;color:var(--dim);letter-spacing:.2em;margin-top:2px}
+#coach ul{margin-top:12px;padding-left:17px}
+#coach li{font-size:15px;line-height:1.6;margin-bottom:10px;color:#CFDDD6}
+#coach li b{color:var(--coin)}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:900px){
+  .screen{padding:14px 16px} h1.title{font-size:28px} .scene{font-size:16px} .ask{font-size:17px}
+  .opt-label{font-size:18px} .hud-val{font-size:18px} #cover .big{font-size:42px} #finalNum{font-size:54px}
+  #coach{width:100%} #bar,#foot{padding-left:16px;padding-right:16px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="hud">
+    <div class="hud-cell"><span class="hud-label">现金 · 账上真金</span><span class="hud-val num c-cash" id="hCash">¥0</span></div>
+    <div class="hud-cell"><span class="hud-label">生意估值 · 纸面</span><span class="hud-val num c-val" id="hVal">¥0</span></div>
+    <div class="hud-cell"><span class="hud-label">你的股份</span><span class="hud-val num" id="hShare">100%</span></div>
+    <div class="hud-cell"><span class="hud-label">负债 · 每关吃利息</span><span class="hud-val num c-debt" id="hDebt">—</span></div>
+    <div class="hud-cell grow"><span class="hud-label">进度</span><div id="chapter-strip"></div></div>
+  </div>
+
+  <main>
+    <section class="screen on" id="cover">
+      <div class="eyebrow serif">钥匙玩校 · 一小时创业与财商实验 · 全班共同经营一家公司</div>
+      <div class="big serif">第一桶金 · 九道关</div>
+      <div class="sub">
+        1998 年，一个叫 Glenn Stearns 的美国人身上只剩 100 美元。今天你比他多一点：<b class="num">¥50,000</b>——打工、压岁钱、家里凑的。<br>
+        今天全班一起开一家公司：<b>「一根不留科技」</b>。产品只有一个——<b>收毛机</b>：一把梳子，在沙发、毛衣、车座上推一遍，浮毛全被卷进去，按一下弹出一整块毛毡；刀头像剃须刀一样能换。<br>
+        广告词已经想好了：<b>「让你的黑裤子重获自由。」</b>接下来九个决定，全班投票。九关之后我们结算，看看还剩下多少。
+      </div>
+      <div class="askbox">
+        <div class="lbl">开场提问 · 先别急着看选项</div>
+        <div class="ask">一、你觉得一个人的「第一桶金」，最有可能从哪里来？</div>
+        <div class="ask">二、如果今天给你 5 万块，一年后你希望它变成多少？你打算怎么做？</div>
+      </div>
+      <div class="rules">
+        <span class="chip">规则一 · <b>现金归零立刻出局</b>，估值再高也没用</span>
+        <span class="chip">规则二 · 每个选项背后都是<b>真人真事</b>，并且会讲他当时怎么想的</span>
+        <span class="chip">规则三 · 每关揭晓<b>所有选项的死法</b>，包括你没选的</span>
+      </div>
+      <div class="rules" style="margin-top:10px">
+        <span class="chip">这产品为什么讲得通 · 中国有<b>一亿多个养宠家庭</b>，掉毛是每天都在发生的痛苦</span>
+        <span class="chip">而且 <b>刀头是耗材</b>——记住这一点，第七关会用上</span>
+      </div>
+    </section>
+
+    <section class="screen" id="stage">
+      <div class="eyebrow serif" id="sEyebrow"></div>
+      <h1 class="title serif" id="sTitle"></h1>
+      <p class="scene" id="sScene"></p>
+      <div class="askbox" id="sAsk"></div>
+      <div id="options"></div>
+    </section>
+
+    <section class="screen" id="finalWrap">
+      <div id="finalRank"></div>
+      <div class="num" id="finalNum"></div>
+      <div id="finalNote"></div>
+    </section>
+
+    <section class="screen" id="range">
+      <div class="eyebrow serif">九关走完了，现在可以揭晓 · 这一局的天花板和地板</div>
+      <h1 class="title serif">最好能到多少，最坏会怎样</h1>
+      <div class="twocol">
+        <div class="path">
+          <div class="ph">天花板 <span class="num">约 ¥1.04 亿</span></div>
+          <ol>
+            <li>自己接活赚出模具钱，不借不融<em>宗庆后蹬三轮 · 李嘉诚先打两年工再开厂</em></li>
+            <li>卖 299，只做重度铲屎官<em>汪滔卖飞控 · 段永平的「学习机」</em></li>
+            <li>跟大客户谈到三成定金，谈不成就不做<em>曹德旺不赊账 · 李嘉诚永远留够现金</em></li>
+            <li>只融 200 万，够走到下一个里程碑<em>按里程碑融资，把估值留给证明过自己的自己</em></li>
+            <li>自己占大头，其他人股份加期权、四年兑现<em>马云的湖畔花园</em></li>
+            <li>拒绝猫砂和那块地，把钱全投回收毛机<em>马斯克 2008 年 · 曹德旺一辈子只做玻璃</em></li>
+            <li>把刀头做成每两个月自动寄的会员<em>哈斯廷斯用订阅干掉百视达</em></li>
+            <li>同时给自己开一条不靠公司的路<em>Dan Koe 的一人公司 · Naval 的四种杠杆</em></li>
+            <li>卖掉公司，落袋为安<em>Palmer Luckey 的 20 亿美元</em></li>
+          </ol>
+          <div class="pf">共同点：<b>每一步都先保护现金，只在自己看得懂的地方冒险。</b>它一次都没有赌过别人的良心。</div>
+        </div>
+        <div class="path worst">
+          <div class="ph">地板 <span class="num">−¥438 万</span></div>
+          <ol>
+            <li>借 60 万开模具，利息从第一天开始跑<em>门面漂亮，第七个月发不出工资</em></li>
+            <li>卖 89 块冲量，毛利被运费和退货吃光<em>卖得越多，垫的钱越多</em></li>
+            <li>为那张 100 万的大单去借月息两分的钱<em>现金第一次断裂 → 被迫续命，债务翻倍</em></li>
+            <li>不敢再融资，硬扛<em>没钱的时候拒绝融资，不叫骨气，叫没得选</em></li>
+            <li>三兄弟一人三分之一<em>从此没有人能拍板</em></li>
+            <li>把仅剩的钱全押去贴牌卖猫砂<em>赚不到认知以外的钱</em></li>
+            <li>最后猛打一波广告救场<em>现金第二次断裂 → 彻底出局</em></li>
+          </ol>
+          <div class="pf"><b>注意：这条路从头到尾没有一年是「亏损」的，它是被现金流活活饿死的。</b>现实里对应 Coolest Cooler——众筹到 1330 万美元，最后一台冰箱都发不出来。</div>
+          <div class="pf" style="color:#E9938A">最坏的结局不是赚得少，是<b>连游戏都打不完</b>。</div>
+        </div>
+      </div>
+      <div id="ladder"></div>
+    </section>
+
+    <section class="screen" id="real">
+      <div class="eyebrow serif">游戏结束 · 回到现实</div>
+      <h1 class="title serif">他们的第一桶金，真的是从哪来的</h1>
+      <div class="lead" style="font-size:17px;color:#CFDDD6;margin-top:6px">今天每一个选项背后都有一个真人。这是他们真实的起点——注意看金额，大部分都比你想的小得多。</div>
+      <div class="rtab" id="rtab"></div>
+    </section>
+
+    <section class="screen" id="signs">
+      <div class="eyebrow serif">下课前最后一件事 · 送你一份「自查表」</div>
+      <h1 class="title serif">一个人开始变富的五个征兆</h1>
+      <div class="lead" style="font-size:17px;color:#CFDDD6;margin-top:6px">
+        这五条来自 Naval Ravikant——本课第八关那个讲「四种杠杆」的人。它们说的<b style="color:var(--coin)">不是你已经有多少钱</b>，而是钱正在往你这边走的信号。哪怕你现在一分钱没有，只要开始出现这些，方向就对了。
+      </div>
+      <div class="sgrid" id="sgrid"></div>
+    </section>
+
+    <section class="screen" id="books">
+      <div class="eyebrow serif">下课之后 · 把这一小时变成十年</div>
+      <h1 class="serif">有钱人自己在读什么</h1>
+      <div class="lead">下面每一本、每一部，后面都标了「谁在推荐」。不用全看，挑一本今晚就开始。<b style="color:var(--coin)">（本页可以往下滚）</b></div>
+      <div class="bgrid" id="bgrid"></div>
+    </section>
+
+    <div id="reveal">
+      <div id="reveal-head">
+        <h2 class="serif" id="rTitle">揭晓</h2>
+        <div class="num" id="delta"></div>
+        <div id="rbrand">钥匙玩校 KIID SCHOOL</div>
+      </div>
+      <div id="cards"></div>
+      <div id="concept"><div class="ct" id="cTerm"></div><div class="cx" id="cText"></div></div>
+      <div class="askbox after" id="debrief"></div>
+    </div>
+
+    <aside id="coach">
+      <h3 id="coachH">教师节奏</h3>
+      <div class="t" id="coachT"></div>
+      <ul id="coachL"></ul>
+    </aside>
+  </main>
+
+  <div id="bar">
+    <div class="keys">
+      <span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd> 计票 +1</span>
+      <span><kbd>Q</kbd><kbd>W</kbd><kbd>E</kbd> 计票 −1</span>
+      <span><kbd>Enter</kbd> 下一步</span>
+      <span><kbd>T</kbd> 教师节奏</span>
+      <span><kbd>R</kbd> 重开</span>
+    </div>
+    <button id="next">开 始</button>
+  </div>
+
+  <div id="foot">
+    <span class="brand">钥匙玩校 <em>KIID SCHOOL</em></span>
+    <span>第一桶金 · 九道关 · 少年财商与创业启蒙</span>
+    <span class="sp"></span>
+    <span class="pg" id="footPg">封面</span>
+  </div>
+</div>
+
+<script>
+/* ================= 数据 ================= */
+const LEVELS=[
+{
+ ch:"第一关 · 钱从哪来", title:"你有一个想法，和五万块",
+ scene:"样品做出来了，好用得不像话。但开一副模具要 30 万，第一批 5000 把还要 30 万。你手上只有 5 万。<b>想法不值钱，把想法变成货才要钱。</b>四条路，全世界的创业者基本只走这四条。",
+ ask:["一、如果明天你要开一家公司，你最想从哪里拿到第一笔钱？为什么？","二、这四种钱里面，哪一种是<b>不用还的</b>？"],
+ debrief:["追问一、这四条路里，只有一条路的钱<b>从头到尾是你自己的</b>，是哪一条？","追问二、宗庆后 42 岁才蹬上那辆三轮车。这件事对你意味着什么？"],
+ concept:{t:"启动资金的四种血型",x:"客户的钱最难要，但不用还、不稀释；投资人的钱买的是你未来的股份；银行的钱身上挂着时钟；众筹的钱是别人先给你的信任——<b>预收款不是收入，是债</b>。"},
+ coach:{t:"约 6 分钟",l:["先只念题目和提问，<b>不要念选项</b>，让学生凭直觉说。","揭晓后强调：四条路没有对错，只有<b>代价不同</b>。","埋钩子：只有一条路的钱是你自己的。"]},
+ opts:[
+  {k:"A",label:"打工接单，把利润滚回去",sub:"不借钱、不融资，先赚小钱",v:"good",
+   hero:"宗庆后 42 岁蹬三轮车，给学校送冰棍、汽水、作业本，一年挣下十几万，才有钱做娃哈哈儿童营养液。曹德旺卖过烟丝、拉过板车、种过白木耳，攒出福耀的本钱。李嘉诚 17 岁做推销员，几乎全部工资存下来，22 岁用五万港币开了长江塑胶厂。",
+   why:"宗庆后当时的判断很土：<b>学校要的东西天天都要，而且钱当场结</b>——他挑的不是最赚钱的生意，是回款最快的生意。李嘉诚的判断是：先在别人的塑胶厂做两年推销和管理，把每个环节学会再花钱进去，这样学费别人替他付了。",
+   method:"先卖，再造。用一个已经有人肯付钱的小需求，赚到第一笔属于自己的钱——这笔钱不用还、不稀释、不催你。",
+   death:"慢，而且脆。盘子小的时候压错一次货就归零；更常见的死法是<b>永远长不大</b>，二十年后还是那个小生意，因为你从来没敢押过大的。",
+   fx:{cash:150000,val:900000}},
+  {k:"B",label:"讲故事，找投资人",sub:"用产品、团队、愿景换钱",v:"mid",
+   hero:"张一鸣做字节跳动时，产品还很粗糙就拿到了 SIG 百万美元级的早期投资。Brian Chesky 做 Airbnb 前，靠卖总统竞选主题麦片赚了三万美元硬撑，才活到红杉给他 60 万美元的那天。",
+   why:"张一鸣的判断：信息分发这件事晚半年就没了，所以必须<b>用别人的钱买时间</b>。Chesky 的判断更妙：卖麦片那三万块撑不了多久，但它能证明「这两个人什么都干得出来」——投资人投的从来不是麦片，是这一点。",
+   method:"融资不是要钱，是<b>卖未来的股份</b>。投资人不买你的努力，只买你的增长速度和天花板。见投资人之前先问自己：我凭什么长得比别人快十倍？",
+   death:"拿到钱那天以为赢了。烧钱买用户，钱烧完发现没人复购——罗永浩的锤子科技融了十几亿，最后背了 6 亿债去直播还钱。另一种死法是稀释过头：公司还在，你已经被董事会请出门（乔布斯 1985 年就是这样离开苹果的）。",
+   fx:{cash:1000000,val:5000000,share:-20}},
+  {k:"C",label:"抵押、借款，去银行",sub:"用信用和资产换现金",v:"mid",
+   hero:"山姆·沃尔顿 1945 年跟岳父借了 2 万美元，加上自己攒的 5 千，盘下一家小杂货店，那是沃尔玛的原点。雷·克洛克 52 岁抵押了房子和人寿保险，才买下麦当劳的特许经营权。",
+   why:"沃尔顿的判断：这家店的位置和客流他已经蹲了很久，两万美元买的不是店面，是<b>一份已经在赚钱的现金流</b>。克洛克的判断更狠：他跑遍全美卖奶昔机，只有麦当劳兄弟这家能在 15 秒内出餐——他赌的不是汉堡好吃，是「标准化可以复制一千家」。",
+   method:"借来的钱身上挂着时钟。所以它只能投到<b>能立刻产生现金</b>的地方——进货、生产、交付，不能投到装修和面子上。",
+   death:"借钱买了不生钱的东西。利息每天都在跑，生意还没跑起来就被利息拖死。这是小老板最标准的死法：门面装修得漂亮，第七个月发不出工资。",
+   fx:{cash:600000,debt:600000,val:300000}},
+  {k:"D",label:"众筹预售，让客户先掏钱",sub:"没做出来就先收钱",v:"mid",
+   hero:"Palmer Luckey 2012 年把 Oculus 头显放上 Kickstarter，目标 25 万美元，最后收了将近 244 万。两年后 Facebook 用 20 亿美元把它买走。",
+   why:"Luckey 的判断：<b>他不知道有没有人要 VR，所以他决定先问，而不是先做。</b>那 244 万美元与其说是融资，不如说是一次全世界最便宜的市场调研——顺便还把研发费用报销了。",
+   method:"用订单证明需求，用客户的钱造产品。这是零成本验证——如果没人肯预付，那就是老天在替你省钱。",
+   death:"收了钱做不出来。Coolest Cooler 众筹到 1330 万美元，成本算错、关税一涨，几万人的货永远发不出来，公司破产。<b>预收款不是收入，是债。</b>",
+   fx:{cash:1500000,val:300000,flag:"crowd"}}
+ ]
+},
+{
+ ch:"第二关 · 第一笔生意", title:"东西做出来了，卖给谁，卖多少钱",
+ scene:"收毛机量产了，<b>一把的成本是 60 块</b>。你可以卖 89，可以卖 299，也可以先白送一万把。同一把梳子，三个价格，通向三家完全不同的公司。",
+ ask:["一、成本 60 块的收毛机，你会卖多少钱？说出你的理由。","二、你身边哪个生意毛利最高？哪个最低？为什么差这么多？"],
+ debrief:["追问一、段永平为什么要把游戏机改名叫「学习机」？他真正的客户是谁？","追问二、如果毛利只有 10%，卖出去 10 万件，你会更有钱还是更没钱？"],
+ concept:{t:"毛利 = 卖价 − 成本",x:"毛利是生意的第一个数，也是唯一能救你命的数。毛利太低的生意，<b>卖得越多死得越快</b>——因为每多卖一件，你要先垫的钱就更多。"},
+ coach:{t:"约 6 分钟",l:["现场算一次：成本 100、卖 120，卖 1000 件赚多少？扣掉运费、退货、房租还剩多少？","关键句：<b>价格是你选的客户，不是你选的数字。</b>"]},
+ opts:[
+  {k:"A",label:"卖 89，先把量冲上去",sub:"薄利多销，先占住货架",v:"bad",
+   hero:"过去十年电商平台上，无数白牌卖家用 9.9 包邮冲销量榜，冲到第一名，年底一算账全年净亏。",
+   why:"他们当时的判断是「先有量，再谈利」。这个判断错在一个地方：<b>量本身不产生议价权，成本优势才产生议价权。</b>",
+   method:"低价只有一种正确用法：你的成本结构真的比对手低（规模、供应链、技术）。否则低价不是策略，是自杀。",
+   death:"卖一件亏一点，卖得越多亏得越多，现金全被库存和运费吃掉。等你想涨价，客户全跑了——他们本来就是冲价格来的。",
+   fx:{cash:-100000,val:100000}},
+  {k:"B",label:"卖 299，只做重度铲屎官",sub:"一个人养三只以上的那种",v:"good",
+   hero:"汪滔的大疆最早不卖消费级无人机，卖飞控系统给航模发烧友，一套几千块，客户不多但个个肯付钱，靠这笔毛利养活了研发。段永平更绝：把游戏机包装成「小霸王学习机」，请成龙代言。",
+   why:"汪滔的判断：航模玩家最痛的是炸机，一次炸掉几千块，所以他们<b>愿意为「不炸」付高价</b>——痛点越痛，毛利越高。段永平的判断：孩子想要游戏机，但掏钱的是家长，家长不会为「玩」付钱，只会为「学」付钱——所以改名比改产品有用一百倍。",
+   method:"找到「愿意为这件事多付一倍钱」的那群人，先服务好他们。高毛利买来的是<b>试错的空间</b>：你可以犯错，还能活着改。",
+   death:"风险是把小众当成了终点，一辈子只有 500 个客户。要在赚够钱之后，主动往更大的人群走一步。",
+   fx:{cash:600000,val:1500000}},
+  {k:"C",label:"先白送一万把",sub:"用户量优先，以后再想赚钱",v:"bad",
+   hero:"这是 2015 年前后中国互联网最流行的打法，也是死亡名单最长的打法：共享单车、O2O 上门、生鲜到家，补贴一停，用户就散。",
+   why:"他们的判断是「先占坑，后收费」。错在没想清楚一件事：<b>免费吸引来的人，本来就是冲免费来的。</b>",
+   method:"免费只在一种情况下成立：你有另一个人替用户付钱（广告主、平台、政府），并且你已经知道他是谁。否则不要开始。",
+   death:"白送来的人不是客户，是路人。你以为在做用户增长，其实在花钱雇人假装喜欢你。",
+   fx:{cash:-300000,val:500000}}
+ ]
+},
+{
+ ch:"第三关 · 现金流危机", title:"一张看起来很赚的大单",
+ scene:"连锁宠物医院「毛孩子」找上门，一口气要 4000 套，<b>合同金额 100 万</b>——但付款条款写着「验收后三个月付」。你要先花 60 万备料开工。账上有多少钱，抬头看 HUD。",
+ ask:["一、今天要付 60 万，三个月后才收 100 万。中间这 90 天，你靠什么活？","二、一家账面上正在赚钱的公司，有没有可能倒闭？"],
+ debrief:["追问一、回头看，A 选项在什么条件下才是对的？","追问二、如果你是那个大客户，你会不会也想拖三个月再付钱？为什么？"],
+ concept:{t:"利润是观点，现金是事实",x:"公司不是被亏损杀死的，是被现金流杀死的。账面赚钱、账上没钱，叫<b>「黑字倒闭」</b>——这是全世界中小企业的第一死因。"},
+ coach:{t:"约 8 分钟 · 全课核心",l:["黑板画时间轴：<b>今天付 60 万 → 90 天后收 100 万</b>。","解释「账期」：大公司为什么都拖着付钱？因为拖着的每一天，钱在他账上生息。","锚点句：<b>看起来最赚的那个选项，往往是最危险的。</b>"]},
+ opts:[
+  {k:"A",label:"借高息的钱，把单子吃下来",sub:"这么大的单不能放",v:"bad",
+   hero:"每年都有制造业老板为了一张大单去借月息两分的钱。客户延期一个月，利息吃掉全部利润；延期三个月，公司没了。",
+   why:"他们当时的判断是「这单肯定能收回来」。错在把<b>客户会准时付款</b>当成了确定的事——而这世界上唯一确定的事，是利息每天都在跑。",
+   method:"这条路只有一种情况成立：客户的付款能力确定无疑，且利息成本你已经算进报价里。否则你不是在做生意，是在赌客户的良心。",
+   death:"客户一句「财务流程还没走完」，资金链就断了。而且高息借款一旦开始，你会为了还上一笔而借下一笔——这就是死亡螺旋。",
+   fx:{cash:-600000,debt:800000,val:2000000}},
+  {k:"B",label:"跟客户谈：先付三成定金",sub:"谈不成就不做",v:"good",
+   hero:"曹德旺早年做水表玻璃就立过规矩：不赊账。李嘉诚在长江塑胶厂差点因为赶单出质量事故倒闭之后，一辈子的信条就是手上永远留够现金——所以 2008 年金融危机他毫发无伤。",
+   why:"曹德旺的判断：<b>赊出去的账，收回来的成本比毛利还高，不如不做。</b>李嘉诚出事之后想明白了一件事：只要现金不断，任何错误都有时间修；现金一断，再对的战略也没用。所以他宁可少赚，也要留一大笔「怎么样都不动」的钱。",
+   method:"把「什么时候收钱」当成合同里最重要的条款去谈，比价格还重要。定金 + 分期 + 尾款，让客户的钱替你垫资，这是最便宜的融资。",
+   death:"唯一的代价是丢掉一部分傲慢的大客户。丢就丢了——用现金流换来的订单不叫订单，叫套牢。",
+   fx:{cash:400000,val:2500000}},
+  {k:"C",label:"放弃它，只做现款现货的小客户",sub:"我不冒这个险",v:"mid",
+   hero:"很多活了三十年的小公司都是这么活下来的：不做账期、不做工程、不进大卖场，只做能当场收钱的生意。慢，但从来没死过。",
+   why:"他们的判断是：<b>我今天的资金规模只支持这么大的单，越界不是勇敢，是无知。</b>",
+   method:"承认自己的资金能力边界，并且不越界。活着，是复利的前提。",
+   death:"不会猝死，但会慢性缺氧：你永远接不到能让你上一个台阶的单子，只能看着敢冒险的同行超过你。",
+   fx:{cash:350000,val:500000}}
+ ]
+},
+{
+ ch:"第四关 · 增长的诱惑", title:"有人要投你 500 万，占 30%",
+ scene:"收毛机在网上火了。一家基金找上门：投 500 万，占 30%，要求你三个月内铺进全国 2000 家宠物店。也可以不拿这笔钱，用赚来的利润一家一家慢慢铺。",
+ ask:["一、100% 的 1000 万，和 30% 的 5000 万，哪个多？算给我看。","二、你愿意为了跑得更快，把公司的一部分永远让给别人吗？"],
+ debrief:["追问一、黄仁勋那次赌对了。如果赌错了呢？我们该学他什么，不该学他什么？","追问二、什么样的行业适合「慢慢滚」，什么样的行业不许你慢？"],
+ concept:{t:"股权稀释",x:"融资不是拿钱，是卖股份。判断标准只有一个：<b>这笔钱能不能让蛋糕大到「切走一块之后我还更多」。</b>"},
+ coach:{t:"约 7 分钟",l:["现场算：100%×1000万=1000万；70%×3000万=2100万；30%×5000万=1500万。让学生自己得结论。","一句话：<b>融资买的不是钱，是试错的次数。</b>"]},
+ opts:[
+  {k:"A",label:"拿满 500 万，猛踩油门",sub:"用钱换时间，赢家通吃",v:"mid",
+   hero:"黄仁勋 1993 年拿了红杉等机构的钱创办英伟达，头两代芯片全部失败，1996 年公司账上只剩一个月工资，他把所有筹码押在 RIVA 128 上——赌对了，才有今天。",
+   why:"黄仁勋的判断：显卡这条赛道<b>一代做不对就出局</b>，所以他要的从来不是钱，是「再试一次的机会」。1996 年他甚至没做完全部测试就直接流片，因为钱只够试这一次——他宁可承担做错的风险，也不接受根本没机会做的结局。",
+   method:"钱只在一种时候该猛烧：你已经<b>验证过单个客户是赚钱的</b>，烧钱只是把这个动作复制一千遍。验证之前烧钱，等于把火药倒进水里。",
+   death:"没验证就扩张：招一百人、开二十家店、投一亿广告，然后发现单店模型本来就是亏的。还有一种死法叫估值太高——这轮吹得太狠，下一轮没人接盘，公司当场断气。",
+   fx:{cash:3000000,val:30000000,share:-30}},
+  {k:"B",label:"一分不拿，用利润慢慢滚",sub:"我不想被别人管",v:"mid",
+   hero:"段永平的步步高从不上市、不融资，用自己的现金流生出了 OPPO 和 vivo。汪滔早期的大疆也长期靠销售收入自我造血。",
+   why:"段永平的判断：<b>「快」不是决定胜负的因素，产品对不对才是。</b>而拿了别人的钱，你就必须按别人的节奏跑——他不想在一个需要慢慢打磨的行业里被逼着冲刺。",
+   method:"如果你的生意毛利够高、回款够快，利润滚动是最优解——你保住了全部股份和全部决策权。",
+   death:"死于慢。如果你的赛道是赢家通吃、有网络效应（社交、平台、AI），对手拿了十亿在跑，三年后你的产品还没上线，市场已经没了。",
+   fx:{cash:1500000,val:5000000}},
+  {k:"C",label:"只拿 200 万，够用就行",sub:"少稀释，留余地",v:"good",
+   hero:"这是老练创业者最常做的选择：只融「到下一个里程碑」需要的钱，把估值留到证明了自己之后再谈。",
+   why:"他们的判断：<b>今天我值多少钱，是市场对我的误会；等我把这个误会变成事实，同样的钱只需要卖更少的股份。</b>",
+   method:"融资按里程碑融，不按胃口融。每一轮只解决一个明确问题，问题解决了估值自然涨，下一轮稀释更少。",
+   death:"算错里程碑，钱不够用，被迫在最难看的时候出去要钱——那时候你没有议价权，条款会很难看。",
+   fx:{cash:2000000,val:25000000,share:-12}}
+ ]
+},
+{
+ ch:"第五关 · 分蛋糕", title:"三个人一起干，股份怎么分",
+ scene:"你负责产品，一个同学盯工厂，一个同学跑销售——三个人缺一不可。分股份的这一天，决定了三年后你们是继续做事，还是在法院见。",
+ ask:["一、三个人一样出力，是不是就该一人三分之一？","二、如果其中一个人干了半年就走了，他手上的股份怎么办？"],
+ debrief:["追问一、为什么「感情最好的时候」反而最该把规矩说清楚？","追问二、如果你是那个只占 15% 的技术合伙人，你会同意吗？要什么条件你才同意？"],
+ concept:{t:"股权必须有老大 · 股份要有兑现期",x:"50:50 和 33:33:33 是创业公司最危险的两种结构，因为没有人能拍板。股份还要约定<b>干满四年才全部拿到</b>，中途走人只带走干过的那部分。"},
+ coach:{t:"约 6 分钟",l:["先让他们争论一分钟再揭晓。","真功夫案例：两个 50% 的股东，最后一个进了监狱。","一句话：<b>股份是干出来的，不是分出来的。</b>"]},
+ opts:[
+  {k:"A",label:"好兄弟，一人三分之一",sub:"公平，不伤感情",v:"bad",
+   hero:"真功夫的蔡达标和潘宇海各占 50%，谁也压不住谁，从争吵到内斗到刑事案件，创始人获刑，一家曾要上市的公司就此停滞。",
+   why:"他们当时的判断是「我们是一家人，分那么清楚多伤感情」。这个判断把股权<b>当成了对感情的表态，而不是对决策权的安排</b>——等到真的有分歧那天，公司里没有一个人有权说「就这么定了」。",
+   method:"（这条路没有可复制的方法，只有一个教训。）",
+   death:"平分股权等于没有决策权。顺境时看不出来，一遇分歧彻底卡死。感情最好的时候不立规矩，感情最差的时候就只能立案。",
+   fx:{share_mul:0.4,val:1000000}},
+  {k:"B",label:"我占大头，其他人股份加期权",sub:"有老大，也有奔头",v:"good",
+   hero:"马云 1999 年在湖畔花园召集 18 个人，凑了 50 万人民币，一开始就把规则说清楚并留了期权池——后来那批早期员工全都拿到了回报。",
+   why:"马云的判断：<b>这 18 个人他一个都不想丢，但公司必须有人能拍板。</b>所以他把话说在最前面——今天不谈钱，谈规则；规则定好了，将来赚多少都不吵架。",
+   method:"创始人保持绝对话语权，同时用期权池让后来的人也有份。加一条四年兑现期，走的人带不走公司的未来。",
+   death:"如果大股东只拿股份不干活，或者把期权当空头支票，团队会用脚投票。<b>控制权的前提是承担最大的责任。</b>",
+   fx:{share_mul:0.75,val:46000000}},
+  {k:"C",label:"不给股份，给高工资",sub:"钱好说，股份免谈",v:"mid",
+   hero:"很多家族企业就是这样：只请「员工」，不请「合伙人」。稳定，但天花板明显。",
+   why:"他们的判断：<b>这门生意靠系统不靠某个人</b>，那么用现金买劳动力，比用股份便宜得多。在标准化程度高的行业里，这个判断经常是对的。",
+   method:"当你的生意不依赖某个人的不可替代性时，这是对的选择。",
+   death:"真正的高手不会为工资跟你熬四年。你留住的是执行者，留不住能改变公司命运的人。而且高工资是<b>固定现金支出</b>，最烧钱。",
+   fx:{cash:-800000,val:2000000}}
+ ]
+},
+{
+ ch:"第六关 · 快钱的诱惑", title:"有个「稳赚」的机会",
+ scene:"账上终于有钱了。这时一定会有人来找你：「别做梳子了，贴牌卖猫砂，毛利五倍，工厂我认识」；「你们厂旁边那块地要涨，先囤着」；「有个项目，年化 30%，稳的」。",
+ ask:["一、如果你现在有 10 万块，你会怎么用？说三个具体去处。","二、有人告诉你一个「稳赚不赔」的机会，你的第一反应应该是什么？"],
+ debrief:["追问一、马斯克赌赢了，但他 2008 年借钱付房租。你愿意承受这个吗？","追问二、什么叫「认知以外的钱」？举一个你身边的例子。"],
+ concept:{t:"第一桶金的用途，决定有没有第二桶",x:"多数人挣到第一笔钱之后就不再是创业者，而是变成了投机者。区别只在一件事：<b>创业者把钱投回自己能变强的地方，投机者把钱投到自己看不懂的地方。</b>"},
+ coach:{t:"约 6 分钟",l:["先让几个学生说说自己会怎么花 10 万，不评判。","收尾一句：<b>看不懂的钱，不是你的钱。</b>"]},
+ opts:[
+  {k:"A",label:"全押进去，钱生钱最快",sub:"辛苦一整年，不如它一个月",v:"bad",
+   hero:"2010 年之后，大量制造业老板把主业利润抽去炒房、放高利贷，工厂空心化。2015 年之后，这批人集体爆雷，连主业都保不住。",
+   why:"他们当时的判断是「隔壁老王都赚到了，我为什么不能」。错在把<b>别人赚到了</b>当成了<b>我也能赚到</b>——却没算过自己在这件事上有没有任何信息优势。",
+   method:"（没有方法。这是本课唯一一个纯陷阱选项。）",
+   death:"两头落空：投机赔了，主业也因为你不在场而荒废。<b>你赚不到认知以外的钱，赚到了也会用运气还回去。</b>",
+   fx:{cash:-1200000,val_mul:0.6}},
+  {k:"B",label:"全部投回主业",sub:"把自己变得更强",v:"good",
+   hero:"马斯克把 Zip2 卖掉分到的 2200 万、PayPal 卖掉分到的约 1.8 亿美元，几乎全部投进了 SpaceX 和特斯拉，2008 年一度靠朋友借钱付房租——然后猎鹰一号第四次发射成功了。",
+   why:"马斯克 2008 年的判断：<b>钱花光了可以再借，但火箭停了公司就死了</b>——所以他先保项目，后保自己。曹德旺的判断更朴素：玻璃这门生意他做了一辈子还没做到头，凭什么去做一个自己不懂的？",
+   method:"把第一桶金投在能<b>提高你赚钱能力</b>的地方：产品、设备、人、你自己的学习。这是唯一会复利的投资。",
+   death:"风险是全押在一个篮子里。老练的做法是先留一笔「怎么样都不动」的救命钱，剩下的再往前推。",
+   fx:{cash:-600000,val:30000000}},
+  {k:"C",label:"拿一成出来试试水",sub:"两边都不耽误",v:"mid",
+   hero:"这是大多数成熟创业者的做法：主业为主，用小比例资金学习新领域，把学费控制在死不了的范围内。",
+   why:"他们的判断：<b>我不确定这件事对不对，所以我只用「亏光了也不影响生活」的钱去买一个答案。</b>",
+   method:"设一个亏光也不影响生活的上限，然后才允许自己冒险。这句话适用于创业，也适用于投资。",
+   death:"风险是分心。一成的钱不多，但可能占掉你五成的注意力——而注意力才是创始人最贵的资产。",
+   fx:{cash:-200000,val:5000000}}
+ ]
+},
+{
+ ch:"第七关 · 护城河", title:"对手来了，你靠什么活得久",
+ scene:"你被抄了。电商平台上冒出十几款一模一样的收毛机，<b>9.9 包邮</b>，标题还写着「与某品牌同厂」。你手上还有一笔钱，投在哪？",
+ ask:["一、你家里有哪些是「每月自动扣钱」的？为什么你懒得取消？","二、让一个老客户再买一次，和让一个新客户第一次买，哪个更难？"],
+ debrief:["追问一、哈斯廷斯当年愿意 5000 万美元把 Netflix 卖掉。连他都看不清未来，那我们凭什么坚持？","追问二、如果你开一家奶茶店，怎么让人愿意办卡？"],
+ concept:{t:"一次性买卖 vs 会员复购",x:"卖一次赚一次，你每天醒来都要重新找客户；让人每月自动付费，你每天醒来钱已经在账上。<b>同样的收入，后者的估值通常是前者的三到五倍。</b>"},
+ coach:{t:"约 6 分钟",l:["讲百视达的滞纳金：客户最恨的地方，就是最大的机会。","2000 年哈斯廷斯想 5000 万卖给百视达被嘲笑，2010 年百视达破产。"]},
+ opts:[
+  {k:"A",label:"猛打广告，抢新客户",sub:"谁的声音大谁赢",v:"mid",
+   hero:"这是最快见效也最快烧完的打法。广告停的那天，增长就停了。",
+   why:"这个判断的漏洞在于：<b>广告能买来知道你的人，买不来喜欢你的人。</b>",
+   method:"广告只在<b>单个客户的终身价值 > 获客成本</b>时才该投。先算清这两个数，再决定投多少。",
+   death:"用广告掩盖产品问题。客户来了、买了、失望了、走了，你要花更多钱买更贵的新客户，直到买不动为止。",
+   fx:{cash:-1500000,val:8000000}},
+  {k:"B",label:"把刀头做成每两个月自动寄的会员",sub:"本体便宜，耗材赚钱",v:"good",
+   hero:"里德·哈斯廷斯发现百视达最赚钱的居然是罚客户的滞纳金，于是做了一个不罚钱的包月订阅，把一次性租碟变成每月自动扣款。2000 年他想以 5000 万美元把 Netflix 卖给百视达被拒；2010 年百视达破产。",
+   why:"哈斯廷斯的判断来自他自己被罚过一次 40 美元滞纳金，气得要死。他由此得出一个结论：<b>客户最恨的地方，就是最大的机会。</b>所以他做的第一个决定不是技术，是取消滞纳金——先把恨变成爱，再谈生意。",
+   method:"盯住一个数：<b>复购率</b>。老客户再买一次的成本是新客户的五分之一。把钱花在让人回来，而不是让人知道。",
+   death:"这条路慢，前六个月数据难看，很容易被急躁的老板或投资人叫停。要撑得住。",
+   fx:{cash:-300000,val:60000000}},
+  {k:"C",label:"降价，先把对手打死",sub:"我比他能扛",v:"bad",
+   hero:"价格战几乎从来没有赢家，只有活得久一点的输家。共享单车、社区团购、外卖大战，最后活下来的公司也元气大伤。",
+   why:"这个判断错在：<b>你以为你比对手能扛，对手也这么以为。</b>而且你们扛的都不是自己的钱。",
+   method:"只有当你的成本结构真的更低时，降价才是武器；否则它只是把你和对手一起推下悬崖。",
+   death:"你降他也降，两败俱伤；就算他先死了，市场也被教育成「这东西就值这么便宜」，你再也涨不回去。",
+   fx:{cash:-1200000,val:3000000}}
+ ]
+},
+{
+ ch:"第八关 · 另一条路", title:"不创业的人，第一桶金从哪来",
+ scene:"先把收毛机放一边。这一关的钱<b>直接进你的个人账户，不用跟任何人分</b>。创业只是第一桶金的一种来源，而且是失败率最高的一种。全世界更多的第一桶金，来自下面这四条路。",
+ ask:["一、不创业的人，能不能有第一桶金？举一个你知道的例子。","二、什么东西可以在你<b>睡觉的时候</b>还在帮你赚钱？"],
+ debrief:["追问一、这四条路里，哪一条你从 14 岁就可以开始？今晚就能开始？","追问二、Naval 说「用时间换钱的人发不了财」。你同意吗？为什么？"],
+ concept:{t:"杠杆 · 什么东西能被复制",x:"Naval 说真正的杠杆有四种：<b>人、钱、代码、媒体</b>。前两种要别人批准（你得雇得起人、借得到钱），后两种<b>不需要任何人同意</b>——写一篇文章、做一个软件，复制一万份的成本是零。这是这个时代给普通少年最大的礼物。"},
+ coach:{t:"约 7 分钟",l:["强调这一关的钱不稀释、不用还——<b>个人资产和公司股份是两件事</b>。","让学生具体说：如果从今天开始每月存 200 元，十年后是多少？（不算利息也有 2.4 万）","Dan Koe 和 Naval 都不是靠公司发财的，是靠「可复制的东西」。"]},
+ opts:[
+  {k:"A",label:"练一门值钱的技能，然后拼命存",sub:"高收入 + 高储蓄率",v:"good",
+   hero:"绝大多数医生、工程师、律师、优秀销售的第一桶金都是这么来的：不创业、不冒险，靠一门别人替代不了的技能拿高收入，再把其中一大半存下来。",
+   why:"他们的判断：<b>创业的成功率不到一成，而「把一门技能练到前 5%」的成功率高得多。</b>关键不在赚多少，在存下多少——月入两万花两万的人，永远没有第一桶金。",
+   method:"两个数字要同时管：<b>时薪</b>和<b>储蓄率</b>。前者靠技能，后者靠习惯。先给自己发工资（存钱），剩下的才是可以花的。",
+   death:"死在天花板上。时间不能复制，所以收入有硬顶；而且一旦生病、失业、行业下滑，收入就归零。这条路很稳，但走不远。",
+   fx:{cash:2000000}},
+  {k:"B",label:"一个人做一门生意",sub:"个人品牌 · 写作 · 课程 · 一人公司",v:"good",
+   hero:"Dan Koe 原来是健身教练和自由设计师，靠一天天把自己的思考公开写出来（Twitter 和 The Koe Letter），几年时间做成了一门几乎没有员工的生意：写作带来读者，读者买他的课程和工具，全程一个人。",
+   why:"Dan Koe 的判断：<b>用时间换钱的人，收入天花板是固定的；而写下来的一篇文章、录好的一门课，可以在你睡觉的时候被卖一万次。</b>所以他做的第一件事不是找客户，是把自己变成「能被复制的人」——先公开写作，让作品替他去见人。",
+   method:"把你正在学的东西<b>公开地学</b>：写下来、拍出来、做出来。你的学习过程本身就是产品的广告，也可能就是产品本身。14 岁就可以开始，成本是零。",
+   death:"死在「等我准备好了再开始」。也死在三分钟热度——这条路前一年几乎没有回报，靠的是三年不停更。",
+   fx:{cash:3500000}},
+  {k:"C",label:"让钱替自己上班",sub:"长期投资 · 复利",v:"good",
+   hero:"巴菲特 11 岁买了人生第一支股票，从此再没停过。Naval Ravikant 靠早期投资（AngelList、Uber、Twitter 等）积累财富，然后花更多时间告诉年轻人：不要追求钱和地位，去追求财富——能在你睡觉时替你工作的资产。",
+   why:"巴菲特 11 岁的判断朴素得可怕：<b>让钱替我上班，我睡觉它也在上班。</b>Naval 的判断更进一步：他认为「出租自己的时间」这件事本身就不可能致富，因为时间不能复制、不能规模化——所以他劝所有年轻人尽早去做代码和媒体这两种<b>不需要别人批准的杠杆</b>。",
+   method:"两件事：<b>尽早开始</b>（时间是复利里最大的那个变量）和<b>不懂不投</b>。定投指数基金是普通人能拿到的、最不需要天赋的方案。",
+   death:"死在两件事上：一是拿短期的钱做长期的投资，一跌就被迫割肉；二是把投机当投资，追涨杀跌，十年下来跑输存银行。",
+   fx:{cash:3000000}},
+  {k:"D",label:"做一个能一直收租的作品",sub:"版权 · 代码 · 内容",v:"mid",
+   hero:"作家、音乐人、开源程序员、课程作者——他们做一次，然后收很多年。《哈利·波特》让一个靠救济金生活的单亲妈妈成了亿万富翁，代价是她写了七年、被退稿十二次。",
+   why:"判断很简单：<b>作品是一次做完、永远收租的资产。</b>它和「上班」的区别在于，上班停了钱就停了，作品停了钱还在。",
+   method:"选一件你愿意做很久的事，把它做成能被反复使用的东西：一本书、一个工具、一套课、一个开源项目。",
+   death:"成功率极低，而且回报极度不均：99% 的作品没有人看。这条路适合作为 A 或 B 的副产品，不适合作为唯一的赌注。",
+   fx:{cash:2500000}}
+ ]
+},
+{
+ ch:"第九关 · 结算", title:"这一切，什么时候变成你的钱",
+ scene:"一家宠物用品上市公司找上门，想把「一根不留」整个买下来。但估值只是纸上的数字，不是你的钱。最后一个决定：什么时候、怎么把它变成现金。",
+ ask:["一、「我的公司值一个亿」和「我有一个亿」，差在哪里？","二、什么时候该把手上的东西换成钱？"],
+ debrief:["追问一、今天这一局，差距是从哪一关拉开的？","追问二、如果重来一次，你最想改哪一个选择？"],
+ concept:{t:"纸面财富 ≠ 现金",x:"没卖出去之前，估值只是一个说法。第一桶金的定义很朴素：<b>已经落到你账上、你可以自由支配的钱。</b>"},
+ coach:{t:"约 6 分钟 + 结算",l:["讲哈斯廷斯：卖掉第一家公司，才有本钱做 Netflix。","<b>退出不是终点，是下一次创业的启动资金。</b>","结算后带全班看范围表，讨论差距从哪一关拉开。"]},
+ opts:[
+  {k:"A",label:"卖掉公司，落袋为安",sub:"把股份换成现金",v:"good",
+   hero:"Palmer Luckey 的 Oculus 被 Facebook 以 20 亿美元收购。里德·哈斯廷斯把第一家公司 Pure Atria 卖掉之后，才有钱和底气去做 Netflix。马斯克卖掉 Zip2 分到 2200 万美元，卖掉 PayPal 分到约 1.8 亿——全都变成了 SpaceX 和特斯拉的启动资金。",
+   why:"他们的共同判断：<b>把一次成功换成现金和信誉，是为了买下一次更大的入场券。</b>卖公司不是认输，是换赛道。",
+   method:"退出的钱 + 退出带来的信誉，是下一次创业最好的第一桶金。",
+   death:"卖早了。哈斯廷斯当年愿意 5000 万美元卖 Netflix，幸好百视达拒绝了他。",
+   fx:{settle:"sell"}},
+  {k:"B",label:"不卖，继续做大",sub:"我看得更远",v:"mid",
+   hero:"段永平从不上市，宗庆后长期把娃哈哈牢牢握在手里。他们赢了，但也承担了全部风险。",
+   why:"他们的判断：<b>这家公司在我手上会比在别人手上更值钱。</b>——只有当这句话确实成立时，拒绝退出才是对的。",
+   method:"确信自己是这份资产的最优管理者，才该拒绝出价。",
+   death:"账面身家上亿，现金依然紧张。行业一变天，估值三个月归零——你从头到尾没拿到过一分钱。",
+   fx:{settle:"hold"}},
+  {k:"C",label:"上市，先套现一部分",sub:"一手现金，一手股份",v:"good",
+   hero:"绝大多数成熟公司走的路：公开发行，创始人有限度地减持，既拿到现金，又保住控制权。",
+   why:"判断：<b>永远不要在一个时点上赌全部身家。</b>把一部分收益锁进保险箱，是成年人的做法。",
+   method:"分批变现。落袋的那部分，才是真正属于你的第一桶金。",
+   death:"上市之后你要对全市场负责，短期业绩压力会逼你做长期错误的决定。",
+   fx:{settle:"ipo"}}
+ ]
+}
+];
+
+const BOOKS=[
+ {s:"给 14 岁的入门（今晚就能开始）"},
+ {t:"《小狗钱钱》",a:"博多·舍费尔",w:"全世界写给孩子的理财书里最好读的一本。一只会说话的狗教一个女孩记账、存钱、投资。德国人手一本。"},
+ {t:"《穷爸爸富爸爸》",a:"罗伯特·清崎",w:"争议很大，但「资产是把钱放进你口袋的东西，负债是把钱拿走的东西」这一句，值回票价。请配合老师的批注读。"},
+ {t:"《纳瓦尔宝典》",a:"Eric Jorgenson 编 · 网上有免费英文版",w:"Naval Ravikant 的思想全集。核心就一句：<b>去追求财富，不要追求钱和地位</b>。本课第八关就来自这本。"},
+ {t:"《一人企业》Company of One",a:"Paul Jarvis",w:"如果你想像 Dan Koe 那样一个人做一门生意，从这本开始。它反对「越大越好」。"},
+ {t:"《投资第一课》",a:"孟岩、有知有行",w:"中文世界里最适合新手的投资入门。作者是「有知有行」的创始人，不推销、不喊涨，只讲一件事：<b>普通人怎么用「长期 + 便宜 + 分散」慢慢变富</b>。本课第八关「让钱替自己上班」的中文版说明书。"},
+
+ {s:"投资与财商 · 巴菲特和芒格自己在读的"},
+ {t:"《聪明的投资者》",a:"本杰明·格雷厄姆",w:"<b>巴菲特说这是有史以来最好的投资书</b>，并且特别指名第 8 章和第 20 章。他 19 岁读到它，说这本书改变了他的一生。"},
+ {t:"《穷查理宝典》",a:"查理·芒格",w:"芒格自己的演讲合集。他一辈子在讲一件事：<b>用多个学科的模型去看同一个问题</b>。"},
+ {t:"《影响力》",a:"罗伯特·西奥迪尼",w:"<b>芒格公开推荐，还送过作者一股伯克希尔的股票表示感谢。</b>讲人为什么会被说服——学会了既能用，也能防。"},
+ {t:"《商界局外人》The Outsiders",a:"威廉·桑代克",w:"<b>巴菲特在致股东信里推荐过。</b>八个不按常理出牌的 CEO，共同点是：他们都极度会分配资本。"},
+ {t:"《共同基金常识》",a:"约翰·博格",w:"<b>巴菲特说，给普通人的最好建议就是定投低成本指数基金</b>——这本书是那个建议的说明书。"},
+ {t:"《卓越基因》",a:"史蒂夫·扬齐斯",w:"研究了几千家公司后发现：真正长期赚钱的生意，往往在很早就带着某种「基因」。<b>它教你怎么一眼看出一门生意值不值得长期持有</b>——正好接上本课第七关「护城河」和第二关「毛利」。"},
+
+ {s:"创业与判断 · 创始人们互相推荐的"},
+ {t:"《从 0 到 1》",a:"彼得·蒂尔",w:"PayPal 创始人自己写的。核心问题：<b>有什么重要的事实，是很少有人同意你的？</b>"},
+ {t:"《创新者的窘境》",a:"克莱顿·克里斯坦森",w:"<b>乔布斯、贝索斯、里德·哈斯廷斯都推荐过。</b>解释了一件反直觉的事：好公司往往是因为「做对了所有事」才被淘汰的。"},
+ {t:"《创业维艰》",a:"本·霍洛维茨",w:"少有的不讲成功、只讲「快撑不下去那几年」的书。本课第三关的味道全在里面。"},
+ {t:"《段永平投资问答录》",a:"段永平 · 网上有整理版",w:"本课第四关「不融资也能赢」的原始出处。他讲「本分」和「做对的事情」讲了二十年。"},
+ {t:"《原则》",a:"瑞·达利欧",w:"讲的不是投资，是<b>怎么把自己做决定的方式写下来、然后不断修正</b>。适合当工具书用。"},
+
+ {s:"影视 · 一节课看不完，回家看"},
+ {t:"《隐藏的亿万富翁》Undercover Billionaire",a:"纪录片 · 2019",w:"<b>本课开场那个 Glenn Stearns</b>：身上 100 美元、一辆旧卡车、90 天，要在陌生城市从零做出一家百万美元公司。全班必看。",c:"film"},
+ {t:"《美国工厂》American Factory",a:"纪录片 · 奥斯卡最佳",w:"<b>主角就是本课多次提到的曹德旺</b>。看一个中国老板怎么在美国开厂，以及做生意真实的样子。",c:"film"},
+ {t:"《成为沃伦·巴菲特》",a:"HBO 纪录片 · 2017",w:"看他 11 岁买第一支股票、送报纸、至今住在 1958 年买的老房子里。财富和消费是两件事。",c:"film"},
+ {t:"《点球成金》Moneyball",a:"电影 · 2011",w:"用数据打败经验和直觉。<b>把「大家都这么做」当成理由，是最贵的错误。</b>",c:"film"},
+ {t:"《社交网络》The Social Network",a:"电影 · 2010",w:"配合本课第五关看：股权、合伙人、稀释、翻脸，一部电影全齐了。",c:"film"},
+ {t:"《大空头》The Big Short",a:"电影 · 2015",w:"理解金融危机最快的方式。也理解一件事：<b>所有人都同意的时候，往往最危险。</b>",c:"film"},
+ {t:"《鸡毛飞上天》 / 《大江大河》",a:"国产剧",w:"中国人自己的「第一桶金」故事：从义乌鸡毛换糖开始，走完个体户、集体企业、国企三条完全不同的路。",c:"film"},
+ {t:"《当幸福来敲门》",a:"电影 · 2006",w:"最朴素的那一条路：一个人靠死撑和一门技能，把自己从谷底拉出来。",c:"film"},
+
+ {s:"免费的 · 不用花一分钱"},
+ {t:"Naval《How to Get Rich》",a:"播客 / Twitter 长帖 · 免费",w:"一共几十条推文，二十分钟能读完，很多人读了十年。第八关那句「四种杠杆」就出自这里。",c:"free"},
+ {t:"The Koe Letter",a:"Dan Koe 的免费邮件列表",w:"一个人怎么靠写作做成生意的现场直播。英文，正好练阅读。",c:"free"},
+ {t:"《贝佐斯致股东的信》",a:"亚马逊官网 · 免费公开",w:"1997 年那封最重要。<b>「一切都围绕长期。」</b>二十多年他每年都把它重印一遍。",c:"free"},
+ {t:"《巴菲特致股东的信》",a:"伯克希尔官网 · 免费公开",w:"世界上最贵的商业课，一分钱不要。挑最近三年的读就够了。",c:"free"}
+];
+
+const SIGNS=[
+ {t:"你把时间当成最大的资产",x:"时间是你唯一不可再生的本钱。<b>切勿用「忙」来麻痹自己，忙碌不等于有价值。</b>变富的人先算的从来不是钱，是这件事值不值得花掉这段一去不回的时间。",
+  d:["把「今天很忙」换成「今天在哪件事上变强了」——忙了却没长进，等于亏损。","定期砍掉那些只是填满时间、不产生价值的事。","做任何选择前先问：这是在花时间，还是在投资时间？"]},
+ {t:"你做的事情，能沉淀成「资产」",x:"用一个标准判断一件事值不值得做：<b>它做完之后，会不会持续替你产生价值。</b>一篇文章、一门课、一段代码、一门手艺——这些是资产，会为你的自由铺路；纯拿时间换的钱，换完就没了。",
+  d:["优先做那些「做一次、之后一直有用」的事。","有意识地把自己的学习和成果留下来：写出来、做出来、存下来。","问自己：三年后，我今天做的这件事还在替我工作吗？"]},
+ {t:"你退出了「地位游戏」",x:"变富的人不玩比面子、比排场的游戏。<b>面子会上瘾——它让你为了「被看见」而花钱、而做选择。</b>真正的转变，是从「我要被看见」变成「我手上有真东西」。",
+  d:["把「别人怎么看我」的权重调低，把「我实际拥有什么」调高。","警惕一切只为炫耀而做的消费和选择——那是在给面子交税。","停止和别人比排场，只和昨天的自己比进展。"]},
+ {t:"你开始积累「判断力」",x:"判断力是这个时代最贵的资产，它<b>从学习来、从圈层来、从复盘来，也从忍住短期诱惑来</b>。它让你看得到长期价值、学会选择、在所有人都上头的时候保持清醒。",
+  d:["多读、多和高手待在一起、把每个决定事后复盘一遍。","面对「稳赚」「快钱」，先忍住——第六关那些人栽的就是这一关。","练习做「少而对」的选择，而不是「多而忙」的选择。"]},
+ {t:"你常问自己：这件事是在建造我，还是消耗我",x:"人生并不短，是我们浪费得太多。<b>把这一句变成你的日常自查。</b>一件事、一个人、一段关系，让你越来越强、越来越自由，就是建造；让你越来越空、越来越焦虑，就是消耗。",
+  d:["每天挑一件事问一句：它在建造我，还是消耗我？","主动多留建造你的事和人，少留消耗你的。","记住：省下被浪费的时间，本身就是一种变富。",],last:true}
+];
+
+
+const REAL=[
+ {n:"李嘉诚",h:"17 岁做推销员，几乎全部工资存下来；22 岁用积蓄加亲友借款开长江塑胶厂。",m:"起点约五万港币 · 现金流路线"},
+ {n:"宗庆后",h:"42 岁借款十几万承包校办经销部，蹬三轮给学校送冰棍、汽水、作业本，一年攒出办厂的钱。",m:"起点十几万元 · 现金流路线"},
+ {n:"曹德旺",h:"卖过烟丝、拉过板车、种过白木耳，一分一分攒出承包玻璃厂的本钱。",m:"起点几万元 · 现金流路线"},
+ {n:"段永平",h:"用小霸王的经营分红做起步，创办步步高后从不融资、不上市，全靠利润滚动生出 OPPO 和 vivo。",m:"利润滚动 · 拒绝稀释"},
+ {n:"汪滔",h:"从港科大的三万港币奖学金起步，在深圳民房里做飞控卖给航模发烧友，用高毛利养活研发。",m:"起点三万港币 · 高毛利小众"},
+ {n:"山姆·沃尔顿",h:"1945 年跟岳父借 2 万美元，加自己攒的 5 千，盘下一家小杂货店。",m:"起点 2.5 万美元 · 借款路线"},
+ {n:"雷·克洛克",h:"52 岁抵押房子和人寿保险，买下麦当劳的特许经营权。他赌的是「标准化能复制一千家」。",m:"抵押借款 · 大器晚成"},
+ {n:"Brian Chesky",h:"卖总统竞选主题麦片赚了三万美元硬撑，才活到红杉给 Airbnb 60 万美元的那天。",m:"3 万美元续命 → VC 路线"},
+ {n:"张一鸣",h:"字节跳动产品还很粗糙时就拿到 SIG 百万美元级早期投资，用别人的钱买时间。",m:"VC 路线 · 买时间"},
+ {n:"黄仁勋",h:"1993 年靠融资起步，头两代芯片全失败，1996 年账上只剩一个月工资，全押 RIVA 128。",m:"VC 路线 · 买试错次数"},
+ {n:"Palmer Luckey",h:"2012 年 Kickstarter 预售 Oculus，目标 25 万美元，收了近 244 万；两年后 Facebook 用 20 亿美元买走。",m:"众筹 244 万美元 → 20 亿美元"},
+ {n:"埃隆·马斯克",h:"卖掉 Zip2 分到约 2200 万美元，卖掉 PayPal 分到约 1.8 亿——几乎全部投进 SpaceX 和特斯拉，2008 年一度借钱付房租。",m:"创业退出 → 全部再投入"},
+ {n:"里德·哈斯廷斯",h:"先卖掉第一家公司 Pure Atria，才有钱和底气做 Netflix；2000 年想 5000 万美元卖给百视达被拒。",m:"创业退出 → 下一次创业"},
+ {n:"沃伦·巴菲特",h:"11 岁买了人生第一支股票，靠送报纸攒本金，19 岁读到《聪明的投资者》。至今住 1958 年买的房子。",m:"复利路线 · 越早越好"},
+ {n:"Naval Ravikant",h:"靠早期投资积累财富，然后花更多时间讲一件事：财富来自「睡觉时还在为你工作的资产」。",m:"资本 + 媒体杠杆"},
+ {n:"Dan Koe",h:"从健身教练和自由设计师做起，把自己的思考天天公开写出来，几年后做成一门几乎没有员工的生意。",m:"零成本起步 · 媒体杠杆"},
+ {n:"J.K. 罗琳",h:"靠救济金生活，在咖啡馆写了七年《哈利·波特》，被出版社退稿十二次。",m:"作品路线 · 一次做完长期收租"},
+ {n:"Glenn Stearns",h:"今天开场那个人：身上 100 美元、一辆旧卡车，90 天在陌生城市从零做出一家公司（《隐藏的亿万富翁》）。",m:"起点 100 美元"},
+ {n:"反面 · Coolest Cooler",h:"众筹到 1330 万美元，成本算错、关税上涨，几万人的货永远发不出来，公司破产。",m:"预收款不是收入，是债"},
+ {n:"反面 · 真功夫",h:"两位创始人各占 50%，谁也压不住谁，从内斗到刑事案件，一家要上市的公司就此停滞。",m:"股权必须有老大"}
+];
+
+/* ================= 状态 ================= */
+const S={cash:50000,val:0,share:100,debt:0,flags:{},i:-1,phase:"cover",votes:{},picked:null,final:null,dead:false,mode:""};
+const $=id=>document.getElementById(id);
+const fmt=n=>{const s=n<0?"−":"";n=Math.abs(Math.round(n));
+  if(n>=100000000)return s+"¥"+(n/100000000).toFixed(2).replace(/\.?0+$/,"")+"亿";
+  if(n>=10000)return s+"¥"+(n/10000).toFixed(n>=1000000?0:1).replace(/\.0$/,"")+"万";
+  return s+"¥"+n.toLocaleString();};
+
+function drawHUD(){
+  $("hCash").textContent=fmt(S.cash);
+  $("hCash").style.color=S.cash<0?"var(--seal)":"var(--coin)";
+  $("hVal").textContent=fmt(S.val);
+  $("hShare").textContent=Math.round(S.share)+"%";
+  $("hDebt").textContent=S.debt>0?fmt(S.debt):"—";
+  const st=$("chapter-strip");st.innerHTML="";
+  LEVELS.forEach((_,k)=>{const d=document.createElement("div");d.className="pip"+(k<S.i?" done":k===S.i?" now":"");st.appendChild(d);});
+}
+function show(id){
+  const isLevel=(id==="stage");
+  if(!isLevel){$("reveal").classList.remove("on");$("coach").classList.remove("on");}
+  ["cover","stage","finalWrap","range","real","signs","books"].forEach(x=>{const el=$(x);if(el)el.classList.toggle("on",x===id);});
+  const m=document.querySelector("main");if(m)m.scrollTop=0;
+  const cur=$(id);if(cur)cur.scrollTop=0;
+}
+function setFoot(t){$("footPg").textContent=t;}
+
+function renderLevel(){
+  const L=LEVELS[S.i];S.votes={};S.picked=null;
+  $("sEyebrow").textContent=L.ch;
+  $("sTitle").textContent=L.title;
+  $("sScene").innerHTML=L.scene;
+  $("sAsk").innerHTML='<div class="lbl">课堂提问 · 先想再投票</div>'+L.ask.map(q=>'<div class="ask">'+q+'</div>').join("");
+  const box=$("options");box.innerHTML="";
+  box.style.gridTemplateColumns="repeat("+L.opts.length+",1fr)";
+  L.opts.forEach((o,idx)=>{
+    const b=document.createElement("button");b.className="opt";
+    b.innerHTML=`<span class="stamp">选定</span>
+      <div class="opt-no">选项 ${o.k}</div>
+      <div class="opt-label">${o.label}</div>
+      <div class="opt-sub">${o.sub}</div>
+      <div class="tally"><span class="tally-n num" data-t="${idx}">0</span><span class="tally-t">票 · 按 ${idx+1} 计票</span></div>`;
+    b.onclick=()=>vote(idx,1);box.appendChild(b);
+  });
+  $("reveal").classList.remove("on");
+  show("stage");drawHUD();renderCoach();
+  setFoot(L.ch);
+  $("next").textContent="揭 晓";$("next").disabled=false;
+}
+function vote(i,d){
+  if(S.phase!=="vote")return;
+  S.votes[i]=Math.max(0,(S.votes[i]||0)+d);
+  const el=document.querySelector('[data-t="'+i+'"]');if(el)el.textContent=S.votes[i];
+}
+function winner(){const L=LEVELS[S.i];let b=0,bv=-1;L.opts.forEach((_,i)=>{const v=S.votes[i]||0;if(v>bv){bv=v;b=i;}});return b;}
+
+function applyFx(o){
+  const f=o.fx||{},before={c:S.cash,v:S.val,s:S.share};
+  if(f.cash)S.cash+=f.cash;
+  if(f.debt)S.debt+=f.debt;
+  if(f.val)S.val+=f.val;
+  if(f.val_mul)S.val=Math.round(S.val*f.val_mul);
+  if(f.share)S.share+=f.share;
+  if(f.share_mul)S.share=S.share*f.share_mul;
+  if(f.flag)S.flags[f.flag]=true;
+  let extra="";
+  const add=t=>{extra=(extra?extra+" · ":"")+t;};
+  if(S.i===1&&S.flags.crowd){S.cash-=1400000;add("众筹交付成本 −¥140万（预收款不是收入，是债）");}
+  if(S.i===2&&S.flags.crowd&&o.k!=="B"){S.cash-=1000000;add("众筹交付失败，退款赔偿 −¥100万");}
+  if(S.debt>0){const it=Math.round(S.debt*0.05);S.cash-=it;add("负债利息 −"+fmt(it));}
+  if(S.cash<0){
+    if(!S.rescued){S.rescued=true;S.debt+=1500000;S.cash=300000;
+      add("⚠ 现金断了！亲友借你 30 万补窟窿，代价是背上 ¥150 万高息债——这是唯一一次续命");}
+    else{S.dead=true;add("⚠ 现金第二次断裂，彻底出局");}
+  }
+  return {before,extra};
+}
+
+function reveal(){
+  const L=LEVELS[S.i],idx=winner();S.picked=idx;
+  document.querySelectorAll(".opt").forEach((el,i)=>el.classList.toggle("picked",i===idx));
+  const o=L.opts[idx];let d;
+  if(o.fx&&o.fx.settle){d={before:{c:S.cash,v:S.val,s:S.share},extra:""};settle(o.fx.settle);}
+  else d=applyFx(o);
+  drawHUD();
+  $("rTitle").textContent=L.ch.split("·")[0].trim()+" 结果：全班选了 "+o.k;
+  const dc=S.cash-d.before.c,dv=S.val-d.before.v,ds=S.share-d.before.s;let dl="";
+  if(dc)dl+=`<span style="color:${dc>0?'var(--coin)':'var(--seal)'}">现金 ${dc>0?'+':'−'}${fmt(Math.abs(dc)).slice(1)}</span>`;
+  if(dv)dl+=`<span style="color:${dv>0?'var(--jade)':'var(--seal)'}">估值 ${dv>0?'+':'−'}${fmt(Math.abs(dv)).slice(1)}</span>`;
+  if(Math.abs(ds)>0.5)dl+=`<span>股份 ${ds>0?'+':'−'}${Math.abs(Math.round(ds))}%</span>`;
+  if(d.extra)dl+=`<span style="color:var(--seal);font-size:18px">${d.extra}</span>`;
+  $("delta").innerHTML=dl;
+
+  const cards=$("cards");cards.innerHTML="";
+  L.opts.forEach((op,i)=>{
+    const div=document.createElement("div");div.className="rc"+(i===idx?" chosen":"");
+    const tg={good:"值得学",mid:"看情况",bad:"高危"}[op.v];
+    div.innerHTML=`<div class="rc-h"><span class="k">${op.k} · ${op.label}</span>
+        <span class="tag ${op.v}">${tg}</span>${i===idx?'<span class="tag you">全班选择</span>':''}</div>
+      <div class="row hero"><span class="lb">真人真事</span><span class="tx">${op.hero}</span></div>
+      <div class="row why"><span class="lb">他当时怎么想</span><span class="tx">${op.why}</span></div>
+      <div class="row method"><span class="lb">能抄的方法</span><span class="tx">${op.method}</span></div>
+      <div class="row death"><span class="lb">怎么死的</span><span class="tx">${op.death}</span></div>`;
+    cards.appendChild(div);
+  });
+  $("cTerm").textContent="财商概念 · "+L.concept.t;
+  $("cText").innerHTML=L.concept.x;
+  $("debrief").innerHTML='<div class="lbl">揭晓之后 · 继续追问</div>'+L.debrief.map(q=>'<div class="ask">'+q+'</div>').join("");
+  $("reveal").classList.add("on");
+  setFoot(L.ch+" · 揭晓");
+
+  if(S.dead){$("next").textContent="彻 底 出 局 → 结 算";}
+  else $("next").textContent=S.i===LEVELS.length-1?"公 布 第 一 桶 金":"下 一 关";
+}
+
+function settle(mode){
+  const eq=S.val*(S.share/100);
+  if(mode==="sell"){S.final=S.cash+eq*0.9-S.debt;S.mode="卖掉公司，落袋为安";}
+  else if(mode==="hold"){S.val*=1.5;S.final=S.cash+S.val*(S.share/100)*0.3-S.debt;S.mode="继续做，大部分仍是纸面财富";}
+  else{S.cash+=eq*0.2;S.val*=1.8;S.final=S.cash+S.val*(S.share/100)*0.8*0.4-S.debt;S.mode="上市，套现一部分（剩下的仍是纸面）";}
+}
+
+const TIERS=[
+ {min:80000000,r:"传奇级",n:"你走完了几乎没有错误的一条路：自己赚出本钱、守住毛利、扛过账期、克制稀释、股权有老大、专注主业、把一次性买卖变成复购，还给自己留了一条不靠公司的路。现实里能同时做对这九件事的人，一代人里没几个。"},
+ {min:40000000,r:"优等生",n:"千万级的第一桶金。你在某一两关上做了偏冒险的选择，但没有伤到根本。这个结果已经超过 99% 的创业者。"},
+ {min:15000000,r:"合格创业者",n:"百万级。你活下来了，账上是正的——这本身就是胜利。回头看看，是哪一关把上限锁死的？"},
+ {min:3000000,r:"小老板",n:"你有了一门养活自己的生意，但它长不大。通常是因为毛利太薄，或者太早把命押在了一张大单上。"},
+ {min:1,r:"白干几年",n:"公司还在，钱没剩下。这是最常见也最不甘心的结局：忙了很多年，账上依旧空空。问题几乎总是出在毛利和现金流上。"},
+ {min:-1e18,r:"出局",n:"现金断了两次，游戏提前结束。请记住这个感觉：<b>估值再高，现金归零就是终点。</b>公司不是被亏损杀死的，是被没钱付账杀死的——而第二次借钱，永远比第一次贵。"}
+];
+
+function final(){
+  if(S.final===null)S.final=S.cash+S.val*(S.share/100)*0.9-S.debt;
+  if(S.dead||S.cash<0)S.final=-(S.debt||0)+Math.min(0,S.cash);
+  const t=TIERS.find(x=>S.final>=x.min);
+  $("finalRank").textContent="全班共同经营的结果 · "+t.r;
+  $("finalNum").textContent=fmt(S.final);
+  $("finalWrap").classList.toggle("dead",S.final<0);
+  $("finalNote").innerHTML=t.n+(S.mode?'<br><span style="color:var(--dim);font-size:16px">退出方式：'+S.mode+'</span>':'');
+  S.tier=t.r;
+  $("reveal").classList.remove("on");
+  show("finalWrap");setFoot("结算");
+  $("next").textContent="天 花 板 与 地 板 →";S.phase="final";drawHUD();
+}
+
+function renderRange(){
+  const L=$("ladder");
+  L.innerHTML='<div class="lrow" style="background:var(--ink2)"><span>这一局所有可能的结局</span><span class="r">九关共 34,992 条路 · 其中 45% 会至少断一次现金，19% 彻底出局</span></div>';
+  [["天花板 · 九关全对","约 ¥1.04 亿"],["优秀 · 错一两关","¥4,000 万 – 1 亿"],["合格 · 稳但保守","¥1,500 万 – 4,000 万"],["小老板 · 长不大","¥300 万 – 1,500 万"],["勉强活着 · 白干几年","¥0 – 300 万"],["彻底出局 · 现金断两次","−¥150 万 – −¥440 万"]]
+  .forEach((r,i)=>{
+    const hit=["传奇级","优等生","合格创业者","小老板","白干几年","出局"][i]===S.tier;
+    L.insertAdjacentHTML("beforeend",`<div class="lrow${hit?' hit':''}"><span>${r[0]}${hit?' ← 你们在这里':''}</span><span class="r num">${r[1]}</span></div>`);
+  });
+  show("range");setFoot("天花板与地板");
+  $("next").textContent="回 到 现 实 →";S.phase="range";
+}
+
+function renderReal(){
+  const g=$("rtab");g.innerHTML="";
+  REAL.forEach(r=>g.insertAdjacentHTML("beforeend",
+    `<div class="rc2"><div class="n">${r.n}</div><div class="h">${r.h}</div><div class="m">${r.m}</div></div>`));
+  show("real");setFoot("现实中的第一桶金");
+  $("next").textContent="变 富 的 五 个 征 兆 →";S.phase="real";
+}
+
+function renderSigns(){
+  const g=$("sgrid");g.innerHTML="";
+  SIGNS.forEach((s,i)=>g.insertAdjacentHTML("beforeend",
+    `<div class="sg"><div class="no">${i+1}</div><div class="b"><div class="t">${s.t}</div><div class="x">${s.x}</div>`+
+    `<div class="acts"><div class="ah">行动要点</div>`+s.d.map(a=>`<div class="ai">${a}</div>`).join("")+`</div></div></div>`));
+  show("signs");setFoot("变富的五个征兆 · Naval");
+  $("next").textContent="推 荐 书 单 →";S.phase="signs";
+}
+
+function renderBooks(){
+  const g=$("bgrid");g.innerHTML="";
+  BOOKS.forEach(b=>{
+    if(b.s){g.insertAdjacentHTML("beforeend",`<div class="bsec">${b.s}</div>`);return;}
+    g.insertAdjacentHTML("beforeend",
+      `<div class="bk ${b.c||''}"><div class="t">${b.t}</div><div class="a">${b.a}</div><div class="w">${b.w}</div></div>`);
+  });
+  show("books");setFoot("推荐书单与影视");
+  $("next").textContent="重 开";S.phase="done";
+}
+
+function renderCoach(){
+  const L=LEVELS[S.i];if(!L)return;
+  $("coachH").textContent=L.ch;$("coachT").textContent=L.coach.t;
+  $("coachL").innerHTML=L.coach.l.map(x=>"<li>"+x+"</li>").join("");
+}
+
+function advance(){
+  if(S.phase==="cover"){S.i=0;S.phase="vote";renderLevel();return;}
+  if(S.phase==="vote"){S.phase="reveal";reveal();return;}
+  if(S.phase==="reveal"){
+    if(S.dead||S.i>=LEVELS.length-1){final();return;}
+    S.i++;S.phase="vote";renderLevel();return;
+  }
+  if(S.phase==="final"){renderRange();return;}
+  if(S.phase==="range"){renderReal();return;}
+  if(S.phase==="real"){renderSigns();return;}
+  if(S.phase==="signs"){renderBooks();return;}
+  if(S.phase==="done")location.reload();
+}
+$("next").onclick=advance;
+
+document.addEventListener("keydown",e=>{
+  const k=e.key.toLowerCase();
+  if(k==="t"){$("coach").classList.toggle("on");return;}
+  if(k==="r"&&S.phase!=="vote"){if(confirm("重新开始整局？"))location.reload();return;}
+  if(e.key==="Enter"||e.key===" "){e.preventDefault();advance();return;}
+  if(S.phase==="vote"){
+    if("1234".includes(e.key))vote(parseInt(e.key)-1,1);
+    const m={q:0,w:1,e:2};if(k in m)vote(m[k],-1);
+    if(k==="r"){if(confirm("重新开始整局？"))location.reload();}
+  }
+});
+drawHUD();setFoot("封面");
+</script>
+</body>
+</html>
