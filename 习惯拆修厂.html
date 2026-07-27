@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>习惯拆修厂 · 给自己设计一套游戏化改造方案</title>
+<style>
+/* ============ 令牌 ============ */
+:root{
+  --ink:#0B2038;          /* 蓝图底 */
+  --ink-2:#123055;        /* 分区底 */
+  --grid:rgba(190,215,245,.10);
+  --line:#8FB4DE;         /* 图纸线 */
+  --line-soft:rgba(143,180,222,.35);
+  --paper:#F2EDE1;        /* 卡片纸 */
+  --paper-2:#E3DCCB;
+  --orange:#FF6A2B;       /* 安全橙：警示 / 坏习惯 / 机制 */
+  --yellow:#F5C244;       /* 信号黄：奖赏 / 得分 */
+  --text:#E6EEF9;
+  --text-dim:#9FB6D2;
+  --ink-on-paper:#17233A;
+
+  --f-body:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif;
+  --f-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Courier New",monospace;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:var(--ink);
+  background-image:
+    linear-gradient(var(--grid) 1px,transparent 1px),
+    linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:32px 32px;
+  color:var(--text);
+  font-family:var(--f-body);
+  font-size:16px;
+  line-height:1.75;
+  -webkit-font-smoothing:antialiased;
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  html{scroll-behavior:auto}
+}
+
+/* ============ 图框 ============ */
+.frame{
+  max-width:1160px;margin:0 auto;padding:0 20px 100px;
+}
+.rule{border:0;border-top:1px solid var(--line-soft);margin:0}
+
+/* 眉标 */
+.eyebrow{
+  font-family:var(--f-mono);font-size:11px;letter-spacing:.28em;
+  text-transform:uppercase;color:var(--line);margin:0 0 10px;
+}
+.eyebrow b{color:var(--orange);font-weight:700}
+
+/* ============ 页眉 ============ */
+header.top{
+  display:flex;flex-wrap:wrap;gap:14px;align-items:baseline;justify-content:space-between;
+  padding:22px 0 16px;border-bottom:1px solid var(--line-soft);
+}
+.brand{font-family:var(--f-mono);font-size:12px;letter-spacing:.22em;color:var(--line)}
+.brand span{color:var(--orange)}
+nav.sheets{display:flex;flex-wrap:wrap;gap:4px}
+nav.sheets a{
+  font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;
+  color:var(--text-dim);text-decoration:none;padding:5px 10px;
+  border:1px solid var(--line-soft);border-radius:2px;
+}
+nav.sheets a:hover,nav.sheets a:focus-visible{color:var(--ink);background:var(--yellow);border-color:var(--yellow)}
+
+/* ============ HERO ============ */
+.hero{padding:56px 0 34px}
+.hero h1{
+  font-size:clamp(34px,7vw,76px);line-height:1.02;margin:0 0 18px;
+  font-weight:800;letter-spacing:-.02em;
+}
+.hero h1 em{
+  font-style:normal;color:var(--orange);
+  text-decoration:underline;text-decoration-thickness:4px;text-underline-offset:8px;
+}
+.hero p.lede{max-width:60ch;color:var(--text-dim);font-size:clamp(15px,2vw,19px);margin:0 0 8px}
+
+.loop-wrap{margin:26px 0 0;position:relative}
+svg.loop{width:100%;height:auto;display:block;overflow:visible}
+.node-hit{cursor:pointer}
+.node-hit:focus-visible .node-ring{stroke:var(--yellow);stroke-width:4}
+.node-ring{fill:var(--ink-2);stroke:var(--line);stroke-width:2;transition:all .18s}
+.node-hit:hover .node-ring{fill:var(--orange);stroke:var(--orange)}
+.node-hit.on .node-ring{fill:var(--orange);stroke:var(--orange)}
+.node-num{font-family:var(--f-mono);font-size:20px;fill:var(--text);font-weight:700}
+.node-hit.on .node-num,.node-hit:hover .node-num{fill:#fff}
+.node-cn{font-size:27px;font-weight:800;fill:var(--text)}
+.node-en{font-family:var(--f-mono);font-size:14px;fill:var(--line);letter-spacing:.14em}
+.loop-path{fill:none;stroke:var(--line);stroke-width:2;stroke-dasharray:1 0}
+@media (max-width:760px){.node-cn{font-size:38px}.node-en{font-size:19px}.node-num{font-size:26px}}
+.loop-glow{fill:var(--yellow)}
+.leader{stroke:var(--line-soft);stroke-width:1;stroke-dasharray:4 4}
+
+/* 节点详情 */
+.node-detail{
+  margin-top:20px;border:1px solid var(--line-soft);border-left:5px solid var(--orange);
+  background:var(--ink-2);padding:22px 24px;min-height:150px;
+}
+.node-detail h3{margin:0 0 4px;font-size:22px}
+.node-detail .tag{font-family:var(--f-mono);font-size:11px;letter-spacing:.2em;color:var(--orange);text-transform:uppercase}
+.node-detail p{margin:10px 0 0;color:var(--text)}
+.node-detail .hack{
+  margin-top:14px;padding-top:12px;border-top:1px dashed var(--line-soft);
+  color:var(--yellow);font-size:15px;
+}
+.node-detail .hack b{font-family:var(--f-mono);letter-spacing:.1em;font-size:11px;display:block;color:var(--line);text-transform:uppercase;margin-bottom:4px}
+
+/* ============ 分区标题 ============ */
+section{padding:64px 0 8px;scroll-margin-top:12px}
+.sheet-head{display:flex;align-items:flex-end;gap:16px;border-bottom:2px solid var(--line);padding-bottom:10px;margin-bottom:28px}
+.sheet-no{
+  font-family:var(--f-mono);font-size:clamp(30px,5vw,52px);line-height:.9;
+  color:var(--orange);font-weight:700;flex:0 0 auto;
+}
+.sheet-title{flex:1}
+.sheet-title h2{margin:0;font-size:clamp(21px,3.4vw,32px);font-weight:800;letter-spacing:-.01em}
+.sheet-title .sub{font-family:var(--f-mono);font-size:11px;letter-spacing:.2em;color:var(--text-dim);text-transform:uppercase}
+
+/* ============ 原理补充 ============ */
+.laws{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1px;background:var(--line-soft);border:1px solid var(--line-soft);margin-top:34px}
+.law{background:var(--ink);padding:20px 20px 24px}
+.law .k{font-family:var(--f-mono);font-size:11px;letter-spacing:.18em;color:var(--orange);margin-bottom:8px}
+.law h4{margin:0 0 8px;font-size:17px}
+.law p{margin:0;font-size:14.5px;color:var(--text-dim);line-height:1.7}
+
+/* 时间不一致小图 */
+.timechart{margin-top:34px;border:1px solid var(--line-soft);padding:22px;background:var(--ink-2)}
+.timechart h4{margin:0 0 2px;font-size:18px}
+.timechart .cap{font-size:14px;color:var(--text-dim);margin:0 0 16px}
+.bars{display:grid;gap:14px}
+.barrow{display:grid;grid-template-columns:96px 1fr;gap:12px;align-items:center;font-size:14px}
+.barrow .lbl{font-family:var(--f-mono);font-size:12px;color:var(--line);text-align:right}
+.bar{display:flex;height:34px;border:1px solid var(--line-soft)}
+.bar span{display:flex;align-items:center;justify-content:center;font-size:12px;font-family:var(--f-mono);white-space:nowrap;overflow:hidden}
+.b-now-good{background:var(--line-soft);color:var(--text)}
+.b-later-good{background:var(--yellow);color:var(--ink)}
+.b-now-bad{background:var(--yellow);color:var(--ink)}
+.b-later-bad{background:var(--orange);color:#fff}
+
+/* ============ 案例卡 ============ */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:14px}
+.card{
+  background:transparent;border:0;padding:0;perspective:1200px;
+  height:302px;cursor:pointer;font:inherit;color:inherit;text-align:left;
+}
+.card:focus-visible .card-in{outline:3px solid var(--yellow);outline-offset:3px}
+.card-in{position:relative;width:100%;height:100%;transition:transform .5s cubic-bezier(.2,.8,.25,1);transform-style:preserve-3d}
+.card.flip .card-in{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;padding:18px;display:flex;flex-direction:column;border:1px solid var(--line-soft)}
+.front{background:var(--paper);color:var(--ink-on-paper)}
+.back{background:var(--ink-2);color:var(--text);transform:rotateY(180deg);border-color:var(--orange)}
+.front .idx{font-family:var(--f-mono);font-size:11px;letter-spacing:.2em;color:#7b6a53}
+.front h4{margin:6px 0 6px;font-size:20px;font-weight:800;line-height:1.25}
+.front .who{font-size:13px;color:#5d5341;margin:0}
+.front .mech{margin-top:auto;font-family:var(--f-mono);font-size:11.5px;letter-spacing:.06em;color:#fff;background:var(--ink-on-paper);display:inline-block;padding:4px 8px;align-self:flex-start}
+.front .turn{position:absolute;right:14px;bottom:16px;font-family:var(--f-mono);font-size:10px;color:#8c7c64;letter-spacing:.14em}
+.back .idx{font-family:var(--f-mono);font-size:11px;letter-spacing:.2em;color:var(--orange)}
+.back h5{margin:8px 0 4px;font-size:13px;font-family:var(--f-mono);letter-spacing:.14em;color:var(--line)}
+.back p{margin:0 0 10px;font-size:13.5px;line-height:1.6}
+.back .steal{margin-top:auto;border-top:1px dashed var(--line-soft);padding-top:10px;color:var(--yellow);font-size:13.5px;line-height:1.55}
+
+/* 事故报告 */
+.crash{margin-top:36px;border:1px solid var(--orange);background:rgba(255,106,43,.07);padding:24px}
+.crash > .k{font-family:var(--f-mono);font-size:11px;letter-spacing:.22em;color:var(--orange);margin-bottom:14px}
+.crash ol{margin:0;padding-left:20px}
+.crash li{margin-bottom:14px}
+.crash li:last-child{margin-bottom:0}
+.crash b{color:var(--yellow)}
+
+/* SDT 三问 */
+.three{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:30px}
+.q{border:1px solid var(--line-soft);padding:18px}
+.q .n{font-family:var(--f-mono);color:var(--orange);font-size:12px;letter-spacing:.2em}
+.q h4{margin:6px 0 8px;font-size:18px}
+.q p{margin:0;font-size:14px;color:var(--text-dim)}
+
+/* ============ 抽卡台 ============ */
+.draw{border:1px solid var(--line-soft);background:var(--ink-2);padding:26px}
+.draw p.hint{margin:0 0 18px;color:var(--text-dim);max-width:62ch}
+.slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-bottom:18px}
+.slot{border:1px dashed var(--line-soft);min-height:158px;padding:16px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;color:var(--text-dim);font-family:var(--f-mono);font-size:12px;letter-spacing:.14em}
+.slot.filled{border:1px solid var(--yellow);background:var(--ink);color:var(--text);text-align:left;align-items:flex-start;justify-content:flex-start;letter-spacing:0;font-family:var(--f-body)}
+.slot .sk{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.2em;color:var(--yellow)}
+.slot h4{margin:6px 0 8px;font-size:19px;font-weight:800}
+.slot p{margin:0;font-size:13.5px;color:var(--text-dim);line-height:1.6}
+
+/* ============ 按钮 ============ */
+.btn{
+  font-family:var(--f-mono);font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;
+  background:var(--orange);color:#fff;border:0;padding:13px 22px;cursor:pointer;
+  border-radius:2px;transition:transform .12s,box-shadow .12s;
+}
+.btn:hover{transform:translate(-2px,-2px);box-shadow:4px 4px 0 var(--line-soft)}
+.btn:active{transform:none;box-shadow:none}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line-soft)}
+.btn.ghost:hover{background:var(--line-soft)}
+.btn.gold{background:var(--yellow);color:var(--ink)}
+.btn:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
+.btnrow{display:flex;flex-wrap:wrap;gap:10px}
+
+/* ============ 图纸表单 ============ */
+.build{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:start}
+@media (max-width:960px){.build{grid-template-columns:1fr}}
+.form{display:grid;gap:2px}
+.field{border:1px solid var(--line-soft);padding:16px 18px;background:var(--ink-2)}
+.field label{display:block;font-weight:700;font-size:15.5px;margin-bottom:2px}
+.field .no{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.2em;color:var(--orange)}
+.field .tip{font-size:13px;color:var(--text-dim);margin:2px 0 10px;line-height:1.6}
+.field input,.field textarea,.field select{
+  width:100%;background:var(--ink);border:1px solid var(--line-soft);color:var(--text);
+  font-family:var(--f-body);font-size:15px;padding:10px 12px;border-radius:2px;line-height:1.6;
+}
+.field textarea{min-height:74px;resize:vertical}
+.field input:focus,.field textarea:focus,.field select:focus{outline:2px solid var(--yellow);outline-offset:0;border-color:var(--yellow)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;width:0;height:0}
+.chip span{
+  display:inline-block;border:1px solid var(--line-soft);padding:7px 12px;font-size:13.5px;cursor:pointer;border-radius:2px;
+}
+.chip input:checked + span{background:var(--orange);border-color:var(--orange);color:#fff;font-weight:700}
+.chip input:focus-visible + span{outline:3px solid var(--yellow);outline-offset:2px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:520px){.row2{grid-template-columns:1fr}}
+
+/* 预览图纸 */
+.preview-wrap{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow-y:auto}
+@media (max-width:960px){.preview-wrap{position:static;max-height:none;overflow:visible}}
+.blueprint{
+  background:var(--paper);color:var(--ink-on-paper);border:2px solid var(--ink-on-paper);
+  padding:8px;font-size:14px;
+}
+.bp-inner{border:1px solid var(--ink-on-paper);padding:20px 20px 0}
+.bp-head{border-bottom:2px solid var(--ink-on-paper);padding-bottom:10px;margin-bottom:16px}
+.bp-head .k{font-family:var(--f-mono);font-size:10px;letter-spacing:.24em;color:#7b6a53}
+.bp-head h3{margin:2px 0 0;font-size:24px;font-weight:800;line-height:1.2}
+.bp-sec{margin-bottom:14px}
+.bp-sec .k{font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;color:#7b6a53;border-bottom:1px dotted #b3a68d;padding-bottom:3px;margin-bottom:5px}
+.bp-sec .v{font-size:15px;line-height:1.6;white-space:pre-wrap;word-break:break-word;min-height:1.6em}
+.bp-sec .v.empty{color:#a99a80;font-style:italic}
+.bp-loop{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:16px 0}
+.bp-loop div{border:1px solid #b3a68d;padding:8px;font-size:12.5px;line-height:1.45}
+.bp-loop div b{display:block;font-family:var(--f-mono);font-size:9.5px;letter-spacing:.14em;color:#7b6a53;margin-bottom:3px}
+.bp-mechs{display:flex;flex-wrap:wrap;gap:5px}
+.bp-mechs em{font-style:normal;background:var(--ink-on-paper);color:var(--paper);font-family:var(--f-mono);font-size:11px;padding:3px 7px}
+/* 标题栏 */
+.titleblock{display:grid;grid-template-columns:repeat(4,1fr);border-top:2px solid var(--ink-on-paper);margin:16px -20px 0}
+.titleblock div{border-right:1px solid #b3a68d;padding:8px 10px 10px}
+.titleblock div:last-child{border-right:0}
+.titleblock .k{font-family:var(--f-mono);font-size:9px;letter-spacing:.16em;color:#7b6a53;display:block}
+.titleblock .v{font-family:var(--f-mono);font-size:14px;font-weight:700;word-break:break-word}
+
+/* 评分表 */
+.rubric{width:100%;border-collapse:collapse;margin-top:8px;font-size:14.5px}
+.rubric th,.rubric td{border:1px solid var(--line-soft);padding:11px 13px;text-align:left;vertical-align:top}
+.rubric th{background:var(--ink-2);font-family:var(--f-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--line);font-weight:600}
+.rubric td:first-child{font-weight:700;white-space:nowrap}
+.rubric td:last-child{color:var(--text-dim);font-size:13.5px}
+
+.agenda{display:grid;gap:1px;background:var(--line-soft);border:1px solid var(--line-soft);margin-top:30px}
+.ag{display:grid;grid-template-columns:88px 1fr;background:var(--ink);padding:14px 16px;gap:14px;align-items:baseline}
+.ag .t{font-family:var(--f-mono);color:var(--yellow);font-size:13px}
+.ag b{font-size:15.5px}
+.ag p{margin:2px 0 0;font-size:14px;color:var(--text-dim)}
+@media (max-width:520px){.ag{grid-template-columns:1fr;gap:2px}}
+
+footer{margin-top:70px;padding-top:20px;border-top:1px solid var(--line-soft);font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;color:var(--text-dim);display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between}
+
+/* ============ 打印：晒成白图纸 ============ */
+@media print{
+  body{background:#fff!important;color:#000;font-size:12pt}
+  .frame{max-width:none;padding:0}
+  header.top,nav.sheets,.hero,section:not(#sheet-d),.btnrow,.form,footer,.node-detail{display:none!important}
+  #sheet-d .sheet-head{display:none}
+  .build{display:block}
+  .preview-wrap{position:static}
+  .blueprint{border:2px solid #000;color:#000;background:#fff}
+  .bp-inner{border-color:#000}
+  .bp-head,.titleblock{border-color:#000}
+  .bp-mechs em{background:#000;color:#fff}
+}
+</style>
+</head>
+<body>
+<div class="frame">
+
+<header class="top">
+  <div class="brand">习惯拆修厂 <span>/</span> HABIT TEARDOWN LAB <span>·</span> 第 01 版</div>
+  <nav class="sheets" aria-label="图纸导航">
+    <a href="#sheet-a">A 原理</a>
+    <a href="#sheet-b">B 案例库</a>
+    <a href="#sheet-c">C 抽卡</a>
+    <a href="#sheet-d">D 画你的图纸</a>
+    <a href="#sheet-e">E 路演</a>
+  </nav>
+</header>
+
+<!-- ======== HERO ======== -->
+<div class="hero">
+  <p class="eyebrow">工作坊 · 每人一台机器 <b>·</b> 拆开它，重新装一遍</p>
+  <h1>坏习惯不是你的缺点，<br>是一台<em>装错了的机器</em>。</h1>
+  <p class="lede">意志力修不好机器。今天你要做的是：把自己身上最烦的那个习惯拆开，看清它靠什么零件运转，然后用游戏设计师的手法，重新给它接线。</p>
+  <p class="lede" style="color:var(--yellow)">先点一下下面这四个节点——这是所有习惯共用的电路。</p>
+
+  <div class="loop-wrap">
+    <svg class="loop" viewBox="0 0 900 400" role="img" aria-label="习惯回路示意图：提示、渴求、反应、奖赏四个节点构成一个闭环">
+      <defs>
+        <path id="loopPath" d="M 450 70 H 780 A 60 60 0 0 1 840 130 V 270 A 60 60 0 0 1 780 330 H 120 A 60 60 0 0 1 60 270 V 130 A 60 60 0 0 1 120 70 Z"/>
+      </defs>
+      <use href="#loopPath" class="loop-path"/>
+      <circle r="7" class="loop-glow" id="pulse"><animateMotion dur="7s" repeatCount="indefinite"><mpath href="#loopPath"/></animateMotion></circle>
+
+      <!-- 01 提示 -->
+      <g class="node-hit" data-node="0" tabindex="0" role="button" aria-label="节点1 提示">
+        <line class="leader" x1="450" y1="70" x2="450" y2="26"/>
+        <circle class="node-ring" cx="450" cy="70" r="26"/>
+        <text class="node-num" x="450" y="77" text-anchor="middle">1</text>
+        <text class="node-cn" x="450" y="16" text-anchor="middle">提示</text>
+        <text class="node-en" x="510" y="60">CUE</text>
+      </g>
+      <!-- 02 渴求 -->
+      <g class="node-hit" data-node="1" tabindex="0" role="button" aria-label="节点2 渴求">
+        <line class="leader" x1="840" y1="200" x2="880" y2="200"/>
+        <circle class="node-ring" cx="840" cy="200" r="26"/>
+        <text class="node-num" x="840" y="207" text-anchor="middle">2</text>
+        <text class="node-cn" x="840" y="264" text-anchor="middle">渴求</text>
+        <text class="node-en" x="840" y="286" text-anchor="middle">CRAVING</text>
+      </g>
+      <!-- 03 反应 -->
+      <g class="node-hit" data-node="2" tabindex="0" role="button" aria-label="节点3 反应">
+        <line class="leader" x1="450" y1="330" x2="450" y2="372"/>
+        <circle class="node-ring" cx="450" cy="330" r="26"/>
+        <text class="node-num" x="450" y="337" text-anchor="middle">3</text>
+        <text class="node-cn" x="450" y="396" text-anchor="middle">反应</text>
+        <text class="node-en" x="390" y="342" text-anchor="end">RESPONSE</text>
+      </g>
+      <!-- 04 奖赏 -->
+      <g class="node-hit" data-node="3" tabindex="0" role="button" aria-label="节点4 奖赏">
+        <line class="leader" x1="60" y1="200" x2="20" y2="200"/>
+        <circle class="node-ring" cx="60" cy="200" r="26"/>
+        <text class="node-num" x="60" y="207" text-anchor="middle">4</text>
+        <text class="node-cn" x="60" y="264" text-anchor="middle">奖赏</text>
+        <text class="node-en" x="60" y="286" text-anchor="middle">REWARD</text>
+      </g>
+      <text x="450" y="200" text-anchor="middle" class="node-en" style="font-size:17px;letter-spacing:.3em;">THE HABIT LOOP</text>
+      <text x="450" y="228" text-anchor="middle" fill="#9FB6D2" style="font-size:15px;">跑得越顺，你越察觉不到它在跑</text>
+    </svg>
+  </div>
+
+  <div class="node-detail" id="nodeDetail" aria-live="polite">
+    <span class="tag">点击上方任一节点</span>
+    <h3>先看电路，再动手</h3>
+    <p>四个环节里，只有第 3 环「反应」是你能直接看见的行为。绝大多数人一辈子都在跟第 3 环较劲——而真正好改的，是第 1 环和第 4 环。</p>
+  </div>
+</div>
+
+<!-- ======== 图纸 A ======== -->
+<section id="sheet-a">
+  <div class="sheet-head">
+    <div class="sheet-no">A</div>
+    <div class="sheet-title">
+      <div class="sub">Sheet A · Principles</div>
+      <h2>习惯的基本原理：为什么「下决心」总是失败</h2>
+    </div>
+  </div>
+
+  <div class="laws">
+    <div class="law">
+      <div class="k">01 · 省电模式</div>
+      <h4>习惯是大脑主动外包的结果</h4>
+      <p>行为重复到一定次数，控制权会从耗能高的前额叶转移到基底神经节，动作被打包成一个「块」。这不是你意志薄弱，这是大脑在省电。所以对抗习惯 = 对抗一套已经装好的省电程序。</p>
+    </div>
+    <div class="law">
+      <div class="k">02 · 想要 ≠ 喜欢</div>
+      <h4>多巴胺在「期待」时最高，不在「得到」时</h4>
+      <p>神经科学里「想要（wanting）」和「喜欢（liking）」由不同系统负责。多巴胺管的是想要。刷了两小时短视频并不快乐，但下一条的期待感始终存在——这就是渴求环在空转。</p>
+    </div>
+    <div class="law">
+      <div class="k">03 · B = MAP</div>
+      <h4>行为 = 动机 × 能力 × 提示</h4>
+      <p>福格行为模型：三者必须同时出现。动机每天都在波动，最不可靠；提高「能力」（把行为变简单）才是最稳的杠杆。所以好习惯要缩小到两分钟，坏习惯要人为加装摩擦。</p>
+    </div>
+    <div class="law">
+      <div class="k">04 · 替换，不要删除</div>
+      <h4>回路删不掉，只能改中间那一段</h4>
+      <p>提示和奖赏一旦建立就很难消除。可行的做法是保留第 1 环和第 4 环，只把第 3 环换掉：同样的时间、同样的地点、同样想要的那个感觉，换一个动作去满足它。</p>
+    </div>
+    <div class="law">
+      <div class="k">05 · 身份层</div>
+      <h4>结果 → 过程 → 身份，从里往外改最牢</h4>
+      <p>「我要少玩手机」是结果层，「我每天关机一小时」是过程层，「我是一个能自己决定注意力去哪的人」是身份层。每一次行动都是给这个身份投的一票。票多了，身份就成立了。</p>
+    </div>
+    <div class="law">
+      <div class="k">06 · 永不错过两次</div>
+      <h4>断掉一次是意外，断掉两次是新习惯</h4>
+      <p>完美主义是习惯改造最大的杀手：漏一天就整个放弃。成熟的方案一开始就写好「失败条款」——允许漏，但规定漏完必须立刻补回来。</p>
+    </div>
+  </div>
+
+  <div class="timechart">
+    <h4>为什么坏习惯特别难改：账单送达的时间不一样</h4>
+    <p class="cap">同一件事的成本与收益分布在不同时间点上。人对「当下」的权重远高于「以后」（双曲贴现），于是当下那一格几乎决定了一切。</p>
+    <div class="bars">
+      <div class="barrow"><div class="lbl">坏习惯</div>
+        <div class="bar"><span class="b-now-bad" style="flex:0 0 32%">当下：爽</span><span class="b-later-bad" style="flex:1">以后：代价</span></div></div>
+      <div class="barrow"><div class="lbl">好习惯</div>
+        <div class="bar"><span class="b-now-good" style="flex:0 0 32%">当下：难受</span><span class="b-later-good" style="flex:1">以后：回报</span></div></div>
+    </div>
+    <p class="cap" style="margin:18px 0 0;color:var(--yellow)">所以整个游戏化设计只干一件事：<b>把「以后」搬到「当下」。</b>让好习惯当场有分可拿，让坏习惯当场有代价可付。</p>
+  </div>
+</section>
+
+<!-- ======== 图纸 B ======== -->
+<section id="sheet-b">
+  <div class="sheet-head">
+    <div class="sheet-no">B</div>
+    <div class="sheet-title">
+      <div class="sub">Sheet B · Teardown of 12 famous systems</div>
+      <h2>案例零件库：这些产品是怎么让你上钩的</h2>
+    </div>
+  </div>
+  <p class="lede" style="max-width:64ch;color:var(--text-dim);margin:-12px 0 24px">点开每张卡的背面。你要看的不是产品有多红，而是它拆出来的那个零件——那个零件今天可以直接装到你的方案上。</p>
+  <div class="cards" id="cards"></div>
+
+  <div class="crash">
+    <div class="k">事故报告 · 游戏化最常见的三种翻车</div>
+    <ol>
+      <li><b>把内在兴趣挤走（过度合理化效应）。</b>经典实验里，本来爱画画的孩子一旦被许诺奖状，撤掉奖励后反而画得更少了。原则：<b>本来就享受的事，别加分数</b>；分数只用在你抗拒但认可的事情上。</li>
+      <li><b>指标被玩坏（古德哈特定律）。</b>为了保连胜去刷最水的一课，为了凑步数把手机绑在风扇上。一旦指标成了目标，它就不再是好指标。原则：<b>计分要挂在难以造假的证据上</b>——照片、作品、他人签字、时间戳。</li>
+      <li><b>游戏化变成电子皮鞭。</b>把员工业绩做成大屏排行榜，结果是焦虑和内卷，不是动力。原则：<b>排行榜自愿参加、随时可退，且只跟过去的自己比才是安全的默认值。</b></li>
+    </ol>
+  </div>
+
+  <div class="three">
+    <div class="q"><div class="n">检验 01 · 自主</div><h4>这套规则是我自己定的吗？</h4><p>被安排的游戏叫任务，自己定的任务才叫游戏。规则可以由你随时修改，这一条本身就是动力来源。</p></div>
+    <div class="q"><div class="n">检验 02 · 胜任</div><h4>难度刚好在我够得着的边缘吗？</h4><p>太难挫败，太易无聊。心流出现在两者之间。第一周宁可定得可笑地简单。</p></div>
+    <div class="q"><div class="n">检验 03 · 联结</div><h4>有人会看见我做到或没做到吗？</h4><p>一个知情的队友，效果通常大于任何精美的积分体系。人最怕的不是失败，是当着人失败。</p></div>
+  </div>
+</section>
+
+<!-- ======== 图纸 C ======== -->
+<section id="sheet-c">
+  <div class="sheet-head">
+    <div class="sheet-no">C</div>
+    <div class="sheet-title">
+      <div class="sub">Sheet C · Constraint draw</div>
+      <h2>抽卡台：抽三张机制，逼自己想得不一样</h2>
+    </div>
+  </div>
+  <div class="draw">
+    <p class="hint">没有限制的时候，人想出来的方案永远长一个样（「我要每天打卡」）。抽三张机制卡，要求你的方案<b style="color:var(--yellow)">至少真正用上其中两张</b>。抽到不顺手的，正是有意思的地方。</p>
+    <div class="slots" id="slots">
+      <div class="slot">槽位 01 · 待抽</div>
+      <div class="slot">槽位 02 · 待抽</div>
+      <div class="slot">槽位 03 · 待抽</div>
+    </div>
+    <div class="btnrow">
+      <button class="btn" id="drawBtn">抽三张机制卡</button>
+      <button class="btn ghost" id="drawOne">只换掉一张</button>
+    </div>
+  </div>
+</section>
+
+<!-- ======== 图纸 D ======== -->
+<section id="sheet-d">
+  <div class="sheet-head">
+    <div class="sheet-no">D</div>
+    <div class="sheet-title">
+      <div class="sub">Sheet D · Draw your own</div>
+      <h2>画你自己的改造图纸</h2>
+    </div>
+  </div>
+  <div class="build">
+    <div class="form">
+      <div class="field">
+        <div class="no">01 · 署名</div>
+        <label for="f-name">你的代号</label>
+        <div class="tip">用什么名字都行，但它会印在图纸的标题栏上。</div>
+        <input id="f-name" data-bp="name" placeholder="例：老李 / 深夜特工 / 陈知远">
+      </div>
+
+      <div class="field">
+        <div class="no">02 · 送修机器</div>
+        <label for="f-habit">我要拆的这个习惯是</label>
+        <div class="tip">写具体的动作和频率，不要写「我很拖延」。要写「每天晚上 11 点躺床上刷短视频，平均刷到 1 点半」。</div>
+        <textarea id="f-habit" data-bp="habit" placeholder="行为 + 时间 + 频率 + 持续多久"></textarea>
+      </div>
+
+      <div class="field">
+        <div class="no">03 · 现场勘查 · 第 1 环</div>
+        <label for="f-cue">触发它的提示是什么</label>
+        <div class="tip">从五个方向找：什么时间／在哪里／前一个动作是什么／当时什么情绪／身边有谁。提示往往不止一个，写下最常见的那个。</div>
+        <textarea id="f-cue" data-bp="cue" placeholder="例：写完作业、关灯躺下、手机就在枕头边、心里有点空"></textarea>
+      </div>
+
+      <div class="field">
+        <div class="no">04 · 现场勘查 · 第 4 环</div>
+        <label for="f-reward">它到底给了我什么（说实话）</label>
+        <div class="tip">没有奖赏的习惯不会存在。是逃避、是刺激、是放松、是不用面对某件事，还是社交上的安全感？这一格答得越诚实，方案越管用。</div>
+        <textarea id="f-reward" data-bp="reward" placeholder="例：不用面对明天的考试，脑子可以停止工作"></textarea>
+      </div>
+
+      <div class="field">
+        <div class="no">05 · 换零件 · 第 3 环</div>
+        <label for="f-swap">保留奖赏，换掉动作：两分钟版的新行为</label>
+        <div class="tip">新行为必须能给出同一种奖赏，并且小到「不做完全说不过去」。不是「每天读半小时」，是「打开书读一页」。</div>
+        <textarea id="f-swap" data-bp="swap" placeholder="例：躺下后戴耳机听一集播客，手机放客厅充电"></textarea>
+      </div>
+
+      <div class="field">
+        <div class="no">06 · 改造环境</div>
+        <label for="f-env">给坏习惯加摩擦，给好习惯拆门槛</label>
+        <div class="tip">环境比意志力可靠得多。多走一步就能挡住的行为，就别指望靠忍。</div>
+        <textarea id="f-env" data-bp="env" placeholder="例：手机充电器移到客厅；书提前翻开放在枕头上"></textarea>
+      </div>
+
+      <div class="field">
+        <div class="no">07 · 机制</div>
+        <label>这套方案用到的机制</label>
+        <div class="tip">勾选你抽到并真正用上的机制卡（可多选）。</div>
+        <div class="chips" id="mechChips"></div>
+      </div>
+
+      <div class="field">
+        <div class="no">08 · 计分规则</div>
+        <label for="f-score">怎么算一分？证据是什么？</label>
+        <div class="tip">要防作弊：分数必须挂在一个别人能查验的痕迹上。想一想，你最容易怎么骗自己？</div>
+        <textarea id="f-score" data-bp="score" placeholder="例：早上把前一晚的书页照片发到小组群 = 1 分，没发就是 0 分，不补拍"></textarea>
+      </div>
+
+      <div class="field">
+        <div class="no">09 · 失败条款</div>
+        <div class="row2">
+          <div>
+            <label for="f-forgive">赦免与复活规则</label>
+            <div class="tip">允许漏几次？怎么补？</div>
+            <input id="f-forgive" data-bp="forgive" placeholder="例：整季可用 2 张赦免卡，绝不连漏两天">
+          </div>
+          <div>
+            <label for="f-penalty">代价（可选）</label>
+            <div class="tip">失败时当场付出的东西，要小而确定。</div>
+            <input id="f-penalty" data-bp="penalty" placeholder="例：漏一次，给队友买一瓶水">
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="no">10 · 赛季</div>
+        <div class="row2">
+          <div>
+            <label for="f-season">赛季长度</label>
+            <div class="tip">短赛季更容易开始，结束时必须结算。</div>
+            <select id="f-season" data-bp="season">
+              <option>7 天</option><option selected>14 天</option><option>21 天</option><option>30 天</option>
+            </select>
+          </div>
+          <div>
+            <label for="f-win">通关条件与奖励</label>
+            <div class="tip">达到多少分算赢？赢了给自己什么？</div>
+            <input id="f-win" data-bp="win" placeholder="例：14 天里拿到 11 分，去吃那家一直想去的店">
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="no">11 · 见证人</div>
+        <label for="f-ally">谁会看见我做到或没做到</label>
+        <div class="tip">写具体的人名和他要做的动作（收图？签字？周日问一句？）。这一格空着的方案，存活率最低。</div>
+        <input id="f-ally" data-bp="ally" placeholder="例：小舟，每晚 10 点在群里点名一次">
+      </div>
+
+      <div class="field">
+        <div class="no">12 · 身份宣言</div>
+        <label for="f-identity">赛季结束时，我会说：我是一个 ______ 的人</label>
+        <div class="tip">这是整张图纸真正的目标。分数会过期，身份不会。</div>
+        <input id="f-identity" data-bp="identity" placeholder="例：能自己决定注意力放在哪里">
+      </div>
+    </div>
+
+    <div class="preview-wrap">
+      <div class="blueprint" id="blueprint">
+        <div class="bp-inner">
+          <div class="bp-head">
+            <div class="k">HABIT TEARDOWN LAB · 改造图纸</div>
+            <h3 data-bpout="habit" class="empty-h">待填写：我要拆的习惯</h3>
+          </div>
+
+          <div class="bp-loop">
+            <div><b>1 CUE 提示</b><span data-bpout="cue" class="empty">—</span></div>
+            <div><b>3 RESPONSE 新动作</b><span data-bpout="swap" class="empty">—</span></div>
+            <div><b>4 REWARD 真实奖赏</b><span data-bpout="reward" class="empty">—</span></div>
+            <div><b>ENV 环境改造</b><span data-bpout="env" class="empty">—</span></div>
+          </div>
+
+          <div class="bp-sec"><div class="k">机制 / MECHANICS</div><div class="bp-mechs" id="bpMechs"><span class="v empty">未选择</span></div></div>
+          <div class="bp-sec"><div class="k">计分与证据 / SCORING</div><div class="v empty" data-bpout="score">—</div></div>
+          <div class="bp-sec"><div class="k">赦免规则 / FORGIVENESS</div><div class="v empty" data-bpout="forgive">—</div></div>
+          <div class="bp-sec"><div class="k">失败代价 / PENALTY</div><div class="v empty" data-bpout="penalty">—</div></div>
+          <div class="bp-sec"><div class="k">通关条件 / WIN CONDITION</div><div class="v empty" data-bpout="win">—</div></div>
+          <div class="bp-sec"><div class="k">见证人 / WITNESS</div><div class="v empty" data-bpout="ally">—</div></div>
+          <div class="bp-sec"><div class="k">身份宣言 / IDENTITY</div><div class="v empty" data-bpout="identity">—</div></div>
+
+          <div class="titleblock">
+            <div><span class="k">设计者</span><span class="v" data-bpout="name">—</span></div>
+            <div><span class="k">赛季</span><span class="v" data-bpout="season">14 天</span></div>
+            <div><span class="k">日期</span><span class="v" id="bpDate">—</span></div>
+            <div><span class="k">版本</span><span class="v">A · 01</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="btnrow" style="margin-top:14px">
+        <button class="btn gold" id="printBtn">打印这张图纸</button>
+        <button class="btn ghost" id="copyBtn">复制成文字</button>
+        <button class="btn ghost" id="clearBtn">清空重画</button>
+      </div>
+      <p style="font-size:13px;color:var(--text-dim);margin:10px 0 0">图纸只存在这个页面上，刷新会消失。定稿了就打印或复制走。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======== 图纸 E ======== -->
+<section id="sheet-e">
+  <div class="sheet-head">
+    <div class="sheet-no">E</div>
+    <div class="sheet-title">
+      <div class="sub">Sheet E · Pitch & review</div>
+      <h2>路演与验收</h2>
+    </div>
+  </div>
+
+  <p class="lede" style="max-width:64ch;color:var(--text-dim);margin:-12px 0 20px">每人 90 秒讲完自己的图纸，其余人扮演「投资人」。投资人只能问问题，不能给建议——好问题比好建议有用。</p>
+
+  <table class="rubric">
+    <thead><tr><th>维度</th><th>过关的样子</th><th>常见的不过关</th></tr></thead>
+    <tbody>
+      <tr><td>具体</td><td>说得出时间、地点、动作，别人照着能演一遍</td><td>「我要早点睡」</td></tr>
+      <tr><td>即时</td><td>做到之后 30 秒内拿得到反馈或分数</td><td>奖励要等到月底</td></tr>
+      <tr><td>够小</td><td>最糟糕的一天也做得到</td><td>第一天就要跑 5 公里</td></tr>
+      <tr><td>防作弊</td><td>说得出自己最可能怎么骗自己，并已经堵上</td><td>全靠自己心里记</td></tr>
+      <tr><td>能失败</td><td>写好了漏掉之后怎么回来</td><td>方案里没有「万一」</td></tr>
+      <tr><td>有人看</td><td>点得出具体的人和他要做的动作</td><td>「我会自己坚持」</td></tr>
+    </tbody>
+  </table>
+
+  <div class="agenda">
+    <div class="ag"><span class="t">00:00</span><div><b>开场：拆机器</b><p>每人 30 秒说出自己最烦的那个习惯，只描述行为，不许自责。</p></div></div>
+    <div class="ag"><span class="t">00:10</span><div><b>图纸 A · 原理</b><p>四节点回路 + 时间不一致。用现场例子当场拆一遍。</p></div></div>
+    <div class="ag"><span class="t">00:25</span><div><b>图纸 B · 案例库</b><p>两人一组翻卡，各挑一张最想抄的，说明抄哪个零件。</p></div></div>
+    <div class="ag"><span class="t">00:40</span><div><b>图纸 C · 抽卡</b><p>每人抽三张，抽到什么用什么。</p></div></div>
+    <div class="ag"><span class="t">00:45</span><div><b>图纸 D · 画图纸</b><p>安静写 25 分钟，中途只允许找一次同伴对话。</p></div></div>
+    <div class="ag"><span class="t">01:10</span><div><b>图纸 E · 路演</b><p>90 秒陈述 + 两个提问，按上表打分，当场改一处。</p></div></div>
+    <div class="ag"><span class="t">01:30</span><div><b>开赛</b><p>打印图纸，签字，交换见证人，第二天开始计分。</p></div></div>
+  </div>
+</section>
+
+<footer>
+  <span>习惯拆修厂 · 工作坊用页面</span>
+  <span>刷新即清空 · 定稿请打印</span>
+</footer>
+
+</div>
+
+<script>
+/* ============ 数据 ============ */
+const NODES = [
+  {cn:"提示 CUE", tag:"第 1 环 · 你看不见它，但它一直在按开关",
+   p:"提示是启动整条回路的那个信号：一个时间点、一个地点、一个前置动作、一种情绪，或者某个人出现。大脑对提示的反应快到你意识不到——手指已经点开 App 了，你才想起来「我本来要干嘛来着」。坏习惯之所以难改，很大一部分原因是提示藏得太深。",
+   hack:"改造手法：把提示挖出来写在纸上（时间／地点／前一个动作／情绪／人）。要么让它消失（手机充电器搬出卧室），要么给它接上新线（同一个提示，新的动作）。"},
+  {cn:"渴求 CRAVING", tag:"第 2 环 · 你想要的从来不是那个动作",
+   p:"没人真的渴望「滑动屏幕」这个动作，人渴望的是它带来的状态改变：不再无聊、不用面对、被人回应。多巴胺管的是「想要」而不是「喜欢」，而且它在期待的那一刻就冲到最高——这就是为什么刷完并不快乐，但下一次还是会点开。",
+   hack:"改造手法：诚实回答「它到底给了我什么」。找到那个真实的渴求，你才能给它找一个替身。回答不诚实，后面全部白搭。"},
+  {cn:"反应 RESPONSE", tag:"第 3 环 · 唯一看得见的一环，也是最不该硬刚的一环",
+   p:"行为发不发生，取决于动机、能力、提示三者是否同时出现（福格行为模型 B=MAP）。动机每天上下波动，靠不住；提示可以设计；而最稳的杠杆是能力——把行为变得足够简单，简单到你状态最差的那天也做得到。",
+   hack:"改造手法：新行为一律先做成两分钟版本。目标不是「读完一本书」，是「打开书读一页」。先让回路跑通，再谈跑多远。"},
+  {cn:"奖赏 REWARD", tag:"第 4 环 · 闭环，大脑才肯记住",
+   p:"奖赏是大脑给这条回路盖章的动作：这条线路有用，下次留着。关键在于时效——延迟的奖赏几乎训练不了大脑。健身三个月后的身材管不住你今晚，但练完立刻在墙上贴一个贴纸可以。",
+   hack:"改造手法：设计一个 30 秒内就能拿到的即时反馈：划掉一格、贴一个贴纸、涨一分、发一张照片到群里。整个游戏化的全部工作，就是把「以后」搬到「当下」。"}
+];
+
+const CASES = [
+  {n:"多邻国 连胜",who:"Duolingo",mech:"损失厌恶 + 赦免",
+   how:"连续天数被做成一个越来越大、越来越舍不得丢的数字。真正狠的不是「坚持」，是「断了就归零」——归零的痛苦远大于多学一天的快乐。同时它又提供连胜冻结卡，让你断一次还能救。",
+   steal:"可抄：让已积累的东西可见且会归零；并且一定要配一张官方赦免卡，否则第一次失手你就永久退出了。"},
+  {n:"蚂蚁森林",who:"支付宝",mech:"收集 + 社交 + 真实结果",
+   how:"绿色出行变成「能量球」，早起可以去朋友那里偷能量，攒够了在真实的荒漠种一棵挂着你名字的树。虚拟分数最后落地成一件现实中真实存在的东西。",
+   steal:"可抄：让你的积分对应一件真实的、能拍照的东西——攒够多少分就真的去买那件工具、去那个地方。"},
+  {n:"专注森林",who:"Forest",mech:"沉没成本可视化",
+   how:"想专注就先种一棵树，中途切出去玩手机，树当场枯死，而且枯树会永远留在你的森林里。惩罚不是扣分，是留下一个看得见的疤。",
+   steal:"可抄：让失败留下痕迹，而不是悄无声息地清零。日历上的那个红叉，比任何提醒都管用。"},
+  {n:"Habitica",who:"生活 RPG 化",mech:"角色成长 + 队友连坐",
+   how:"把整个人生做成角色扮演：完成任务加经验升级，偷懒掉血。最狠的一招是公会副本——你没完成任务，队友会一起掉血。",
+   steal:"可抄：把后果绑给队友。一个人偷懒毫无成本，让队友一起承担后果，成本立刻真实起来。"},
+  {n:"三环 / 跑步俱乐部",who:"Apple Watch, Nike Run Club",mech:"闭合强迫 + 每日重置",
+   how:"三个圆环差一点点没闭合，会让人晚上十一点起来在客厅走圈。人对「未完成」的容忍度极低（蔡格尼克效应），而且每天零点重置，永远有新的一局。",
+   steal:"可抄：把进度做成一个「差一点就圆了」的形状，而不是一串数字。并且每天重置，别让人背着旧债。"},
+  {n:"运动排行榜",who:"Strava / 微信运动",mech:"社会比较 + 公开可见",
+   how:"你的数据默认对朋友可见。多数人不是为了赢，只是不想在熟人面前排在最后。可见性本身就是动力。",
+   steal:"可抄：把记录公开给一小圈熟人。注意：只跟过去的自己比更安全，跟人比容易上头也容易崩。"},
+  {n:"僵尸，快跑！",who:"Zombies, Run!",mech:"叙事驱动",
+   how:"跑步时耳机里在放广播剧：你是幸存者，僵尸在追你，跑快点才能拿到补给推进剧情。行为没变，故事变了。",
+   steal:"可抄：给你的任务套一个故事和角色。「我在做作业」和「特工在破译文件」，身体的感受真的不一样。"},
+  {n:"宝可梦 GO",who:"Pokémon GO",mech:"图鉴收集 + 稀有度",
+   how:"收集欲被「没填满的格子」激活，稀有度制造了变动奖励——你永远不知道下一只是什么，这种不确定性比确定的奖励更抓人。",
+   steal:"可抄：做一本自己的图鉴，每种情况填一格（在不同地方读书、不同时间跑步）。空格子比数字更有吸引力。"},
+  {n:"Beeminder / StickK",who:"契约装置",mech:"押注 + 反慈善",
+   how:"你先设定目标并绑定银行卡，偏离曲线就自动扣钱。StickK 更狠：可以把钱指定捐给你最讨厌的组织，失败的痛感被放到最大。",
+   steal:"可抄：提前把代价确定下来并交给别人执行。注意：金额要小，代价要立刻兑现，别设成「半年后惩罚自己」。"},
+  {n:"星星 / 里程",who:"星巴克、航空公司",mech:"进度效应",
+   how:"经典研究发现：需要盖 10 个章的卡，和需要盖 12 个章但已经预先送你 2 个的卡，后者完成率明显更高。人不喜欢从零开始，但讨厌放弃已经开始的东西。",
+   steal:"可抄：给你的记录表预先划掉前两格。听起来像自欺欺人，但它确实提高了你走完全程的概率。"},
+  {n:"段位系统",who:"王者荣耀 / LOL",mech:"分层 + 赛季重置 + 保护",
+   how:"目标被切成一小段一小段，每段都够得着；匹配机制把难度控制在胜率五成左右，正好卡在心流区；赛季会重置，输了也有星星保护。",
+   steal:"可抄：把大目标切成能在一周内升一级的小段；设一个保护机制，别让一次失手掉回原点。"},
+  {n:"钢琴楼梯",who:"The Fun Theory",mech:"让行为本身变好玩",
+   how:"地铁站的楼梯被改造成会发声的钢琴键，走楼梯的人比平时多了六成多。没有积分，没有排行榜，只是走上去这件事本身变得有趣了。",
+   steal:"可抄：先别急着加分数。问一句——有没有办法让这个动作本身变得好玩？这是最高级也最少人用的一招。"}
+];
+
+const MECHS = [
+  {k:"STREAK",n:"连胜与归零",p:"连续天数可见，断了就清零。配一张赦免卡，别让第一次失手变成永久退出。"},
+  {k:"WITNESS",n:"见证人与连坐",p:"把结果公开给一个具体的人，或者让队友承担你的后果。"},
+  {k:"STAKE",n:"押注与代价",p:"提前押上一件小而确定的东西，失败当场兑现，由别人执行。"},
+  {k:"COLLECT",n:"图鉴收集",p:"做一张有空格的表，每种情况填一格。空格子会自己召唤你。"},
+  {k:"NARRATIVE",n:"角色与剧情",p:"给自己一个角色和一条故事线，任务变成剧情推进。"},
+  {k:"LEVEL",n:"分段与赛季",p:"切成一周一级的小段，赛季结算，设保护机制防止一次掉回原点。"},
+  {k:"SCAR",n:"留疤",p:"失败留下看得见的痕迹（枯树、红叉），而不是悄悄清零。"},
+  {k:"HEADSTART",n:"预先起跑",p:"记录表先划掉前两格，制造「已经开始了」的感觉。"},
+  {k:"FRICTION",n:"环境摩擦",p:"给坏习惯多加三步，给好习惯少掉三步。改环境，不改人。"},
+  {k:"FUN",n:"行为本身变好玩",p:"不加分数，直接改造动作本身，让它值得做。"},
+  {k:"RANDOM",n:"随机奖励",p:"完成后抽一张奖励卡，结果不确定。谨慎使用，容易上瘾。"},
+  {k:"CLOSE",n:"闭合与重置",p:"把进度做成一个差一点就圆的形状，每天零点重置，不背旧债。"}
+];
+
+/* ============ 回路节点 ============ */
+const detail = document.getElementById('nodeDetail');
+document.querySelectorAll('.node-hit').forEach(g=>{
+  const act = ()=>{
+    document.querySelectorAll('.node-hit').forEach(x=>x.classList.remove('on'));
+    g.classList.add('on');
+    const d = NODES[+g.dataset.node];
+    detail.innerHTML = '<span class="tag">'+d.tag+'</span><h3>'+d.cn+'</h3><p>'+d.p+'</p><div class="hack"><b>怎么用</b>'+d.hack+'</div>';
+  };
+  g.addEventListener('click',act);
+  g.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();act();} });
+});
+
+/* ============ 案例卡 ============ */
+const cardsEl = document.getElementById('cards');
+CASES.forEach((c,i)=>{
+  const b = document.createElement('button');
+  b.className='card'; b.type='button';
+  b.setAttribute('aria-label', c.n+'，点击查看机制拆解');
+  const idx = String(i+1).padStart(2,'0');
+  b.innerHTML =
+    '<div class="card-in">'+
+      '<div class="face front"><div class="idx">B-'+idx+'</div><h4>'+c.n+'</h4><p class="who">'+c.who+'</p>'+
+        '<div class="mech">'+c.mech+'</div><div class="turn">翻面 →</div></div>'+
+      '<div class="face back"><div class="idx">B-'+idx+' · 拆解</div><h5>它是怎么运转的</h5><p>'+c.how+'</p><div class="steal">'+c.steal+'</div></div>'+
+    '</div>';
+  b.addEventListener('click',()=>b.classList.toggle('flip'));
+  cardsEl.appendChild(b);
+});
+/* ============ 抽卡 ============ */
+const slotsEl = document.getElementById('slots');
+let drawn = [];
+function renderSlots(){
+  slotsEl.innerHTML='';
+  for(let i=0;i<3;i++){
+    const d=document.createElement('div');
+    if(drawn[i]){
+      d.className='slot filled';
+      d.innerHTML='<span class="sk">'+drawn[i].k+'</span><h4>'+drawn[i].n+'</h4><p>'+drawn[i].p+'</p>';
+    }else{
+      d.className='slot'; d.textContent='槽位 '+String(i+1).padStart(2,'0')+' · 待抽';
+    }
+    slotsEl.appendChild(d);
+  }
+}
+function pick(n,exclude){
+  const pool=MECHS.filter(m=>!exclude.includes(m));
+  const out=[];
+  for(let i=0;i<n && pool.length;i++) out.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]);
+  return out;
+}
+document.getElementById('drawBtn').addEventListener('click',()=>{ drawn=pick(3,[]); renderSlots(); });
+document.getElementById('drawOne').addEventListener('click',()=>{
+  if(!drawn.length){ drawn=pick(3,[]); }
+  else { const i=Math.floor(Math.random()*3); drawn[i]=pick(1,drawn)[0]; }
+  renderSlots();
+});
+renderSlots();
+
+/* ============ 机制勾选 ============ */
+const chipsEl=document.getElementById('mechChips');
+MECHS.forEach((m,i)=>{
+  const l=document.createElement('label'); l.className='chip';
+  l.innerHTML='<input type="checkbox" value="'+m.n+'"><span>'+m.n+'</span>';
+  chipsEl.appendChild(l);
+});
+
+/* ============ 图纸实时预览 ============ */
+const outs={};
+document.querySelectorAll('[data-bpout]').forEach(el=>{ outs[el.dataset.bpout]=el; });
+function setOut(key,val,fallback){
+  const el=outs[key]; if(!el) return;
+  if(val && val.trim()){ el.textContent=val; el.classList.remove('empty','empty-h'); }
+  else { el.textContent=fallback; el.classList.add('empty'); }
+}
+const FALLBACK={name:'—',habit:'待填写：我要拆的习惯',cue:'—',swap:'—',reward:'—',env:'—',score:'—',forgive:'—',penalty:'—',win:'—',ally:'—',identity:'—',season:'14 天'};
+document.querySelectorAll('[data-bp]').forEach(inp=>{
+  const k=inp.dataset.bp;
+  const sync=()=>setOut(k,inp.value,FALLBACK[k]);
+  inp.addEventListener('input',sync);
+  inp.addEventListener('change',sync);
+});
+const bpMechs=document.getElementById('bpMechs');
+function syncMechs(){
+  const on=[...chipsEl.querySelectorAll('input:checked')].map(i=>i.value);
+  bpMechs.innerHTML = on.length ? on.map(v=>'<em>'+v+'</em>').join('') : '<span class="v empty">未选择</span>';
+}
+chipsEl.addEventListener('change',syncMechs);
+const d=new Date();
+document.getElementById('bpDate').textContent=d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0');
+
+/* ============ 操作 ============ */
+document.getElementById('printBtn').addEventListener('click',()=>window.print());
+document.getElementById('clearBtn').addEventListener('click',()=>{
+  document.querySelectorAll('[data-bp]').forEach(i=>{ if(i.tagName==='SELECT'){i.selectedIndex=1;} else {i.value='';} i.dispatchEvent(new Event('input')); i.dispatchEvent(new Event('change')); });
+  chipsEl.querySelectorAll('input').forEach(i=>i.checked=false); syncMechs();
+});
+document.getElementById('copyBtn').addEventListener('click',async(e)=>{
+  const g=k=>{const el=document.querySelector('[data-bp="'+k+'"]');return el?el.value.trim():'';};
+  const on=[...chipsEl.querySelectorAll('input:checked')].map(i=>i.value).join('、');
+  const txt=[
+    '【习惯改造图纸】',
+    '设计者：'+(g('name')||'（未署名）')+'　赛季：'+g('season')+'　日期：'+document.getElementById('bpDate').textContent,
+    '',
+    '我要拆的习惯：'+g('habit'),
+    '1 提示：'+g('cue'),
+    '4 真实奖赏：'+g('reward'),
+    '3 新动作（两分钟版）：'+g('swap'),
+    '环境改造：'+g('env'),
+    '',
+    '机制：'+(on||'（未选）'),
+    '计分与证据：'+g('score'),
+    '赦免规则：'+g('forgive'),
+    '失败代价：'+g('penalty'),
+    '通关条件：'+g('win'),
+    '见证人：'+g('ally'),
+    '',
+    '身份宣言：赛季结束时，我是一个'+(g('identity')||'______')+'的人。'
+  ].join('\n');
+  try{ await navigator.clipboard.writeText(txt); e.target.textContent='已复制 ✓'; }
+  catch{ e.target.textContent='复制失败，请手动选中'; }
+  setTimeout(()=>{e.target.textContent='复制成文字';},1800);
+});
+
+/* 尊重减少动效偏好 */
+if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+  const p=document.getElementById('pulse'); if(p) p.remove();
+}
+</script>
+</body>
+</html>
