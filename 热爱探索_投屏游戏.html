@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>热爱探索 · 投屏版</title>
+<style>
+:root{
+  --ink:#101A2E; --ink2:#16233C; --line:rgba(242,237,227,.16);
+  --bone:#F2EDE3; --dim:rgba(242,237,227,.52);
+  --gold:#E9B23C;      /* 热爱 */
+  --cel:#79B0A6;       /* 天赋 */
+  --serif:"Songti SC","STSong","Noto Serif SC","Source Han Serif SC","SimSun",serif;
+  --sans:"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  --mono:"SF Mono","Menlo","Consolas",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--ink);color:var(--bone);font-family:var(--sans);overflow:hidden;
+  -webkit-font-smoothing:antialiased}
+
+/* 背景：一节课点亮一张九宫格 */
+#mandala{position:fixed;inset:0;display:grid;grid-template-columns:repeat(9,1fr);
+  grid-template-rows:repeat(9,1fr);pointer-events:none;z-index:0;opacity:.5}
+#mandala i{border-right:1px solid var(--line);border-bottom:1px solid var(--line);
+  transition:background .9s ease}
+#mandala i.on{background:rgba(233,178,60,.085)}
+
+#stage{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;
+  padding:clamp(20px,3.2vh,42px) clamp(24px,4vw,72px)}
+
+/* 页眉 */
+header{display:flex;justify-content:space-between;align-items:center;
+  font-family:var(--mono);font-size:clamp(10px,1.05vw,14px);letter-spacing:.14em;color:var(--dim);
+  border-bottom:1px solid var(--line);padding-bottom:12px;flex:0 0 auto}
+header .arc b{color:var(--bone);font-weight:400}
+header .arc s{text-decoration:none;opacity:.35;margin:0 .5em}
+
+main{flex:1;display:flex;align-items:center;min-height:0;padding:clamp(14px,2.6vh,34px) 0}
+.slide{display:none;width:100%;max-height:100%;overflow:hidden}
+.slide.live{display:block;animation:in .5s cubic-bezier(.2,.7,.3,1)}
+@keyframes in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+.eyebrow{font-family:var(--mono);font-size:clamp(11px,1.1vw,15px);letter-spacing:.24em;
+  color:var(--gold);margin-bottom:clamp(10px,1.6vh,20px)}
+h1{font-family:var(--serif);font-weight:700;line-height:1.14;letter-spacing:.02em;
+  font-size:clamp(30px,5.4vw,84px)}
+h2{font-family:var(--serif);font-weight:700;line-height:1.22;
+  font-size:clamp(24px,3.5vw,54px);letter-spacing:.02em}
+.lede{font-size:clamp(15px,1.55vw,24px);line-height:1.75;color:var(--dim);
+  margin-top:clamp(12px,2vh,24px);max-width:52ch}
+.big{font-family:var(--serif);font-size:clamp(26px,4.2vw,64px);line-height:1.3}
+
+.step{opacity:0;transform:translateY(10px);transition:opacity .45s,transform .45s}
+.step.on{opacity:1;transform:none}
+
+footer{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;
+  border-top:1px solid var(--line);padding-top:12px;
+  font-family:var(--mono);font-size:clamp(10px,.95vw,13px);letter-spacing:.1em;color:var(--dim)}
+footer .keys b{color:var(--bone);font-weight:400}
+#bar{position:fixed;left:0;bottom:0;height:3px;background:var(--gold);z-index:3;
+  transition:width .5s ease;box-shadow:0 0 14px rgba(233,178,60,.6)}
+
+/* 组件 */
+.cards4{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(10px,1.2vw,20px);
+  margin-top:clamp(14px,2.4vh,30px)}
+.card{border:1px solid var(--line);background:var(--ink2);padding:clamp(14px,1.7vw,26px);
+  display:flex;flex-direction:column;gap:10px;position:relative;min-height:0}
+.card .no{font-family:var(--mono);font-size:clamp(10px,.9vw,13px);color:var(--gold);letter-spacing:.18em}
+.card .t{font-family:var(--serif);font-size:clamp(17px,1.85vw,30px);line-height:1.3}
+.card .d{font-size:clamp(12px,1.05vw,16px);line-height:1.65;color:var(--dim)}
+.card .tally{margin-top:auto;display:flex;align-items:flex-end;gap:10px}
+.card .cnt{font-family:var(--mono);font-size:clamp(24px,3vw,46px);color:var(--gold);line-height:1}
+.card button{background:none;border:1px solid var(--line);color:var(--bone);font-family:var(--mono);
+  font-size:14px;width:30px;height:30px;cursor:pointer;border-radius:2px}
+.card button:hover{border-color:var(--gold);color:var(--gold)}
+.card:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+
+.phases{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(10px,1.2vw,18px);
+  margin-top:clamp(14px,2.2vh,28px)}
+.ph{border-top:2px solid var(--gold);padding-top:12px}
+.ph:nth-child(1){border-color:rgba(233,178,60,.28)}
+.ph:nth-child(2){border-color:rgba(233,178,60,.5)}
+.ph:nth-child(3){border-color:rgba(233,178,60,.75)}
+.ph h3{font-family:var(--serif);font-size:clamp(16px,1.6vw,26px);margin-bottom:8px;font-weight:700}
+.ph p{font-size:clamp(12px,1.05vw,16px);line-height:1.65;color:var(--dim)}
+.ph em{font-style:normal;font-family:var(--mono);font-size:11px;color:var(--gold);
+  letter-spacing:.14em;display:block;margin-bottom:8px}
+
+/* 计时卡组 */
+.deck{display:flex;gap:clamp(20px,3vw,56px);align-items:center}
+.deck .q{flex:1}
+.timer{flex:0 0 auto;width:clamp(140px,15vw,230px);text-align:center}
+.timer .num{font-family:var(--mono);font-size:clamp(46px,7vw,110px);line-height:1;
+  color:var(--gold);font-variant-numeric:tabular-nums}
+.timer .num.done{color:#D9695A;animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.35}}
+.timer .lab{font-family:var(--mono);font-size:12px;letter-spacing:.16em;color:var(--dim);margin-top:12px}
+.pips{display:flex;gap:6px;justify-content:center;margin-top:16px}
+.pips s{width:14px;height:3px;background:var(--line);text-decoration:none}
+.pips s.on{background:var(--gold)}
+
+/* 分拣挑战 */
+.sortwrap{display:flex;gap:clamp(20px,3vw,56px);align-items:center}
+.sortwrap .stmt{flex:1}
+.verdict{flex:0 0 auto;width:clamp(180px,20vw,300px);text-align:center;
+  border:1px solid var(--line);padding:clamp(16px,2vw,30px);opacity:0;transition:.4s}
+.verdict.on{opacity:1}
+.verdict .tag{font-family:var(--serif);font-size:clamp(26px,3.4vw,52px);font-weight:700}
+.verdict .why{font-size:clamp(12px,1.05vw,16px);color:var(--dim);line-height:1.65;margin-top:12px}
+.tag.love{color:var(--gold)}.tag.gift{color:var(--cel)}
+.qcount{font-family:var(--mono);color:var(--dim);font-size:13px;letter-spacing:.16em;margin-bottom:14px}
+
+/* 四象限 */
+.quad{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;
+  border:1px solid var(--line);margin-top:clamp(12px,2vh,24px);
+  height:clamp(230px,44vh,420px)}
+.quad div{border-right:1px solid var(--line);border-bottom:1px solid var(--line);
+  padding:clamp(14px,1.6vw,26px);display:flex;flex-direction:column;justify-content:center}
+.quad div:nth-child(2n){border-right:none}
+.quad div:nth-child(n+3){border-bottom:none}
+.quad b{font-family:var(--serif);font-size:clamp(18px,2.1vw,34px);display:block;margin-bottom:8px}
+.quad p{font-size:clamp(12px,1.05vw,16px);color:var(--dim);line-height:1.65}
+.quad .c-core b{color:var(--gold)}.quad .c-train b{color:var(--gold);opacity:.75}
+.quad .c-tool b{color:var(--cel)}.quad .c-drop b{color:var(--dim)}
+
+/* 大谷九宫格 */
+.o-wrap{display:flex;gap:clamp(20px,3.4vw,60px);align-items:center}
+.o-grid{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);
+  width:clamp(280px,38vh,440px);height:clamp(280px,38vh,440px);border:1px solid var(--line);flex:0 0 auto}
+.o-grid div{border-right:1px solid var(--line);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  font-size:clamp(12px,1.15vw,19px);line-height:1.4;padding:8px;
+  opacity:0;transform:scale(.9);transition:.45s}
+.o-grid div.on{opacity:1;transform:none}
+.o-grid div:nth-child(3n){border-right:none}
+.o-grid div:nth-child(n+7){border-bottom:none}
+.o-grid .mid{background:rgba(233,178,60,.12);font-family:var(--serif);
+  font-size:clamp(15px,1.6vw,26px);color:var(--gold);font-weight:700}
+.o-grid .hl{color:var(--cel)}
+.o-note{flex:1}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:clamp(20px,3vw,56px);align-items:start}
+.rule{border-left:2px solid var(--gold);padding-left:clamp(14px,1.6vw,24px)}
+.rule.g{border-color:var(--cel)}
+.rule h3{font-family:var(--serif);font-size:clamp(20px,2.4vw,38px);margin-bottom:12px}
+.rule ul{list-style:none;font-size:clamp(13px,1.15vw,19px);line-height:2;color:var(--dim)}
+.rule li::before{content:"—";color:var(--line);margin-right:.7em}
+.src{font-family:var(--mono);font-size:clamp(10px,.9vw,13px);color:var(--dim);
+  letter-spacing:.06em;margin-top:clamp(12px,2vh,24px);line-height:1.9;opacity:.8}
+.hint{font-family:var(--mono);font-size:clamp(11px,1vw,14px);letter-spacing:.1em;
+  color:var(--gold);margin-top:clamp(12px,2vh,22px)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="mandala"></div>
+<div id="stage">
+  <header>
+    <div class="arc"><b>有意义的玩耍</b><s>▸</s>激情<s>▸</s>使命</div>
+    <div id="clock">00 / 40 分钟</div>
+  </header>
+
+  <main>
+
+    <!-- 0 -->
+    <section class="slide">
+      <div class="eyebrow">钥匙玩校 · 40 分钟</div>
+      <h1>热爱探索</h1>
+      <p class="lede">接下来 40 分钟，你不用决定人生。<br>
+        你只需要把那些一闪而过的苗头，写到纸上，让它们变得可以被看见。</p>
+      <p class="hint">教师：按 → 推进　·　← 后退　·　F 全屏</p>
+    </section>
+
+    <!-- 1 站队计票 -->
+    <section class="slide" data-timer-off>
+      <div class="eyebrow">第一步 · 进展判断</div>
+      <h2>你现在站在哪一格？</h2>
+      <p class="lede">听完四句话，走到教室对应的角落站好。没有哪一格更高级。</p>
+      <div class="cards4">
+        <div class="card"><div class="no">A</div><div class="t">不太知道方向</div>
+          <div class="d">被点燃过，但没留下痕迹</div>
+          <div class="tally"><span class="cnt" data-c="0">0</span><button data-vote="0">+</button></div></div>
+        <div class="card"><div class="no">B</div><div class="t">模糊知道方向</div>
+          <div class="d">说得出大概，说不出具体</div>
+          <div class="tally"><span class="cnt" data-c="0">0</span><button data-vote="1">+</button></div></div>
+        <div class="card"><div class="no">C</div><div class="t">清晰知道方向</div>
+          <div class="d">没人催也会主动回来做</div>
+          <div class="tally"><span class="cnt" data-c="0">0</span><button data-vote="2">+</button></div></div>
+        <div class="card"><div class="no">D</div><div class="t">方向清晰＋有计划</div>
+          <div class="d">有作品、有节奏、卡壳会自己找办法</div>
+          <div class="tally"><span class="cnt" data-c="0">0</span><button data-vote="3">+</button></div></div>
+      </div>
+      <p class="hint">把你站的那一格，勾在学习单最上面那条进度条上</p>
+    </section>
+
+    <!-- 2 四阶段 -->
+    <section class="slide">
+      <div class="eyebrow">这不是四种人，是同一件事的四个阶段</div>
+      <h2>兴趣是有发育过程的</h2>
+      <div class="phases">
+        <div class="ph step"><em>PHASE 1</em><h3>被触发</h3><p>某个瞬间被勾住。来得快，去得也快。</p></div>
+        <div class="ph step"><em>PHASE 2</em><h3>被维持</h3><p>因为有人陪、有反馈，所以还在继续。</p></div>
+        <div class="ph step"><em>PHASE 3</em><h3>开始自转</h3><p>没人推也会主动回来，开始自己提问题。</p></div>
+        <div class="ph step"><em>PHASE 4</em><h3>长成自己的</h3><p>遇到无聊和挫折也不走，因为已经是"我的事"。</p></div>
+      </div>
+      <p class="lede step">所以"我没什么感兴趣的"，往往不是没有兴趣，<br>而是没有一件事被允许走到第三阶段。</p>
+      <p class="src step">兴趣发展四阶段模型　Hidi &amp; Renninger, 2006</p>
+    </section>
+
+    <!-- 3 认知反转 -->
+    <section class="slide">
+      <div class="eyebrow">第二步 · 开始之前，先纠正一个观念</div>
+      <h2>热爱是"找到"的，<br>还是"养出来"的？</h2>
+      <p class="lede">先举手投票，再看研究怎么说。</p>
+      <div class="step" style="margin-top:2vh">
+        <p class="big" style="color:var(--gold)">养出来的。</p>
+        <p class="lede">心理学家给大学生做过一个实验。相信"热爱是天生找到的"那组，
+          一旦读到自己感兴趣领域里艰深难懂的文章，兴趣就迅速掉下去；
+          相信"热爱是慢慢养出来的"那组，遇到同样的困难，反而扛住了。</p>
+        <p class="lede" style="color:var(--gold)">把热爱当成一颗待找的宝石，你会在第一次觉得难的时候放弃它。</p>
+        <p class="src">O'Keefe, Dweck &amp; Walton, 2018,《兴趣的内隐信念：找到热情，还是发展热情？》</p>
+      </div>
+    </section>
+
+    <!-- 4 快问快答 -->
+    <section class="slide" id="deck">
+      <div class="eyebrow">第三步 · 快问快答　每题 45 秒　写在学习单第 2 区</div>
+      <div class="deck">
+        <div class="q">
+          <div class="qcount" id="dk-n">CARD 1 / 6</div>
+          <h2 id="dk-q">别人夸过你什么？<br>尽量写下他们的原话。</h2>
+          <p class="lede" id="dk-d">不用谦虚，谦虚在这一步毫无用处。</p>
+        </div>
+        <div class="timer">
+          <div class="num" id="dk-t">45</div>
+          <div class="lab" id="dk-s">按 空格 开始</div>
+          <div class="pips" id="dk-p"></div>
+        </div>
+      </div>
+      <p class="hint">规则：一个字都不许评价自己，写满比写好重要。→ 进入下一张卡</p>
+    </section>
+
+    <!-- 5 双评分 -->
+    <section class="slide">
+      <div class="eyebrow">第四步 · 给清单上的每一项打两个分</div>
+      <h2>两把不同的尺子</h2>
+      <div class="two-col" style="margin-top:2.4vh">
+        <div class="rule step">
+          <h3 style="color:var(--gold)">忍受分 · 0–5</h3>
+          <ul>
+            <li>它最枯燥、最重复的那部分，我能坐多久</li>
+            <li>没人夸、没有分数，我还会不会做</li>
+            <li>做完之后我是更累，还是更有劲</li>
+          </ul>
+          <p class="lede" style="max-width:none">passion 这个词在希腊语里的本义，是「忍受」。
+            你最热爱的事，就是你最愿意忍受它的无聊的那件事。</p>
+        </div>
+        <div class="rule g step">
+          <h3 style="color:var(--cel)">快人分 · 0–5</h3>
+          <ul>
+            <li>同样的时间，我学得比身边人快多少</li>
+            <li>有没有人来问过我这方面的事</li>
+            <li>别人以为我练了很久，其实没有</li>
+          </ul>
+          <p class="lede" style="max-width:none">这一栏别自己拍脑袋，尽量找得到证据：谁说的、什么时候、什么事。</p>
+        </div>
+      </div>
+      <p class="hint step">打完分，把每一条的编号点进学习单右边那张坐标图里</p>
+    </section>
+
+    <!-- 6 分拣挑战 -->
+    <section class="slide" id="sort">
+      <div class="eyebrow">第五步 · 分拣挑战　全班举手：热爱信号？还是天赋信号？</div>
+      <div class="sortwrap">
+        <div class="stmt">
+          <div class="qcount" id="s-n">01 / 08</div>
+          <h2 id="s-q">做这件事的时候，我常常忘了看时间。</h2>
+        </div>
+        <div class="verdict" id="s-v">
+          <div class="tag love" id="s-tag">热爱</div>
+          <div class="why" id="s-why">时间感消失是心流的典型信号，它只发生在你自己心里。</div>
+        </div>
+      </div>
+      <p class="hint">→ 揭晓答案　再按 → 下一题</p>
+    </section>
+
+    <!-- 7 边界 -->
+    <section class="slide">
+      <div class="eyebrow">分清楚这两件事，你才不会走错路</div>
+      <h2 class="step">热爱问「想不想」，天赋问「快不快」</h2>
+      <p class="lede step">热爱的信号几乎都来自你的内部：时间感、能量、忍受度。<br>
+         天赋的信号几乎都来自你的外部：速度、别人的反应、做出来的东西。</p>
+      <div class="quad step">
+        <div class="c-train"><b>训练区</b><p>爱，但还不快。<br>天赋大多是练出来的——缺的不是天分，是刻意练习和一个能给人看的作品。</p></div>
+        <div class="c-core"><b>核心区</b><p>又爱又快。<br>别再想了，本周就做出一个别人能看见的小东西，去要反馈。</p></div>
+        <div class="c-drop"><b>放下区</b><p>不爱也不快。<br>划掉它。放下也是进展，探索预算是有限的。</p></div>
+        <div class="c-tool"><b>工具区</b><p>快，但不爱。<br>可以用它换资源、换机会，但别让它定义你是谁。</p></div>
+      </div>
+      <p class="src step">纵轴＝忍受分（热爱）　横轴＝快人分（天赋）　·　与学习单第 2 区同一张图</p>
+    </section>
+
+    <!-- 8 大谷 -->
+    <section class="slide" id="ohtani">
+      <div class="eyebrow">第六步 · 一个 16 岁的人怎么用一张纸</div>
+      <div class="o-wrap">
+        <div class="o-grid" id="og">
+          <div>身体</div><div>控球</div><div>球的尾劲</div>
+          <div class="hl">人品</div><div class="mid">八球团<br>第一指名</div><div>球速 160</div>
+          <div class="hl">运气</div><div>心理</div><div>变化球</div>
+        </div>
+        <div class="o-note">
+          <h2>大谷翔平的九宫格</h2>
+          <p class="lede step">高一那年，他把最大的目标写在正中间：被八支球队同时选为第一顺位。
+            然后把它拆成八件小事，填在周围。</p>
+          <p class="lede step" style="color:var(--cel)">注意左边那两格：<b>运气</b>和<b>人品</b>。
+            他在"运气"格里写的是——捡垃圾、打招呼、珍惜球具、对裁判的态度、读书。
+            他把连运气都变成了可以每天练的动作。</p>
+          <p class="lede step">这就是今天最后一件事：<br>
+            中间写你的<b style="color:var(--gold)">大方向</b>，周围八格写<b style="color:var(--gold)">小目标</b>。
+            方向可以先写得很粗糙，粗糙的方向也比空白强。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9 收尾 -->
+    <section class="slide">
+      <div class="eyebrow">最后 5 分钟</div>
+      <h2>挑三格，变成今晚就能开始的动作</h2>
+      <div class="two-col" style="margin-top:2.4vh">
+        <div class="rule step">
+          <h3>合格的小任务长这样</h3>
+          <ul>
+            <li>今晚就能开始，不需要等谁同意</li>
+            <li>做完了有明确信号，不是"多练练"</li>
+            <li>至少有一个人会看见它</li>
+          </ul>
+        </div>
+        <div class="rule g step">
+          <h3>写完再做两件事</h3>
+          <ul>
+            <li>回到学习单最上面，再勾一次进度条</li>
+            <li>把这张纸贴在你每天都会看见的地方</li>
+          </ul>
+        </div>
+      </div>
+      <p class="big step" style="margin-top:3vh;color:var(--gold)">热爱不是找到的，是养出来的。</p>
+      <p class="lede step">你今天没有找到答案，你只是把苗头留了下来。<br>下一次它还在，那就不是三分钟热度了。</p>
+    </section>
+
+  </main>
+
+  <footer>
+    <div class="keys">→ <b>推进</b>　← 后退　空格 <b>计时</b>　F 全屏</div>
+    <div id="pos">01 / 10</div>
+  </footer>
+</div>
+<div id="bar" style="width:0"></div>
+
+<script>
+(function(){
+  const slides=[...document.querySelectorAll('.slide')];
+  const bar=document.getElementById('bar'), pos=document.getElementById('pos'), clock=document.getElementById('clock');
+  // 每页建议用时（分钟），用于顶部时间提示
+  const mins=[1,4,3,4,7,4,6,4,4,3];
+  let si=0, step=0;
+
+  // 背景九宫格：由内向外螺旋点亮
+  const md=document.getElementById('mandala'), cells=[];
+  for(let i=0;i<81;i++){const e=document.createElement('i');md.appendChild(e);cells.push(e);}
+  const order=(()=>{const o=[];for(let r=0;r<5;r++)for(let y=0;y<9;y++)for(let x=0;x<9;x++)
+    if(Math.max(Math.abs(x-4),Math.abs(y-4))===r)o.push(y*9+x);return o;})();
+
+  function steps(){return [...slides[si].querySelectorAll('.step')];}
+  function render(){
+    slides.forEach((s,i)=>s.classList.toggle('live',i===si));
+    steps().forEach((e,i)=>e.classList.toggle('on',i<step));
+    const p=(si+(steps().length?step/steps().length:1))/slides.length;
+    bar.style.width=(p*100)+'%';
+    order.forEach((c,i)=>cells[c].classList.toggle('on', i < Math.round(81*p)));
+    pos.textContent=String(si+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0');
+    const acc=mins.slice(0,si).reduce((a,b)=>a+b,0);
+    clock.textContent=String(acc).padStart(2,'0')+' / 40 分钟';
+  }
+  function go(d){
+    if(d>0){
+      if(slides[si].id==='deck'&&deckNext())return render();
+      if(slides[si].id==='sort'&&sortNext())return render();
+      if(slides[si].id==='ohtani'&&ohNext())return render();
+      if(step<steps().length){step++;}
+      else if(si<slides.length-1){si++;step=0;onEnter();}
+    }else{
+      if(step>0){step--;}
+      else if(si>0){si--;step=steps().length;onEnter(true);}
+    }
+    render();
+  }
+  function onEnter(back){
+    if(slides[si].id==='deck'&&!back)deckReset();
+    if(slides[si].id==='sort'&&!back)sortReset();
+    if(slides[si].id==='ohtani'&&!back)ohReset();
+  }
+
+  /* 投票 */
+  document.querySelectorAll('[data-vote]').forEach(b=>b.addEventListener('click',e=>{
+    e.stopPropagation();
+    const s=b.closest('.tally').querySelector('.cnt');
+    s.dataset.c=(+s.dataset.c)+1; s.textContent=s.dataset.c;
+  }));
+
+  /* 快问快答卡组 */
+  const CARDS=[
+    ['别人夸过你什么？<br>尽量写下他们的原话。','不用谦虚，谦虚在这一步毫无用处。'],
+    ['你有过哪些「三分钟热度」？<br>全部写下来。','热度本身就是数据。写下来不代表你要负责。'],
+    ['什么事你一做起来<br>就不知不觉过去很久？','不用是"有用"的事。游戏、聊天、拆东西都算。'],
+    ['回想三个最有成就感的时刻，<br>你当时具体在做什么？','那些时刻里藏着你的潜能密码。'],
+    ['看到别人做成了什么事，<br>你第一反应是"这我也能做"？','这种不服气，往往指向你的天赋。'],
+    ['你不讨厌、但从没认真做过的事，<br>尽量多写。','不用喜欢，不讨厌就够。最不讨厌的那件，常常会长成喜欢。']
+  ];
+  const dkN=document.getElementById('dk-n'),dkQ=document.getElementById('dk-q'),dkD=document.getElementById('dk-d'),
+        dkT=document.getElementById('dk-t'),dkS=document.getElementById('dk-s'),dkP=document.getElementById('dk-p');
+  let ci=0,left=45,tid=null;
+  dkP.innerHTML=CARDS.map(()=>'<s></s>').join('');
+  function deckDraw(){
+    dkN.textContent='CARD '+(ci+1)+' / '+CARDS.length;
+    dkQ.innerHTML=CARDS[ci][0]; dkD.textContent=CARDS[ci][1];
+    [...dkP.children].forEach((s,i)=>s.classList.toggle('on',i<=ci));
+    stop(); left=45; dkT.textContent=45; dkT.classList.remove('done'); dkS.textContent='按 空格 开始';
+  }
+  function deckReset(){ci=0;deckDraw();}
+  function deckNext(){ if(ci<CARDS.length-1){ci++;deckDraw();return true;} stop(); return false; }
+  function stop(){clearInterval(tid);tid=null;}
+  function toggleTimer(){
+    if(tid){stop();dkS.textContent='已暂停 · 空格继续';return;}
+    dkS.textContent='书写中';
+    tid=setInterval(()=>{ left--; dkT.textContent=String(Math.max(left,0));
+      if(left<=0){stop();dkT.classList.add('done');dkS.textContent='时间到';}},1000);
+  }
+
+  /* 分拣挑战 */
+  const SORT=[
+    ['做这件事的时候，我常常忘了看时间。','热爱','love','时间感消失是心流的典型信号，它只发生在你自己心里。'],
+    ['老师第一次教，我比大部分同学更快学会。','天赋','gift','同样的输入、更快的进展，这是天赋最朴素的定义。'],
+    ['就算没人夸、没有分数，我还是会做。','热爱','love','奖励拿掉了动机还在，这是内在动机的核心检验。'],
+    ['班上有人遇到这类问题，会来问我。','天赋','gift','天赋的证据在别人那里，不在你的自我感觉里。'],
+    ['它最枯燥的那部分，我也坐得住。','热爱','love','passion 的本义是「忍受」。能忍无聊，才叫热爱。'],
+    ['做完之后我不累，反而更有劲。','热爱','love','能量变化比"开不开心"更准，因为它骗不了人。'],
+    ['我做出来的东西，别人以为我练了很久。','天赋','gift','效率差被别人误读成时间差，通常就是天赋。'],
+    ['我不喜欢它，但我做得又快又好。','天赋','gift','这是最容易走错的一格：它能养活你，但别让它定义你。']
+  ];
+  const sN=document.getElementById('s-n'),sQ=document.getElementById('s-q'),sV=document.getElementById('s-v'),
+        sT=document.getElementById('s-tag'),sW=document.getElementById('s-why');
+  let qi=0,shown=false;
+  function sortDraw(){
+    sN.textContent=String(qi+1).padStart(2,'0')+' / 08';
+    sQ.textContent=SORT[qi][0]; sT.textContent=SORT[qi][1];
+    sT.className='tag '+SORT[qi][2]; sW.textContent=SORT[qi][3];
+    sV.classList.remove('on'); shown=false;
+  }
+  function sortReset(){qi=0;sortDraw();}
+  function sortNext(){
+    if(!shown){sV.classList.add('on');shown=true;return true;}
+    if(qi<SORT.length-1){qi++;sortDraw();return true;}
+    return false;
+  }
+
+  /* 大谷九宫格逐格点亮 */
+  const og=[...document.getElementById('og').children];
+  const seq=[4,0,1,2,5,8,7,6,3];
+  let oi=0;
+  function ohReset(){oi=0;og.forEach(c=>c.classList.remove('on'));}
+  function ohNext(){ if(oi<seq.length){og[seq[oi]].classList.add('on');oi++;return true;} return false; }
+
+  /* 控制 */
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key==='PageDown'){e.preventDefault();go(1);}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1);}
+    else if(e.key===' '){e.preventDefault(); slides[si].id==='deck'?toggleTimer():go(1);}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}
+  });
+  document.addEventListener('click',e=>{if(!e.target.closest('button'))go(1);});
+  deckReset(); sortReset(); ohReset(); render();
+})();
+</script>
+</body>
+</html>
